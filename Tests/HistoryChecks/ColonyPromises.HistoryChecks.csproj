@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="ColonyPromises"><HintPath>../../1.6/Assemblies/ColonyPromises.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>
