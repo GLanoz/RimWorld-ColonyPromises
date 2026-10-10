@@ -32,7 +32,11 @@ namespace ColonyPromises
 
         public static void Apply(ColonistPromises state, PromiseRecord record, PromiseOutcome outcome, int tick)
         {
-            if (outcome != PromiseOutcome.Fulfilled && outcome != PromiseOutcome.Broken && outcome != PromiseOutcome.Withdrawn) return;
+            if (outcome != PromiseOutcome.Fulfilled && outcome != PromiseOutcome.Broken && outcome != PromiseOutcome.Withdrawn)
+            {
+                record.RecordConsequences(0, 0);
+                return;
+            }
             string defName;
             int days;
             float mood;
@@ -69,8 +73,7 @@ namespace ColonyPromises
             }
             int oldTrust = state.Trust;
             state.Trust = PromiseBalance.ClampTrust(oldTrust + trust);
-            record.AppliedTrust = state.Trust - oldTrust;
-            record.AppliedMood = mood;
+            record.RecordConsequences(mood, state.Trust - oldTrust);
             var memories = state.Pawn.needs?.mood?.thoughts?.memories;
             if (memories != null)
             {
