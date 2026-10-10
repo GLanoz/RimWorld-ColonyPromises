@@ -26,6 +26,10 @@ namespace ColonyPromises
         public int ResolvedTick;
         public float AppliedMood;
         public int AppliedTrust;
+        public bool HasHistoryMetadata;
+        public bool HasResolvedTick;
+        public bool HasAppliedMood;
+        public bool HasAppliedTrust;
         public float MinimumHitPointsFraction;
         public bool FrozenConsequences;
         public float SuccessMood;
@@ -38,6 +42,21 @@ namespace ColonyPromises
         public int BrokenDays;
         public int WithdrawnDays;
         public int CooldownDays;
+
+        public void RecordResolution(int tick)
+        {
+            ResolvedTick = tick;
+            HasResolvedTick = true;
+            HasHistoryMetadata = true;
+        }
+
+        public void RecordConsequences(float mood, int trust)
+        {
+            AppliedMood = mood;
+            AppliedTrust = trust;
+            HasAppliedMood = HasAppliedTrust = true;
+            HasHistoryMetadata = true;
+        }
 
         public void ResetHold()
         {
@@ -65,6 +84,18 @@ namespace ColonyPromises
             Scribe_Values.Look(ref ResolvedTick, "resolvedTick");
             Scribe_Values.Look(ref AppliedMood, "appliedMood");
             Scribe_Values.Look(ref AppliedTrust, "appliedTrust");
+            Scribe_Values.Look(ref HasHistoryMetadata, "hasHistoryMetadata");
+            Scribe_Values.Look(ref HasResolvedTick, "hasResolvedTick");
+            Scribe_Values.Look(ref HasAppliedMood, "hasAppliedMood");
+            Scribe_Values.Look(ref HasAppliedTrust, "hasAppliedTrust");
+            if (Scribe.mode == LoadSaveMode.LoadingVars && !HasHistoryMetadata)
+            {
+                // Older saves omit default zero values. Infer only explicitly stored data.
+                HasResolvedTick = Scribe.loader.curXmlParent["resolvedTick"] != null;
+                HasAppliedMood = Scribe.loader.curXmlParent["appliedMood"] != null;
+                HasAppliedTrust = Scribe.loader.curXmlParent["appliedTrust"] != null;
+                HasHistoryMetadata = true;
+            }
             Scribe_Values.Look(ref MinimumHitPointsFraction, "minimumHitPointsFraction");
             Scribe_Values.Look(ref FrozenConsequences, "frozenConsequences");
             Scribe_Values.Look(ref SuccessMood, "successMood");
