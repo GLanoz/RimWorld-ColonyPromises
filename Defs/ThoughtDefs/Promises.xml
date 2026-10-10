@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThoughtDef><defName>CP_PromiseFulfilled</defName><thoughtClass>Thought_Memory</thoughtClass><durationDays>5</durationDays><stackLimit>1</stackLimit><stages><li><label>promise kept</label><description>The colony's leadership kept its promise to me.</description><baseMoodEffect>4</baseMoodEffect></li></stages></ThoughtDef>
+  <ThoughtDef><defName>CP_PromiseBroken</defName><thoughtClass>Thought_Memory</thoughtClass><durationDays>5</durationDays><stackLimit>1</stackLimit><stages><li><label>promise broken</label><description>The colony's leadership broke its promise to me.</description><baseMoodEffect>-6</baseMoodEffect></li></stages></ThoughtDef>
+  <ThoughtDef><defName>CP_PromiseWithdrawn</defName><thoughtClass>Thought_Memory</thoughtClass><durationDays>3</durationDays><stackLimit>1</stackLimit><stages><li><label>promise withdrawn</label><description>The colony's leadership withdrew its promise to me.</description><baseMoodEffect>-3</baseMoodEffect></li></stages></ThoughtDef>
+</Defs>
