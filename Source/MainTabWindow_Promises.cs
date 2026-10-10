@@ -116,8 +116,7 @@ namespace ColonyPromises
             if (state.History.Count == 0) Label(ref y, width, "CP_NoHistory".Translate());
             foreach (var r in state.History)
             {
-                Label(ref y, width, "CP_HistoryEntry".Translate(("CP_Type_" + r.Kind).Translate(), ("CP_Outcome_" + r.Outcome).Translate(),
-                    (now - r.ResolvedTick) / (float)PromiseBalance.TicksPerDay, r.AppliedMood, r.AppliedTrust));
+                Label(ref y, width, PromiseHistory.Format(r, now));
                 Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
             }
             contentHeight = y + 8;
