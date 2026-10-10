@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Colony Promises</name>
+  <author>Lanoz</author>
+  <packageId>lanoz.colonypromises</packageId>
+  <supportedVersions><li>1.6</li></supportedVersions>
+  <modDependencies><li><packageId>brrainz.harmony</packageId><displayName>Harmony</displayName><steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl></li></modDependencies>
+  <loadAfter><li>brrainz.harmony</li></loadAfter>
+  <description>Make timed promises to adult free colonists: a private bedroom, actual recreation, or equipped gear. Track leadership trust, progress and outcomes. No DLC required. Deadlines keep running during illness, combat and caravans. Requires Harmony.</description>
+</ModMetaData>
