@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <CP_SelectColonist>Select a colonist</CP_SelectColonist>
+  <CP_NoColonists>No eligible colonists. Promises are available to free adult player colonists, excluding guests, prisoners and slaves.</CP_NoColonists>
+  <CP_Trust>{0} — leadership trust: {1}/{2}</CP_Trust>
+  <CP_Type_Bedroom>Private bedroom</CP_Type_Bedroom>
+  <CP_Type_Leisure>Recreation</CP_Type_Leisure>
+  <CP_Type_Equipment>Equipment</CP_Type_Equipment>
+  <CP_Outcome_Fulfilled>fulfilled</CP_Outcome_Fulfilled>
+  <CP_Outcome_Broken>broken</CP_Outcome_Broken>
+  <CP_Outcome_Withdrawn>withdrawn</CP_Outcome_Withdrawn>
+  <CP_Outcome_Closed>closed without penalty</CP_Outcome_Closed>
+  <CP_Active>Active promise: {0}</CP_Active>
+  <CP_BedroomConditions>Own a bed as its only assigned owner in a private bedroom rated at least “{0}”. No barracks or medical beds. Keep the same bed and room continuously for {1} verified hours. Leaving the map, changing rooms or losing eligibility resets the hold.</CP_BedroomConditions>
+  <CP_LeisureConditions>Accumulate {0} actual recreation hours after making the promise. Counts recreation activity and deliberate leisure recognized by the game. Timetable assignments, travel to an activity, sleep, unconsciousness, hospital stays, drafted activity and forced idleness do not count.</CP_LeisureConditions>
+  <CP_EquipmentConditions>Actually equip {0} of at least {1} quality and keep the same item equipped continuously for {2} verified hours. Inventory and stockpiles do not count. Removing the item or leaving the map resets the hold.</CP_EquipmentConditions>
+  <CP_Remaining>Time remaining: {0:0.00} days</CP_Remaining>
+  <CP_Progress>Verified progress: {0:0.00} / {1:0.00} hours</CP_Progress>
+  <CP_DeadlineRule>The deadline keeps running during illness, caravans and combat. Unverified time away from a map never counts. A broken promise is assessed at expiry.</CP_DeadlineRule>
+  <CP_Withdraw>Withdraw promise…</CP_Withdraw>
+  <CP_WithdrawConfirm>Withdraw this promise? Mood: {0} for {1} days; trust: {2}; wait {3} days before new requests can be observed.</CP_WithdrawConfirm>
+  <CP_History>Recent history</CP_History>
+  <CP_NoHistory>No completed requests or promises.</CP_NoHistory>
+  <CP_HistoryEntry>{0}: {1}, {2:0.00} days ago. Mood {3:+0.##;-0.##;0}; trust {4:+0;-0;0}.</CP_HistoryEntry>
+  <CP_Ineligible>Only free adult player colonists with a mood need are eligible. Guests, prisoners and slaves are excluded.</CP_Ineligible>
+  <CP_AlreadyActive>This colonist already has an active promise.</CP_AlreadyActive>
+  <CP_Cooldown>New requests may be observed in {0:0.00} days.</CP_Cooldown>
+  <CP_InvalidParameters>The saved conditions are invalid or unavailable.</CP_InvalidParameters>
+  <CP_MissingParameter>missing content</CP_MissingParameter>
+  <CP_MissingColonist>Missing colonist</CP_MissingColonist>
+  <CP_Result>{0}: {1} — {2}.</CP_Result>
+  <CP_RequestTitle>Request: {0}</CP_RequestTitle>
+  <CP_ResponseTime>Respond within {0:0.00} days. If accepted, fulfill within {1} days.</CP_ResponseTime>
+  <CP_FixedConsequences>Success: {0:+0.##;-0.##;0} mood for {1} days; {2:+0;-0;0} trust. Broken: {3:+0;-0;0} mood for {4} days; {5:+0;-0;0} trust. Withdrawn: {6:+0;-0;0} mood for {7} days; {8:+0;-0;0} trust. Cooldown after resolution: {9} days. These values are fixed when accepted; repeated successes reduce rewards, never penalties.</CP_FixedConsequences>
+  <CP_Accept>Promise to fulfill…</CP_Accept>
+  <CP_AcceptConfirm>Promise to {0}:
+
+{1}
+
+Fulfill within {2} days after accepting.
+
+{3}
+
+{4}</CP_AcceptConfirm>
+  <CP_Decline>Decline…</CP_Decline>
+  <CP_DeclineConfirm>Decline this request? No mood or trust penalty. New requests require a {0}-day cooldown and a fresh persistent deficit.</CP_DeclineConfirm>
+  <CP_NoRequest>No open request or active promise.</CP_NoRequest>
+  <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining or ignoring a request has no penalty. Trust stays between 0 and 100 and gives no permanent mood bonus.</CP_RequestRules>
+  <CP_RequestUnavailable>This request is no longer open or its response time has expired.</CP_RequestUnavailable>
+  <CP_RequestOutdated>This request is not currently relevant or verifiable. Acceptance requires a current unmet need and usable replacement stock for equipment.</CP_RequestOutdated>
+  <CP_NewRequest>{0} requests: {1}. Review it in Promises.</CP_NewRequest>
+  <CP_ReasonBedroomMissing>No qualifying private bedroom for at least {1} observed days. Current expectations: {0}.</CP_ReasonBedroomMissing>
+  <CP_ReasonBedroomImprove>The private bedroom has remained below the target for at least {1} observed days. Current expectations: {0}; the request asks for a limited improvement.</CP_ReasonBedroomImprove>
+  <CP_ReasonLeisure>Recreation has stayed below 35% for at least {1} observed days. Required hours reflect the duration and severity of this deficit.</CP_ReasonLeisure>
+  <CP_ReasonEquipmentWorn>Apparel has remained below 50% durability for at least {1} observed days, with a usable replacement of the same type available on this map.</CP_ReasonEquipmentWorn>
+  <CP_ReasonEquipmentQuality>An equipped item has remained below normal quality for at least {1} observed days, with a usable higher-quality copy of the same type available on this map.</CP_ReasonEquipmentQuality>
+  <CP_Durability>Maintain at least {0:0}% durability throughout the hold.</CP_Durability>
+  <CP_LegacyPromise>Existing promise: its original conditions and previous consequence rules are preserved.</CP_LegacyPromise>
+  <CP_Outcome_Declined>request declined without penalty</CP_Outcome_Declined>
+  <CP_Outcome_Expired>unanswered request expired without penalty</CP_Outcome_Expired>
+  <CP_Outcome_SatisfiedUnaccepted>unaccepted request satisfied without reward</CP_Outcome_SatisfiedUnaccepted>
+  <CP_StatusPromise>active promise</CP_StatusPromise>
+  <CP_StatusRequest>open request</CP_StatusRequest>
+  <CP_StatusWaiting>no request</CP_StatusWaiting>
+  <CP_ColonistChoice>{0} — {1}</CP_ColonistChoice>
+  <CP_Outcome_Obsolete>request no longer relevant, closed without penalty</CP_Outcome_Obsolete>
+</LanguageData>
