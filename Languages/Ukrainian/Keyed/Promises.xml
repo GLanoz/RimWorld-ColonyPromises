@@ -21,7 +21,7 @@
   <CP_WithdrawConfirm>Відкликати цю обіцянку? Настрій: {0} на {1} дн.; довіра: {2}; очікування {3} дн. до спостереження для нових прохань.</CP_WithdrawConfirm>
   <CP_History>Нещодавня історія</CP_History>
   <CP_NoHistory>Немає завершених прохань чи обіцянок.</CP_NoHistory>
-  <CP_HistoryEntry>{0}: {1}, {2:0.00} днів тому. Настрій {3:+0.##;-0.##;0}; довіра {4:+0;-0;0}.</CP_HistoryEntry>
+  <CP_HistoryEntry>{0} — {1} {2}. {3}</CP_HistoryEntry>
   <CP_Ineligible>Підходять лише вільні дорослі колоністи гравця з потребою настрою. Гості, полонені й раби виключені.</CP_Ineligible>
   <CP_AlreadyActive>Цей колоніст уже має активну обіцянку.</CP_AlreadyActive>
   <CP_Cooldown>Спостереження для нових прохань почнеться за {0:0.00} дн.</CP_Cooldown>
@@ -64,4 +64,13 @@
   <CP_StatusWaiting>немає прохання</CP_StatusWaiting>
   <CP_ColonistChoice>{0} — {1}</CP_ColonistChoice>
   <CP_Outcome_Obsolete>прохання вже неактуальне, закрито без штрафу</CP_Outcome_Obsolete>
+  <CP_HistoryValueUnavailable>дані недоступні</CP_HistoryValueUnavailable>
+  <CP_HistoryTimeUnavailable>(час завершення невідомий)</CP_HistoryTimeUnavailable>
+  <CP_HistoryAge>{0} {1} тому</CP_HistoryAge>
+  <CP_HistoryNoEffects>Без змін настрою та довіри.</CP_HistoryNoEffects>
+  <CP_HistoryEffects>Настрій: {0}; довіра: {1}.</CP_HistoryEffects>
+  <CP_HistoryDaysFraction>дня</CP_HistoryDaysFraction>
+  <CP_HistoryDaysOne>день</CP_HistoryDaysOne>
+  <CP_HistoryDaysFew>дні</CP_HistoryDaysFew>
+  <CP_HistoryDaysMany>днів</CP_HistoryDaysMany>
 </LanguageData>
