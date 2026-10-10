@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+<CP_PromiseFulfilled.stages.0.label>promise kept</CP_PromiseFulfilled.stages.0.label><CP_PromiseFulfilled.stages.0.description>The colony's leadership kept its promise to me.</CP_PromiseFulfilled.stages.0.description>
+<CP_PromiseBroken.stages.0.label>promise broken</CP_PromiseBroken.stages.0.label><CP_PromiseBroken.stages.0.description>The colony's leadership broke its promise to me.</CP_PromiseBroken.stages.0.description>
+<CP_PromiseWithdrawn.stages.0.label>promise withdrawn</CP_PromiseWithdrawn.stages.0.label><CP_PromiseWithdrawn.stages.0.description>The colony's leadership withdrew its promise to me.</CP_PromiseWithdrawn.stages.0.description>
+</LanguageData>
