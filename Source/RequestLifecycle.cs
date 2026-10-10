@@ -23,10 +23,9 @@ namespace ColonyPromises
             state.Request = null;
             var r = request.Terms;
             r.CreatedTick = request.OfferedTick;
-            r.ResolvedTick = now;
+            r.RecordResolution(now);
             r.Outcome = outcome;
-            r.AppliedMood = 0;
-            r.AppliedTrust = 0;
+            r.RecordConsequences(0, 0);
             state.CooldownUntilTick = now + RequestRules.UnacceptedCooldownDays * PromiseBalance.TicksPerDay;
             RequestGenerator.ResetObservations(state);
             return r;
