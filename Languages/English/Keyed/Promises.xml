@@ -21,7 +21,7 @@
   <CP_WithdrawConfirm>Withdraw this promise? Mood: {0} for {1} days; trust: {2}; wait {3} days before new requests can be observed.</CP_WithdrawConfirm>
   <CP_History>Recent history</CP_History>
   <CP_NoHistory>No completed requests or promises.</CP_NoHistory>
-  <CP_HistoryEntry>{0}: {1}, {2:0.00} days ago. Mood {3:+0.##;-0.##;0}; trust {4:+0;-0;0}.</CP_HistoryEntry>
+  <CP_HistoryEntry>{0} — {1} {2}. {3}</CP_HistoryEntry>
   <CP_Ineligible>Only free adult player colonists with a mood need are eligible. Guests, prisoners and slaves are excluded.</CP_Ineligible>
   <CP_AlreadyActive>This colonist already has an active promise.</CP_AlreadyActive>
   <CP_Cooldown>New requests may be observed in {0:0.00} days.</CP_Cooldown>
@@ -64,4 +64,13 @@ Fulfill within {2} days after accepting.
   <CP_StatusWaiting>no request</CP_StatusWaiting>
   <CP_ColonistChoice>{0} — {1}</CP_ColonistChoice>
   <CP_Outcome_Obsolete>request no longer relevant, closed without penalty</CP_Outcome_Obsolete>
+  <CP_HistoryValueUnavailable>data unavailable</CP_HistoryValueUnavailable>
+  <CP_HistoryTimeUnavailable>(completion time unavailable)</CP_HistoryTimeUnavailable>
+  <CP_HistoryAge>{0} {1} ago</CP_HistoryAge>
+  <CP_HistoryNoEffects>No mood or trust change.</CP_HistoryNoEffects>
+  <CP_HistoryEffects>Mood: {0}; trust: {1}.</CP_HistoryEffects>
+  <CP_HistoryDaysFraction>days</CP_HistoryDaysFraction>
+  <CP_HistoryDaysOne>day</CP_HistoryDaysOne>
+  <CP_HistoryDaysFew>days</CP_HistoryDaysFew>
+  <CP_HistoryDaysMany>days</CP_HistoryDaysMany>
 </LanguageData>
