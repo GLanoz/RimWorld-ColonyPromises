@@ -1,6 +1,6 @@
 # Manual testing
 
-These scenarios are prepared, not completed in-game. Use a copied save and a separate colony. Start with Core, Harmony, and Colony Promises without DLC. Keep production balance unchanged. Use controlled saves/dev mode to provide test conditions, and inspect the Promises tab, Needs tab, and error log.
+These scenarios are prepared for further testing. The player has checked history display in-game; the generation scenarios and Development-mode panel below have not been run in-game by the developer. Use a copied save and a separate colony. Start with Core, Harmony, and Colony Promises without DLC. Keep production balance unchanged. Use controlled saves/dev mode to provide test conditions, and inspect the Promises tab, Needs tab, and error log.
 
 ## Request generation and review
 
@@ -87,3 +87,29 @@ The [history fixture](../Tests/Verify-History.ps1) reproduces the original failu
 | Performance | Use a large colony with mixed requests/promises | Observations hourly, active checks every 250 ticks; no repeated result spam |
 
 Full reference loading, real save migration, safe removal, and compatibility with other mods cannot be established by isolated field checks. After the baseline run, test relevant DLC and normal mod combinations separately. DLC remains optional.
+
+## Reproducible generation checks
+
+Use a copied Core-only test colony with one eligible free adult colonist on a home map. Start each direction from a separate clean branch with no open request, active promise, or cooldown. Keep the pawn undrafted, conscious, and out of mental breaks. Enable Development mode, select the pawn, and open Promises. Avoid other eligible colonists so the global queue cannot delay the result.
+
+All timings below start with the **first eligible sample showing zero observation**, not with setup. At ordinary speed, 48 more hourly scans should reach two days. From completing setup, allow two days plus up to one game hour for the first sample. A loaded overdue schedule or a reset changes that starting point. The initial half-day offer gate should already have elapsed by then; verify the panel instead of assuming it.
+
+| Direction | Concrete setup | Expected request and timing |
+| --- | --- | --- |
+| Missing bedroom | Use a non-Ascetic pawn with no assigned bed or only a barracks bed. Keep joy at least 35%; all equipped items should be Normal or better and apparel at least 50% durable. | Bedroom candidate immediately visible; request after 48 consecutive hourly intervals. Target is the panel's bounded expectation stage, at least stage 2. Missing-room deadline is seven days after acceptance. |
+| Bedroom improvement | Same exclusions; assign a sole-owned non-medical bed in a proper bedroom at impressiveness stage 0 (awful), below the panel's desired stage. Keep room and expectations stable. | Improvement target is stage 2 (mediocre), a real two-stage increase; request after two observed days, seven-day fulfillment deadline. Raising the room to the displayed desired stage before persistence should remove the candidate. |
+| Recreation | Give the pawn a qualifying private bedroom at stage 5 (somewhat impressive, score at least 65), Normal-or-better gear and unworn apparel. Keep joy below 15% for two observed days; use a controlled test save and monitor incidental recreation/mental breaks. | Recreation candidate, no room/gear candidate; normally six actual hours over four days after acceptance. If joy instead stays between 15% and 35%, the target is four hours over three days. Joy reaching 35% or a mental break restarts the two-day clock. |
+| Equipment | Give a violence-capable, non-Brawler pawn a Poor-quality revolver, plus a Normal-quality revolver spawned as reachable, non-forbidden loose stock. Keep joy at least 35% and a qualifying bedroom at stage 5. Do not equip the replacement yet. | Same-def Normal-quality revolver request after two observed days with stock available throughout; four-day deadline, one-day equipped hold. Forbidden/unreachable/removed replacement stock prevents the target and resets its observation; restoring it starts two fresh days. |
+| Worn apparel alternative | On a non-Nudist pawn with suitable body parts, wear a Normal-quality button-down shirt at 40% durability; supply a same-def Normal shirt at 100% in usable loose stock. Suppress other directions as above. | Target requires at least Normal quality and 80% durability; request after two observed days. Repairing the worn shirt to at least 50% before the threshold removes that deficit. |
+
+Diagnostics checks:
+
+1. Pause and repeatedly open/close the tab. Saved observation, cooldown, request/active state, and schedule markers must remain unchanged. Projected duration may change only when game time or actual candidate conditions change.
+2. Click Check now before two observed days, during cooldown, and during a still-blocked global interval. No premature offer. Same-tick repeated clicks add no time and produce no repeated result notifications. Normal creation emits the single existing request notification.
+3. Inspect an ineligible selected pawn by reopening Promises in Development mode; verify the specific exclusion. Turn Development mode off: panel and button disappear.
+4. Create two continuously deficient colonists. The first offer advances the colony-wide gate by half a day; the second cannot immediately receive one. For a longer queue, verify that older capped observations are not repeatedly overtaken by lower-ID pawns starting a fresh deficit.
+5. Decline a request. For three days, the displayed qualifying deficit may remain but verified observation is zero. A new request needs two fresh observed days after cooldown (approximately five days after refusal, plus sampling/queue delay).
+6. Save after one observed day, reload, and compare saved progress and markers. Same-tick loading adds no time; a gap longer than one observation interval restarts evidence. Repeat on a pre-mod save: new state should initialize and start observing without opening the tab. Keep any existing old promise intact.
+7. Switch English/Ukrainian and inspect all directions, missing stock, adequate rooms, busy/absent pawns, and clock markers. Numbers must remain visible, and candidate labels should use the game's localization.
+
+Record the first sample tick, resets and reasons, offer tick, and any errors. These procedures predict behavior from code; they are not evidence of a completed in-game run.

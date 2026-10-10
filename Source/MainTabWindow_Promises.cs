@@ -19,7 +19,7 @@ namespace ColonyPromises
             base.PostOpen();
             var selected = Find.Selector.SingleSelectedThing as Pawn;
             var candidates = Candidates().ToList();
-            if (PromiseConditions.Eligible(selected)) pawn = selected;
+            if (PromiseConditions.Eligible(selected) || (Prefs.DevMode && selected != null)) pawn = selected;
             else if (pawn == null || !candidates.Contains(pawn)) pawn = candidates.FirstOrDefault();
         }
 
@@ -32,12 +32,12 @@ namespace ColonyPromises
             if (component == null) return;
             Text.Font = GameFont.Small;
             var candidates = Candidates().ToList();
-            if (pawn != null && !candidates.Contains(pawn)) pawn = candidates.FirstOrDefault();
+            if (!Prefs.DevMode && pawn != null && !candidates.Contains(pawn)) pawn = candidates.FirstOrDefault();
             if (Widgets.ButtonText(new Rect(0, 0, inRect.width, 32), pawn?.LabelShort ?? "CP_SelectColonist".Translate().ToString()))
             {
                 var options = candidates.Select(p =>
                 {
-                    var s = component.StateFor(p);
+                    var s = component.PeekState(p);
                     string status = s.Active != null ? "CP_StatusPromise".Translate().ToString()
                         : s.Request != null ? "CP_StatusRequest".Translate().ToString() : "CP_StatusWaiting".Translate().ToString();
                     return new FloatMenuOption("CP_ColonistChoice".Translate(p.LabelShort, status), () => { pawn = p; scroll = Vector2.zero; });
@@ -49,7 +49,7 @@ namespace ColonyPromises
                 Widgets.Label(new Rect(0, 45, inRect.width, 80), "CP_NoColonists".Translate());
                 return;
             }
-            var state = component.StateFor(pawn);
+            var state = component.PeekState(pawn);
             Widgets.Label(new Rect(0, 40, inRect.width, 30), "CP_Trust".Translate(pawn.LabelShort, state.Trust, PromiseBalance.MaxTrust));
             var outer = new Rect(0, 78, inRect.width, inRect.height - 78);
             var view = new Rect(0, 0, outer.width - 20, contentHeight);
@@ -80,8 +80,7 @@ namespace ColonyPromises
             else if (state.Request != null)
             {
                 var request = state.Request;
-                var r = request.Terms;
-                PromiseConsequences.Snapshot(state, request, now);
+                var r = PromiseConsequences.Preview(state, request, now);
                 Label(ref y, width, "CP_RequestTitle".Translate(("CP_Type_" + r.Kind).Translate()));
                 Label(ref y, width, request.ReasonKey.Translate(request.Expectation?.label ?? "", RequestRules.PersistentTicks / PromiseBalance.TicksPerDay));
                 Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
@@ -111,6 +110,28 @@ namespace ColonyPromises
                 if (now < state.CooldownUntilTick) Label(ref y, width, "CP_Cooldown".Translate((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay));
                 Label(ref y, width, "CP_RequestRules".Translate());
             }
+            if (Prefs.DevMode)
+            {
+                y += 12;
+                Label(ref y, width, "CP_DebugTitle".Translate());
+                string exclusion = PromiseConditions.EligibilityReason(pawn);
+                Label(ref y, width, "CP_DebugEligible".Translate(
+                    exclusion == null ? "CP_DebugYes".Translate().ToString() : exclusion.Translate().ToString()));
+                Label(ref y, width, "CP_DebugOccupied".Translate(
+                    state.Active != null ? "CP_StatusPromise".Translate() :
+                    state.Request != null ? "CP_StatusRequest".Translate() : "CP_StatusWaiting".Translate()));
+                Label(ref y, width, "CP_DebugCooldown".Translate(
+                    RequestGenerator.Number(Math.Max(0, state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay)));
+                Label(ref y, width, "CP_DebugSchedule".Translate(
+                    DebugTick(state.LastGenerationCheck), DebugTick(component.LastObservation), DebugTick(component.NextObservation)));
+                Label(ref y, width, "CP_DebugSpacing".Translate(
+                    (now < component.NextOffer ? "CP_DebugYes" : "CP_DebugNo").Translate(),
+                    RequestGenerator.Number(Math.Max(0, component.NextOffer - now) / (float)PromiseBalance.TicksPerDay)));
+                foreach (PromiseKind kind in Enum.GetValues(typeof(PromiseKind)))
+                    Label(ref y, width, RequestDiagnostics.Describe(state, kind, now));
+                Label(ref y, width, "CP_DebugSampling".Translate());
+                if (Button(ref y, width, "CP_DebugCheckNow".Translate())) component.CheckRequestsNow(pawn);
+            }
             y += 16;
             Label(ref y, width, "CP_History".Translate());
             if (state.History.Count == 0) Label(ref y, width, "CP_NoHistory".Translate());
@@ -122,6 +143,9 @@ namespace ColonyPromises
             contentHeight = y + 8;
             Widgets.EndScrollView();
         }
+
+        private static string DebugTick(int tick) => tick < 0 ? "CP_DebugNever".Translate().ToString()
+            : "CP_DebugTick".Translate(tick.ToString(), RequestGenerator.Number(tick / (float)PromiseBalance.TicksPerDay)).ToString();
 
         private static string Consequences(PromiseRecord r) => "CP_FixedConsequences".Translate(
             r.SuccessMood, r.SuccessDays, r.SuccessTrust, r.BrokenMood, r.BrokenDays, r.BrokenTrust,

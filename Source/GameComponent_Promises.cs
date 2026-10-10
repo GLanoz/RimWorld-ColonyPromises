@@ -14,6 +14,12 @@ namespace ColonyPromises
         private int nextCheck;
         private int nextObservation;
         private int nextOffer;
+        private int lastObservation = -1;
+        public int LastObservation => lastObservation;
+        public int NextObservation => nextObservation;
+        public int NextOffer => nextOffer;
+        public ColonistPromises PeekState(Pawn pawn) => byPawn.TryGetValue(pawn, out var state)
+            ? state : new ColonistPromises { Pawn = pawn };
         public static GameComponent_Promises Current => Verse.Current.Game?.GetComponent<GameComponent_Promises>();
         public GameComponent_Promises(Game game) { }
 
@@ -31,6 +37,7 @@ namespace ColonyPromises
             Scribe_Collections.Look(ref colonists, "colonyPromises", LookMode.Deep);
             Scribe_Values.Look(ref nextObservation, "nextRequestObservation");
             Scribe_Values.Look(ref nextOffer, "nextRequestOffer");
+            Scribe_Values.Look(ref lastObservation, "lastRequestObservation", -1);
             if (Scribe.mode == LoadSaveMode.PostLoadInit) colonists = colonists ?? new List<ColonistPromises>();
         }
 
@@ -130,44 +137,61 @@ namespace ColonyPromises
             foreach (var pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists.Where(PromiseConditions.Eligible))
                 StateFor(pawn);
             var ready = new List<KeyValuePair<ColonistPromises, RequestCandidate>>();
-            foreach (var state in colonists)
+            lastObservation = now;
+            foreach (var state in colonists) ObserveRequest(state, now, ready);
+            OfferReady(now, ready);
+        }
+
+        public void CheckRequestsNow(Pawn pawn)
+        {
+            if (!Prefs.DevMode || pawn == null) return;
+            int now = Find.TickManager.TicksGame;
+            var ready = new List<KeyValuePair<ColonistPromises, RequestCandidate>>();
+            ObserveRequest(StateFor(pawn), now, ready);
+            OfferReady(now, ready);
+        }
+
+        private void ObserveRequest(ColonistPromises state, int now, List<KeyValuePair<ColonistPromises, RequestCandidate>> ready)
+        {
+            state.LastGenerationCheck = now;
+            if (state.Pawn == null || state.Pawn.Dead || state.Pawn.Destroyed || state.Pawn.Faction != Faction.OfPlayer)
             {
-                if (state.Pawn == null || state.Pawn.Dead || state.Pawn.Destroyed || state.Pawn.Faction != Faction.OfPlayer)
-                {
-                    if (state.Request != null) CloseRequest(state, PromiseOutcome.Closed, now);
-                    RequestGenerator.ResetObservations(state);
-                    continue;
-                }
-                if (state.Request != null)
-                {
-                    var r = state.Request;
-                    bool observable = PromiseConditions.Observable(state.Pawn) && !state.Pawn.Downed && !state.Pawn.Drafted && !state.Pawn.InMentalState;
-                    // Fulfillment of an unanswered request grants nothing, including at its expiry.
-                    if (observable && !RequestGenerator.Relevant(state.Pawn, r))
-                    {
-                        bool satisfied = r.Terms.Kind == PromiseKind.Leisure
-                            ? state.Pawn.needs?.joy != null && state.Pawn.needs.joy.CurLevel >= RequestRules.LowJoy
-                            : PromiseConditions.Get(r.Terms.Kind)?.Observe(state.Pawn, r.Terms).Satisfied == true;
-                        CloseRequest(state, satisfied ? PromiseOutcome.SatisfiedUnaccepted : PromiseOutcome.Obsolete, now);
-                    }
-                    else if (now >= r.ExpiryTick) CloseRequest(state, PromiseOutcome.Expired, now);
-                    continue;
-                }
-                if (state.Active != null || now < state.CooldownUntilTick || !PromiseConditions.Eligible(state.Pawn))
-                {
-                    RequestGenerator.ResetObservations(state);
-                    continue;
-                }
-                foreach (PromiseKind kind in Enum.GetValues(typeof(PromiseKind)))
-                {
-                    var candidate = RequestGenerator.Observe(state, kind, now);
-                    if (candidate != null) ready.Add(new KeyValuePair<ColonistPromises, RequestCandidate>(state, candidate));
-                }
+                if (state.Request != null) CloseRequest(state, PromiseOutcome.Closed, now);
+                RequestGenerator.ResetObservations(state);
+                return;
             }
+            if (state.Request != null)
+            {
+                var r = state.Request;
+                bool observable = PromiseConditions.Observable(state.Pawn) && !state.Pawn.Downed && !state.Pawn.Drafted && !state.Pawn.InMentalState;
+                // Fulfillment of an unanswered request grants nothing, including at its expiry.
+                if (observable && !RequestGenerator.Relevant(state.Pawn, r))
+                {
+                    bool satisfied = r.Terms.Kind == PromiseKind.Leisure
+                        ? state.Pawn.needs?.joy != null && state.Pawn.needs.joy.CurLevel >= RequestRules.LowJoy
+                        : PromiseConditions.Get(r.Terms.Kind)?.Observe(state.Pawn, r.Terms).Satisfied == true;
+                    CloseRequest(state, satisfied ? PromiseOutcome.SatisfiedUnaccepted : PromiseOutcome.Obsolete, now);
+                }
+                else if (now >= r.ExpiryTick) CloseRequest(state, PromiseOutcome.Expired, now);
+                return;
+            }
+            if (state.Active != null || now < state.CooldownUntilTick || !PromiseConditions.Eligible(state.Pawn))
+            {
+                RequestGenerator.ResetObservations(state);
+                return;
+            }
+            foreach (PromiseKind kind in Enum.GetValues(typeof(PromiseKind)))
+            {
+                var candidate = RequestGenerator.Observe(state, kind, now);
+                if (candidate != null) ready.Add(new KeyValuePair<ColonistPromises, RequestCandidate>(state, candidate));
+            }
+        }
+
+        private void OfferReady(int now, List<KeyValuePair<ColonistPromises, RequestCandidate>> ready)
+        {
             if (now < nextOffer || ready.Count == 0) return;
-            // Oldest eligible observation first; pawn identity and kind break ties deterministically.
-            var chosen = ready.OrderByDescending(x => x.Key.Deficits.First(d => d.Kind == x.Value.Terms.Kind).Ticks)
-                .ThenBy(x => x.Key.Pawn.thingIDNumber).ThenBy(x => x.Value.Terms.Kind).First();
+            // Preserve age priority after the accumulation cap; pawn and kind break true ties.
+            var chosen = RequestGenerator.SelectReady(ready);
             chosen.Key.Request = RequestGenerator.Offer(chosen.Value, now);
             RequestGenerator.ResetObservations(chosen.Key);
             nextOffer = now + RequestRules.OfferSpacing;

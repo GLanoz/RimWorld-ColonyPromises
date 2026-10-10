@@ -43,6 +43,8 @@ namespace ColonyPromises
         public int WithdrawnDays;
         public int CooldownDays;
 
+        public PromiseRecord CopyForPreview() => (PromiseRecord)MemberwiseClone();
+
         public void RecordResolution(int tick)
         {
             ResolvedTick = tick;
@@ -116,6 +118,7 @@ namespace ColonyPromises
         public Pawn Pawn;
         public int Trust = PromiseBalance.InitialTrust;
         public int CooldownUntilTick;
+        public int LastGenerationCheck = -1;
         public PromiseRecord Active;
         public ColonistRequest Request;
         public List<DeficitObservation> Deficits = new List<DeficitObservation>();
@@ -128,6 +131,7 @@ namespace ColonyPromises
             Scribe_References.Look(ref Pawn, "pawn");
             Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
+            Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
             Scribe_Deep.Look(ref Active, "active");
             Scribe_Deep.Look(ref Request, "request");
             Scribe_Collections.Look(ref Deficits, "deficits", LookMode.Deep);
@@ -171,6 +175,7 @@ namespace ColonyPromises
         public int Ticks;
         public int SevereTicks;
         public int LastTick = -1;
+        public int StartTick = -1;
         public void ExposeData()
         {
             Scribe_Values.Look(ref Kind, "kind");
@@ -178,6 +183,7 @@ namespace ColonyPromises
             Scribe_Values.Look(ref Ticks, "ticks");
             Scribe_Values.Look(ref SevereTicks, "severeTicks");
             Scribe_Values.Look(ref LastTick, "lastTick", -1);
+            Scribe_Values.Look(ref StartTick, "startTick", -1);
         }
     }
 

@@ -73,4 +73,38 @@
   <CP_HistoryDaysOne>день</CP_HistoryDaysOne>
   <CP_HistoryDaysFew>дні</CP_HistoryDaysFew>
   <CP_HistoryDaysMany>днів</CP_HistoryDaysMany>
+  <CP_DebugTitle>Діагностика генерації прохань (режим розробника)</CP_DebugTitle>
+  <CP_DebugMissing>Пішака не обрано.</CP_DebugMissing>
+  <CP_DebugDead>Пішак помер або знищений.</CP_DebugDead>
+  <CP_DebugFaction>Не належить до фракції гравця.</CP_DebugFaction>
+  <CP_DebugGuest>Не вільний колоніст: гість, полонений, раб або тимчасовий мешканець за завданням.</CP_DebugGuest>
+  <CP_DebugAdult>Потрібен дорослий людиноподібний колоніст.</CP_DebugAdult>
+  <CP_DebugMood>Немає потреби настрою.</CP_DebugMood>
+  <CP_DebugAbsent>Поза картою або призупинений; спостереження неможливе.</CP_DebugAbsent>
+  <CP_DebugHome>Не на домашній карті гравця.</CP_DebugHome>
+  <CP_DebugBusy>Непритомний, призваний або в психічному зриві.</CP_DebugBusy>
+  <CP_DebugAscetic>Аскетичні колоністи не просять спальні.</CP_DebugAscetic>
+  <CP_DebugExpectation>Гра не повернула поточні очікування.</CP_DebugExpectation>
+  <CP_DebugNoJoy>Немає потреби розваг.</CP_DebugNoJoy>
+  <CP_DebugSatisfied>Поточні умови задовольняють правила генерації.</CP_DebugSatisfied>
+  <CP_DebugNoBedroom>Немає відповідної окремої спальні</CP_DebugNoBedroom>
+  <CP_DebugNoGear>Немає придатного зношеного або нижчого за звичайну якість екіпірованого предмета. Виключено одяг нудистів, стрілецьку зброю забіяк, непридатні предмети та зброю нездатних до насильства.</CP_DebugNoGear>
+  <CP_DebugStock>Спорядження потребує покращення, але немає доступного, дозволеного й придатного предмета того самого типу на карті з потрібною якістю та міцністю.</CP_DebugStock>
+  <CP_DebugJoy>Поточні розваги: {0}%; дефіцит вимагає менш ніж {1}%.</CP_DebugJoy>
+  <CP_DebugRoom>Поточна спальня: {0}. Очікування: {1}; бажаний рівень: {2}.</CP_DebugRoom>
+  <CP_DebugItem>{0}, якість {1}, міцність {2}%</CP_DebugItem>
+  <CP_DebugYes>так</CP_DebugYes>
+  <CP_DebugNo>ні</CP_DebugNo>
+  <CP_DebugEligible>Придатність: {0}</CP_DebugEligible>
+  <CP_DebugOccupied>Поточний стан: {0}</CP_DebugOccupied>
+  <CP_DebugCooldown>Залишок індивідуального очікування: {0} дня.</CP_DebugCooldown>
+  <CP_DebugSchedule>Остання перевірка пішака: {0}. Остання перевірка колонії: {1}. Наступна планова перевірка: {2}.</CP_DebugSchedule>
+  <CP_DebugSpacing>Загальний інтервал прохань блокує створення: {0}; залишилося {1} дня.</CP_DebugSpacing>
+  <CP_DebugType>{0}: дефіцит є: {1}; підтверджене спостереження при перевірці зараз: {2}/{3} дня.</CP_DebugType>
+  <CP_DebugTarget>Придатну вимогу можна сформувати: {0}.</CP_DebugTarget>
+  <CP_DebugStored>Збережене спостереження: {0} дня.</CP_DebugStored>
+  <CP_DebugSampling>Цілі є кандидатами, а не проханнями. Зайнятий стан і очікування блокують спостереження. Перегляд не зберігає обчислений час. Перевірка зараз дотримується всіх правил і не переносить планову перевірку колонії.</CP_DebugSampling>
+  <CP_DebugCheckNow>Перевірити зараз</CP_DebugCheckNow>
+  <CP_DebugNever>не записано</CP_DebugNever>
+  <CP_DebugTick>тік {0} (ігровий день {1})</CP_DebugTick>
 </LanguageData>

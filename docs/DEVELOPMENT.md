@@ -8,6 +8,7 @@ See the [README](../README.md) for player rules, the [API reference](API.md) for
 | --- | --- |
 | PromiseData.cs | Saved request, deficit observations, promise terms/effects, trust, history, cooldown, and separate success ledger |
 | RequestGenerator.cs | Game-backed candidates, deficit observation, relevance checks, request offers |
+| RequestDiagnostics.cs | Read-only shared-evaluator diagnostics, localized candidate state |
 | RequestLifecycle.cs | Acceptance and unaccepted closure state transitions |
 | PromiseBalance.cs | Legacy balance, progress arithmetic, and centralized RequestRules |
 | PromiseConditions.cs | Condition registry, bedroom/equipment continuous holds, recreation eligibility |
@@ -16,7 +17,7 @@ See the [README](../README.md) for player rules, the [API reference](API.md) for
 | PromisePatches.cs | Actual recreation callbacks and existing interruption/lifecycle hooks |
 | MainTabWindow_Promises.cs | Request review, acceptance/refusal, active progress, withdrawal, history |
 
-Observation runs once per game hour (2,500 ticks), active checks every 250 ticks or sooner at a deadline. Only active promises enter the progress index. Requests are offered at least half a day apart across the colony. Longest observed deficit wins, followed by pawn ID and kind as deterministic tie breakers.
+Observation runs once per game hour (2,500 ticks), active checks every 250 ticks or sooner at a deadline. Only active promises enter the progress index. Requests are offered at least half a day apart across the colony. Longest observed deficit wins; saved observation start time breaks capped-duration ties before pawn ID and kind. See [generation diagnostics](GENERATION.md) for the execution path and fairness regression.
 
 Generation derives one candidate per direction. The equipment signature includes the current physical item, target quality, and worn state. A request copies its candidate terms; accepting revalidates the need and stock, then transfers that record into the active slot. No reward is granted for meeting terms before acceptance. Unanswered request outcomes never enter the consequence applicator.
 
@@ -24,7 +25,7 @@ To add a direction, extend PromiseKind, register an IPromiseCondition, add candi
 
 ## Persistence and migration
 
-Scribe stores open requests (reason key, expectation def, terms, offer/expiry ticks, deadline days, significance), per-direction deficit clocks and signatures, cooldowns, trust, active progress, history, and success timestamps. Observation and global offer schedules are saved. Expectation defs rather than translated labels let language changes use the current game translation.
+Scribe stores open requests (reason key, expectation def, terms, offer/expiry ticks, deadline days, significance), per-direction deficit clocks and signatures, cooldowns, trust, active progress, history, and success timestamps. Observation and global offer schedules, last-check markers, and deficit StartTick are saved. Missing old start ticks use the last saved sample minus its saved duration; earlier capped time is not reconstructed. Expectation defs rather than translated labels let language changes use the current game translation.
 
 New promises save FrozenConsequences and the exact success/broken/withdrawn mood, trust, duration, and cooldown values. Snapshot refuses to overwrite a frozen record. Reward history and trust are evaluated at acceptance; later expectations, wealth, or passage of the repeat window do not change it.
 
@@ -58,14 +59,17 @@ Build the mod first; see the README for paths. Rule checks require .NET 10. Comp
 dotnet run --project Tests/ColonyPromises.CoreChecks.csproj -c Release
 powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Requests.ps1 -RimWorldDir "C:\Path\To\RimWorld"
 powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Invalidation.ps1 -RimWorldDir "C:\Path\To\RimWorld"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Generation.ps1 -RimWorldDir "C:\Path\To\RimWorld"
 powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-History.ps1 -RimWorldDir "C:\Path\To\RimWorld"
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -RimWorldDir "C:\Path\To\RimWorld" -CecilPath "C:\Path\To\Mono.Cecil.dll"
 ```
 
 Core checks cover progress clipping, duplicate credit, deficit duration/gaps, already-satisfied room targets, cooldown readiness, bounded requirements, and differentiated rewards. Compiled request fixtures cover penalty-free unaccepted closure, preserved repeat history, acceptance snapshots, frozen terms, and legacy field loading. Real Scribe reads old record/state fields and round-trips consequence fields, request metadata, and deficit clocks; these fixtures deliberately exclude engine finalization, non-null reference resolution, full map state, and game lifecycle. They do not validate a complete save migration.
 
+Generation checks reuse the .NET 10 fixture host for the real translator. They cover pure projection and read-only state, capped queue fairness, schedule initialization/persistence, conservative legacy observation migration, and the Dev action guard. Full candidate generation on real maps remains a manual check.
+
 History checks run under .NET 10 because the game formatter uses .NET Standard 2.1 APIs absent from Windows PowerShell's CLR. They reproduce the original missing-number failure through the real translator, then render English/Ukrainian history for every outcome, exercise actual applied effects and trust clamping, and round-trip history fields through Scribe. Keyed data is supplied to isolated language objects; no Unity window or complete game save is loaded.
 
 Invalidation fixtures call the compiled bed-unclaim Prefix and the game's bedless UnclaimBed, then test real tracked-item selection with isolated game objects. Content checks validate patch targets/arguments, XML, localization keys, and placeholder parity.
 
-No completed in-game run is documented. Full generation on real maps, equipment availability under mod restrictions, recreation practicality, UI, notifications, full save migration, and load-time room reconstruction remain manual tests. Successful compilation or IL inspection cannot establish those behaviors.
+The player has verified history display in-game. Generation and the Development-mode diagnostics have not been verified in-game. Full generation on real maps, equipment availability under mod restrictions, recreation practicality, UI, notifications, full save migration, and load-time room reconstruction remain manual tests. Successful compilation or IL inspection cannot establish those behaviors.

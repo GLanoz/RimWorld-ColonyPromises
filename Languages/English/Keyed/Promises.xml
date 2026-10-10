@@ -73,4 +73,38 @@ Fulfill within {2} days after accepting.
   <CP_HistoryDaysOne>day</CP_HistoryDaysOne>
   <CP_HistoryDaysFew>days</CP_HistoryDaysFew>
   <CP_HistoryDaysMany>days</CP_HistoryDaysMany>
+  <CP_DebugTitle>Request generation diagnostics (Development mode)</CP_DebugTitle>
+  <CP_DebugMissing>No pawn selected.</CP_DebugMissing>
+  <CP_DebugDead>Dead or destroyed pawn.</CP_DebugDead>
+  <CP_DebugFaction>Not a member of the player faction.</CP_DebugFaction>
+  <CP_DebugGuest>Not a free colonist: guest, prisoner, slave, or quest lodger.</CP_DebugGuest>
+  <CP_DebugAdult>Requires an adult humanlike colonist.</CP_DebugAdult>
+  <CP_DebugMood>No mood need.</CP_DebugMood>
+  <CP_DebugAbsent>Not spawned on a map, or suspended; no observation.</CP_DebugAbsent>
+  <CP_DebugHome>Not on a player home map.</CP_DebugHome>
+  <CP_DebugBusy>Downed, drafted, or in a mental state.</CP_DebugBusy>
+  <CP_DebugAscetic>Ascetic colonists do not request bedrooms.</CP_DebugAscetic>
+  <CP_DebugExpectation>The game returned no current expectation.</CP_DebugExpectation>
+  <CP_DebugNoJoy>No recreation need.</CP_DebugNoJoy>
+  <CP_DebugSatisfied>Current conditions satisfy the generation rules.</CP_DebugSatisfied>
+  <CP_DebugNoBedroom>No qualifying private bedroom</CP_DebugNoBedroom>
+  <CP_DebugNoGear>No eligible worn or below-normal equipped item. Nudist apparel, Brawler ranged weapons, unusable items, and nonviolent weapons are excluded.</CP_DebugNoGear>
+  <CP_DebugStock>An equipped item needs improvement, but no matching reachable, allowed, usable loose stock meets the quality and durability target.</CP_DebugStock>
+  <CP_DebugJoy>Current recreation: {0}%; deficit requires less than {1}%.</CP_DebugJoy>
+  <CP_DebugRoom>Current bedroom: {0}. Expectations: {1}; desired stage: {2}.</CP_DebugRoom>
+  <CP_DebugItem>{0}, {1} quality, {2}% durability</CP_DebugItem>
+  <CP_DebugYes>yes</CP_DebugYes>
+  <CP_DebugNo>no</CP_DebugNo>
+  <CP_DebugEligible>Eligible: {0}</CP_DebugEligible>
+  <CP_DebugOccupied>Current slot: {0}</CP_DebugOccupied>
+  <CP_DebugCooldown>Individual cooldown remaining: {0} days.</CP_DebugCooldown>
+  <CP_DebugSchedule>Selected pawn last check: {0}. Colony last scan: {1}. Next scheduled scan: {2}.</CP_DebugSchedule>
+  <CP_DebugSpacing>Colony-wide offer interval blocks creation: {0}; {1} days remaining.</CP_DebugSpacing>
+  <CP_DebugType>{0}: deficit exists: {1}; verified observation at a check now: {2}/{3} days.</CP_DebugType>
+  <CP_DebugStored>Saved observation: {0} days.</CP_DebugStored>
+  <CP_DebugSampling>Targets are candidates, not offers. Occupied slots and cooldowns prevent observation. Viewing does not save projected time. Check now uses all normal rules and does not advance the scheduled colony scan.</CP_DebugSampling>
+  <CP_DebugCheckNow>Check now</CP_DebugCheckNow>
+  <CP_DebugNever>not recorded</CP_DebugNever>
+  <CP_DebugTick>tick {0} (game day {1})</CP_DebugTick>
+  <CP_DebugTarget>A suitable target can be formed: {0}.</CP_DebugTarget>
 </LanguageData>

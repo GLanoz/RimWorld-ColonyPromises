@@ -16,11 +16,12 @@ Colony Promises targets **RimWorld 1.6**, checked against **1.6.4871 rev590**. S
 | Bedroom and stages | OwnedBed, OwnersForReading, Medical, ForColonists; Room.Role/Owners/ContainedBeds/GetStat; Impressiveness.scoreStages/GetScoreStageIndex |
 | Equipped items | AllEquipmentListForReading, WornApparel, CompQuality, TryGetQuality, QualityCategory |
 | Actual recreation | JoyUtility.JoyTickCheckEnd, curDriver.asleep, CurrentBed, RoomRoleDefOf.Hospital |
+| Development diagnostics | Prefs.DevMode; existing game ticks, localization, and Widgets APIs |
 | Consequences and UI | ThoughtMaker.MakeThought, Thought_Memory, RemoveMemoriesOfDef, TryGainMemory; MainTabWindow, Widgets, FloatMenu, CreateConfirmation, Messages.Message |
 
 Room targets use the game's standard stages and localized labels. CurrentExpectationFor(Pawn) derives its map expectation from WealthTotal, then applies the game's relevant pawn adjustments. The mod does not add a second wealth multiplier. Trait rules use actual Core defs. Equipment comparisons stay within the same ThingDef, so skill-based ranking of unrelated weapons and invented preferences are unnecessary.
 
-Requests observe needs every 2,500 ticks, separately from 250-tick active-promise checks. Consecutive observations accumulate only bounded intervals with the same deficit signature. Losing observability, satisfying the need, changing the tracked equipment, or entering a cooldown restarts observation. This is sampled persistence, not proof of every intervening tick. Candidate stock must be spawned, reachable, non-forbidden, usable, and match a loaded equipped item's def.
+Generation and diagnostics share candidate evaluation and deficit projection; the selected-pawn Dev action shares the ordinary observation/offer path. See [generation diagnostics](GENERATION.md) for blockers, queue selection, schedules, and migration. Requests observe needs every 2,500 ticks, separately from 250-tick active-promise checks. Consecutive observations accumulate only bounded intervals with the same deficit signature. Losing observability, satisfying the need, changing the tracked equipment, or entering a cooldown restarts observation. This is sampled persistence, not proof of every intervening tick. Candidate stock must be spawned, reachable, non-forbidden, usable, and match a loaded equipped item's def.
 
 ## Recreation accounting
 

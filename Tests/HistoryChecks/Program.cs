@@ -17,7 +17,7 @@ public static class HistoryChecks
         checks++;
         if (!condition) throw new Exception(message);
     }
-    static LoadedLanguage Language(string root, string folder)
+    internal static LoadedLanguage Language(string root, string folder)
     {
         // Supply keyed data to the actual game's translator without loading Unity assets.
         var language = (LoadedLanguage)RuntimeHelpers.GetUninitializedObject(typeof(LoadedLanguage));
@@ -175,9 +175,15 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        if (args.Length != 1) throw new ArgumentException("Pass the absolute mod root.");
+        if (args.Length != 1 && !(args.Length == 2 && args[0] == "--generation-only")) throw new ArgumentException("Pass the absolute mod root.");
         string temporaryFile = Path.GetTempFileName();
         try {
+            if (args.Length == 2)
+            {
+                Console.WriteLine("Passed " + GenerationChecks.Run(args[1], temporaryFile)
+                    + " generation projection, queue fairness, scheduler, diagnostics, and isolated Scribe checks. Live maps remain unverified.");
+                return 0;
+            }
             int count = HistoryChecks.Run(args[0], temporaryFile);
             Console.WriteLine("Passed " + count + " bilingual history, applied-result, and isolated Scribe field checks. Unity UI and full save loading remain unverified.");
             return 0;

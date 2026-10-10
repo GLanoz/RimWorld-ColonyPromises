@@ -18,6 +18,8 @@ Only free adult humanlike player colonists with a mood need are eligible. Guests
 
 Requests require **two observed game days** of an unmet need on a player home map. Short interruptions do not immediately produce requests. The mod offers at most one new request across the colony every half day, favoring the longest observed deficit. An open request allows **two days** to respond. Declining, ignoring, or satisfying an unaccepted request gives no reward or penalty. Requests that cease to be relevant also close without penalty.
 
+For testing, enable the game's **Development mode** to see a generation diagnostic panel in Promises. It shows eligibility, unmet needs, observation clocks, candidate requirements, cooldowns, and the colony-wide offer interval. **Check now** runs an ordinary check for the selected pawn without bypassing rules. See [generation diagnostics](docs/GENERATION.md) and [reproducible manual checks](docs/MANUAL_TESTS.md#reproducible-generation-checks).
+
 ### Bedroom
 
 A colonist can request a private bedroom or an improvement to an existing one. The target uses the game's current expectations, which already reflect colony wealth. It starts at impressiveness stage 2, rises with expectations, and is capped at stage 5; an existing bedroom is asked to improve by at most two stages. The interface uses the game's localized category names.
@@ -73,7 +75,7 @@ Bed reassignment, losing room conditions, switching rooms or physical items, and
 
 Existing promises retain their requirements, progress, deadlines, trust, history, and previous consequence rules, including old one-hour recreation targets. Newly accepted requests use the new frozen consequences.
 
-Adding the mod to existing saves is implemented but has not been verified on a real save; safe removal is also unverified. Release compilation, automated rule checks, compiled lifecycle/invalidation checks, and isolated Scribe field checks pass. These checks do not establish correct in-game behavior, full save migration, Harmony execution, or compatibility with other mods. See the [manual scenarios](docs/MANUAL_TESTS.md).
+Adding the mod to existing saves is implemented but has not been verified on a real save; safe removal is also unverified. Release compilation, automated rule checks, compiled lifecycle/invalidation checks, and isolated Scribe field checks pass. History display has been checked in-game by the player. Request generation and the Development-mode diagnostics still require in-game testing; automated checks do not establish full save migration, Harmony execution, or compatibility with other mods. See the [manual scenarios](docs/MANUAL_TESTS.md).
 
 ## Building from source
 

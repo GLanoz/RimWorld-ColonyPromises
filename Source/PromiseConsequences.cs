@@ -6,6 +6,13 @@ namespace ColonyPromises
 {
     public static class PromiseConsequences
     {
+        public static PromiseRecord Preview(ColonistPromises state, ColonistRequest request, int tick)
+        {
+            var copy = request.Terms.CopyForPreview();
+            Snapshot(state, new ColonistRequest { Terms = copy, Magnitude = request.Magnitude }, tick);
+            return copy;
+        }
+
         public static void Snapshot(ColonistPromises state, ColonistRequest request, int tick)
         {
             var r = request.Terms;

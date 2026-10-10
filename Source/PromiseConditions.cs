@@ -30,10 +30,19 @@ namespace ColonyPromises
         public static IPromiseCondition Get(PromiseKind kind) => Conditions.TryGetValue(kind, out var value) ? value : null;
         public static IEnumerable<IPromiseCondition> All => Conditions.Values;
 
-        public static bool Eligible(Pawn pawn) => pawn != null && !pawn.Dead && !pawn.Destroyed
-            && pawn.Faction == Faction.OfPlayer && pawn.IsFreeNonSlaveColonist
-            && pawn.HostFaction == null && pawn.RaceProps.Humanlike && pawn.ageTracker.Adult
-            && !QuestUtility.IsQuestLodger(pawn) && pawn.needs?.mood != null;
+        public static string EligibilityReason(Pawn pawn)
+        {
+            if (pawn == null) return "CP_DebugMissing";
+            if (pawn.Dead || pawn.Destroyed) return "CP_DebugDead";
+            if (pawn.Faction != Faction.OfPlayer) return "CP_DebugFaction";
+            if (!pawn.IsFreeNonSlaveColonist || pawn.HostFaction != null || QuestUtility.IsQuestLodger(pawn))
+                return "CP_DebugGuest";
+            if (!pawn.RaceProps.Humanlike || !pawn.ageTracker.Adult) return "CP_DebugAdult";
+            if (pawn.needs?.mood == null) return "CP_DebugMood";
+            return null;
+        }
+
+        public static bool Eligible(Pawn pawn) => EligibilityReason(pawn) == null;
 
         public static bool Observable(Pawn pawn) => Eligible(pawn) && pawn.Spawned && !pawn.Suspended;
     }
