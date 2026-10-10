@@ -56,6 +56,8 @@ Invalidation skips events while Scribe is active. FinalizeInit rebuilds active i
 
 New request generation, acceptance, and persistence need no extra Harmony patches. Acceptance rechecks relevance and snapshots consequences. Unaccepted closures bypass PromiseConsequences, preserving trust and the repeat ledger.
 
+History formatting uses plain NamedArgument placeholders and preformatted numeric strings. The inspected grammar resolver treats a colon as a language-function call, not a .NET numeric format clause. Completed records retain the applied mood/trust values and resolution time; saved availability flags distinguish known zeros from missing old fields. The history fixture exercises the actual translator and scalar Scribe round-trips, without loading Unity UI or a complete save.
+
 ## Known limitations
 
 - Caravans generate no requests or simulated progress. Open requests can expire; accepted deadlines keep running. Recreation accumulated before departure remains; continuous holds restart.
