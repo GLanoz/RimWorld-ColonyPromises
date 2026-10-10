@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <CP_SelectColonist>Оберіть колоніста</CP_SelectColonist>
+  <CP_NoColonists>Немає відповідних колоністів. Обіцянки доступні вільним дорослим колоністам гравця, крім гостей, полонених і рабів.</CP_NoColonists>
+  <CP_Trust>{0} — довіра до керівництва: {1}/{2}</CP_Trust>
+  <CP_Type_Bedroom>Окрема спальня</CP_Type_Bedroom>
+  <CP_Type_Leisure>Відпочинок</CP_Type_Leisure>
+  <CP_Type_Equipment>Спорядження</CP_Type_Equipment>
+  <CP_Outcome_Fulfilled>виконано</CP_Outcome_Fulfilled>
+  <CP_Outcome_Broken>порушено</CP_Outcome_Broken>
+  <CP_Outcome_Withdrawn>відкликано</CP_Outcome_Withdrawn>
+  <CP_Outcome_Closed>закрито без штрафу</CP_Outcome_Closed>
+  <CP_Active>Активна обіцянка: {0}</CP_Active>
+  <CP_BedroomConditions>Мати ліжко як його єдиний призначений власник в окремій спальні рівня не нижче «{0}». Бараки та медичні ліжка не зараховуються. Утримувати те саме ліжко й кімнату безперервно протягом {1} перевірених годин. Вихід із карти, зміна кімнати або втрата відповідності умовам скидає прогрес.</CP_BedroomConditions>
+  <CP_LeisureConditions>Накопичити {0} годин фактичного відпочинку після видачі обіцянки. Зараховуються розваги та свідоме дозвілля, які розпізнає гра. Розклад, дорога до розваги, сон, непритомність, перебування в лікарні, бойовий режим і вимушена бездіяльність не зараховуються.</CP_LeisureConditions>
+  <CP_EquipmentConditions>Фактично екіпірувати {0} якості не нижче «{1}» і безперервно утримувати той самий предмет протягом {2} перевірених годин. Інвентар і склад не зараховуються. Зняття предмета або вихід із карти скидає прогрес.</CP_EquipmentConditions>
+  <CP_Remaining>Залишок часу: {0:0.00} днів</CP_Remaining>
+  <CP_Progress>Перевірений прогрес: {0:0.00} / {1:0.00} годин</CP_Progress>
+  <CP_DeadlineRule>Термін продовжує спливати під час хвороби, каравану та бою. Неперевірений час поза картою не зараховується. Порушення визначається після завершення терміну.</CP_DeadlineRule>
+  <CP_Withdraw>Відкликати обіцянку…</CP_Withdraw>
+  <CP_WithdrawConfirm>Відкликати цю обіцянку? Настрій: {0} на {1} дн.; довіра: {2}; очікування {3} дн. до спостереження для нових прохань.</CP_WithdrawConfirm>
+  <CP_History>Нещодавня історія</CP_History>
+  <CP_NoHistory>Немає завершених прохань чи обіцянок.</CP_NoHistory>
+  <CP_HistoryEntry>{0}: {1}, {2:0.00} днів тому. Настрій {3:+0.##;-0.##;0}; довіра {4:+0;-0;0}.</CP_HistoryEntry>
+  <CP_Ineligible>Підходять лише вільні дорослі колоністи гравця з потребою настрою. Гості, полонені й раби виключені.</CP_Ineligible>
+  <CP_AlreadyActive>Цей колоніст уже має активну обіцянку.</CP_AlreadyActive>
+  <CP_Cooldown>Спостереження для нових прохань почнеться за {0:0.00} дн.</CP_Cooldown>
+  <CP_InvalidParameters>Збережені умови недійсні або недоступні.</CP_InvalidParameters>
+  <CP_MissingParameter>відсутній вміст</CP_MissingParameter>
+  <CP_MissingColonist>Відсутній колоніст</CP_MissingColonist>
+  <CP_Result>{0}: {1} — {2}.</CP_Result>
+  <CP_RequestTitle>Прохання: {0}</CP_RequestTitle>
+  <CP_ResponseTime>Час для відповіді: {0:0.00} дн. Після прийняття виконайте за {1} дн.</CP_ResponseTime>
+  <CP_FixedConsequences>Виконання: {0:+0.##;-0.##;0} настрою на {1} дн.; {2:+0;-0;0} довіри. Порушення: {3:+0;-0;0} настрою на {4} дн.; {5:+0;-0;0} довіри. Відкликання: {6:+0;-0;0} настрою на {7} дн.; {8:+0;-0;0} довіри. Очікування після завершення: {9} дн. Значення фіксуються при прийнятті; повторні виконання зменшують винагороду, але не штрафи.</CP_FixedConsequences>
+  <CP_Accept>Пообіцяти виконати…</CP_Accept>
+  <CP_AcceptConfirm>Обіцяти колоністу {0}:
+
+{1}
+
+Виконайте за {2} дн. після прийняття.
+
+{3}
+
+{4}</CP_AcceptConfirm>
+  <CP_Decline>Відмовити…</CP_Decline>
+  <CP_DeclineConfirm>Відмовити в цьому проханні? Без штрафу настрою чи довіри. Нове прохання потребує {0} дн. очікування та нового стійкого дефіциту.</CP_DeclineConfirm>
+  <CP_NoRequest>Немає відкритого прохання чи активної обіцянки.</CP_NoRequest>
+  <CP_RequestRules>Прохання виникають поступово після двох днів спостережуваного дефіциту. Довільно обирати вимоги не можна. Відмова або відсутність відповіді не дають штрафу. Довіра має межі 0–100 і не дає постійного бонусу настрою.</CP_RequestRules>
+  <CP_RequestUnavailable>Це прохання вже закрите або час для відповіді сплив.</CP_RequestUnavailable>
+  <CP_RequestOutdated>Це прохання зараз неактуальне або його неможливо перевірити. Для прийняття потрібна незадоволена потреба, а для спорядження — доступна придатна заміна.</CP_RequestOutdated>
+  <CP_NewRequest>{0} висловлює прохання: {1}. Перегляньте його у вкладці «Обіцянки».</CP_NewRequest>
+  <CP_ReasonBedroomMissing>Немає відповідної власної спальні щонайменше {1} дні спостереження. Поточні очікування: {0}.</CP_ReasonBedroomMissing>
+  <CP_ReasonBedroomImprove>Власна спальня щонайменше {1} дні спостереження нижче цільового рівня. Поточні очікування: {0}; прохання передбачає обмежене покращення.</CP_ReasonBedroomImprove>
+  <CP_ReasonLeisure>Розваги щонайменше {1} дні спостереження залишаються нижче 35%. Потрібні години залежать від тривалості й тяжкості дефіциту.</CP_ReasonLeisure>
+  <CP_ReasonEquipmentWorn>Одяг щонайменше {1} дні спостереження має менше 50% міцності, а на карті є доступна придатна заміна того самого типу.</CP_ReasonEquipmentWorn>
+  <CP_ReasonEquipmentQuality>Екіпірований предмет щонайменше {1} дні спостереження має якість нижче нормальної, а на карті є доступний придатний екземпляр того самого типу кращої якості.</CP_ReasonEquipmentQuality>
+  <CP_Durability>Протягом утримання зберігайте щонайменше {0:0}% міцності.</CP_Durability>
+  <CP_LegacyPromise>Обіцянка попередньої версії: збережено початкові умови та попередні правила наслідків.</CP_LegacyPromise>
+  <CP_Outcome_Declined>у проханні відмовлено без штрафу</CP_Outcome_Declined>
+  <CP_Outcome_Expired>прохання без відповіді спливло без штрафу</CP_Outcome_Expired>
+  <CP_Outcome_SatisfiedUnaccepted>неприйняте прохання виконано без винагороди</CP_Outcome_SatisfiedUnaccepted>
+  <CP_StatusPromise>активна обіцянка</CP_StatusPromise>
+  <CP_StatusRequest>відкрите прохання</CP_StatusRequest>
+  <CP_StatusWaiting>немає прохання</CP_StatusWaiting>
+  <CP_ColonistChoice>{0} — {1}</CP_ColonistChoice>
+  <CP_Outcome_Obsolete>прохання вже неактуальне, закрито без штрафу</CP_Outcome_Obsolete>
+</LanguageData>
