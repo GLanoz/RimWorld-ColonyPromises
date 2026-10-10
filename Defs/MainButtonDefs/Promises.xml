@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs><MainButtonDef><defName>CP_Promises</defName><label>Promises</label><description>Make and review promises to colonists.</description><tabWindowClass>ColonyPromises.MainTabWindow_Promises</tabWindowClass><order>95</order><validWithoutMap>true</validWithoutMap></MainButtonDef></Defs>
