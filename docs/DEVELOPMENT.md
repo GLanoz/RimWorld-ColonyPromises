@@ -32,6 +32,14 @@ The existing keys and enum values for old promise outcomes are retained. Missing
 
 Continuous holds save their physical item and observation tick, with room identity restored by FinalizeInit. Same-tick loads add no time, and unobserved gaps earn no retrospective hold credit. Deficit gaps also restart observation. Completed and unaccepted outcomes clear deficit observations; cooldown time never contributes to a new request.
 
+## History display
+
+History reads ResolvedTick, AppliedMood, and AppliedTrust from the completed record. AppliedTrust is the actual change after clamping, not the promised delta. Rendering does not call the consequence calculator or use current trust or balance.
+
+RimWorld's fixed-arity Translate overloads use NamedArgument and GrammarResolverSimple. A colon in a placeholder invokes a language function, so .NET clauses such as {2:0.00} can disappear instead of formatting a number. PromiseHistory formats numeric strings first, then supplies plain placeholders. English uses a decimal point; Ukrainian uses a comma, with localized day forms and explicit signed effects.
+
+HasHistoryMetadata, HasResolvedTick, HasAppliedMood, and HasAppliedTrust distinguish known zeros from missing data. Resolution and consequence application set these flags; Scribe preserves them even when numeric defaults are omitted. When an old record lacks the metadata marker, only explicitly stored numeric fields are marked available. A missing old trust delta, including an omitted clamped zero, is conservatively shown as unavailable. Penalty-free outcomes have a clear no-change message. No missing effect is reconstructed from current balance.
+
 ## Balance
 
 RequestRules and PromiseBalance are the authoritative sources. The README lists deadlines and base rewards. Significance is binary: a missing bedroom or two-stage room improvement, more than four recreation hours, or apparel that is both worn and below-normal quality is larger.
@@ -50,10 +58,13 @@ Build the mod first; see the README for paths. Rule checks require .NET 10. Comp
 dotnet run --project Tests/ColonyPromises.CoreChecks.csproj -c Release
 powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Requests.ps1 -RimWorldDir "C:\Path\To\RimWorld"
 powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Invalidation.ps1 -RimWorldDir "C:\Path\To\RimWorld"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-History.ps1 -RimWorldDir "C:\Path\To\RimWorld"
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -RimWorldDir "C:\Path\To\RimWorld" -CecilPath "C:\Path\To\Mono.Cecil.dll"
 ```
 
 Core checks cover progress clipping, duplicate credit, deficit duration/gaps, already-satisfied room targets, cooldown readiness, bounded requirements, and differentiated rewards. Compiled request fixtures cover penalty-free unaccepted closure, preserved repeat history, acceptance snapshots, frozen terms, and legacy field loading. Real Scribe reads old record/state fields and round-trips consequence fields, request metadata, and deficit clocks; these fixtures deliberately exclude engine finalization, non-null reference resolution, full map state, and game lifecycle. They do not validate a complete save migration.
+
+History checks run under .NET 10 because the game formatter uses .NET Standard 2.1 APIs absent from Windows PowerShell's CLR. They reproduce the original missing-number failure through the real translator, then render English/Ukrainian history for every outcome, exercise actual applied effects and trust clamping, and round-trip history fields through Scribe. Keyed data is supplied to isolated language objects; no Unity window or complete game save is loaded.
 
 Invalidation fixtures call the compiled bed-unclaim Prefix and the game's bedless UnclaimBed, then test real tracked-item selection with isolated game objects. Content checks validate patch targets/arguments, XML, localization keys, and placeholder parity.
 
