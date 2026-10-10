@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+tools/output/
+*.user
+*.pdb
