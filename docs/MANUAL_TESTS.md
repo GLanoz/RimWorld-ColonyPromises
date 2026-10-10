@@ -62,6 +62,16 @@ These scenarios are prepared, not completed in-game. Use a copied save and a sep
 
 The [automated fixture](../Tests/Verify-Invalidation.ps1) calls the compiled Prefix and isolated handlers; this scenario validates actual Harmony execution in-game.
 
+## History formatting regression
+
+1. In English and Ukrainian, fulfill, break, withdraw, and close promises without penalty. Also decline or let an unaccepted request expire.
+2. Check the immediate result and advance half a game day. A withdrawal with applied −3 mood/−4 trust should show those signed values and 0.5 days (English) or 0,5 дня (Ukrainian), rather than blanks.
+3. Verify positive, fractional, negative, and actual zero trust changes at the trust bounds. Penalty-free outcomes should clearly state that mood and trust did not change.
+4. Save and reload each result. Applied values must remain the same; only elapsed time may advance. Later trust, reward history, or balance changes must not rewrite the historical effect.
+5. Load complete older history, then a copied save whose older entry lacks appliedMood, appliedTrust, or resolvedTick. Explicitly stored fields remain visible; missing fields display an unavailable-data message. Save and reload again and confirm that missing information is not replaced with fabricated zeros.
+6. Confirm that English/Ukrainian day forms, Unicode minus signs, and long history rows remain legible at the normal UI scale.
+
+The [history fixture](../Tests/Verify-History.ps1) reproduces the original failure with the game's formatter and checks isolated history serialization. It does not draw this window or finalize a real save.
 ## Saves, migration, and presentation
 
 | Scenario | Action | Expected result |
