@@ -47,6 +47,9 @@ if (Compare-Object $englishKeys $ukrainianKeys) { throw 'Localization key sets d
 foreach ($key in $englishKeys) {
     $englishValue = $english.LanguageData.SelectSingleNode($key).InnerText
     $ukrainianValue = $ukrainian.LanguageData.SelectSingleNode($key).InnerText
+    if ($key -like 'CP_History*' -and ($englishValue -match '\{\d+:' -or $ukrainianValue -match '\{\d+:')) {
+        throw "History must use plain RimWorld placeholders; format numbers before translation: $key"
+    }
     $enSlots = @([regex]::Matches($englishValue, '\{(\d+)(?:[^}]*)\}') | ForEach-Object { $_.Groups[1].Value } | Sort-Object)
     $ukSlots = @([regex]::Matches($ukrainianValue, '\{(\d+)(?:[^}]*)\}') | ForEach-Object { $_.Groups[1].Value } | Sort-Object)
     if (Compare-Object $enSlots $ukSlots) { throw "Placeholder mismatch in $key" }
