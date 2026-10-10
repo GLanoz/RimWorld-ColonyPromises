@@ -172,6 +172,14 @@ public static class GenerationChecks
             foreach (string folder in new[] { "English", "Ukrainian" })
             {
                 LanguageDatabase.activeLanguage = LanguageDatabase.defaultLanguage = HistoryChecks.Language(root, folder);
+                string half = PromiseText.Number(0.5f);
+                Check("CP_Remaining".Translate(half).ToString().Contains(half), "Remaining time uses a plain placeholder");
+                Check("CP_Progress".Translate(half, PromiseText.Number(24)).ToString().Contains(half), "Progress numbers survive translation");
+                Check("CP_ResponseTime".Translate(half, "3").ToString().Contains(half), "Response time survives translation");
+                Check("CP_Cooldown".Translate(half).ToString().Contains(half), "Cooldown survives translation");
+                Check("CP_Durability".Translate("80").ToString().Contains("80"), "Durability survives translation");
+                Check(PromiseText.Consequences(new PromiseRecord { SuccessMood = 3, BrokenMood = -7 }).Contains("+3"),
+                    "Consequence preview retains explicit signed values");
                 var state = new ColonistPromises();
                 state.Deficits.Add(saved);
                 state.CooldownUntilTick = 900000;

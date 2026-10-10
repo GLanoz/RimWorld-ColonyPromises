@@ -7,6 +7,14 @@ using Verse.AI;
 
 namespace ColonyPromises
 {
+    public sealed class RequestEvaluation
+    {
+        public RequestCandidate Candidate;
+        public bool HasDeficit;
+        public string Reason;
+        public string Current;
+    }
+
     public sealed class RequestCandidate
     {
         public PromiseRecord Terms;
@@ -49,10 +57,7 @@ namespace ColonyPromises
             return result;
         }
 
-        public static string Number(float value) => value.ToString("0.##",
-            LanguageDatabase.activeLanguage?.folderName == "Ukrainian"
-                ? System.Globalization.CultureInfo.GetCultureInfo("uk-UA")
-                : System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+        public static string Number(float value) => PromiseText.Number(value);
 
         private static bool Trait(Pawn pawn, TraitDef def) => pawn.story?.traits?.HasTrait(def) == true;
 
@@ -144,6 +149,14 @@ namespace ColonyPromises
             return result;
         }
 
+        public static void PrepareTerms(RequestCandidate candidate, DeficitObservation observation)
+        {
+            if (candidate.Terms.Kind != PromiseKind.Leisure) return;
+            int hours = RequestRules.LeisureHours(observation.Ticks, observation.SevereTicks);
+            candidate.Terms.RequiredTicks = hours * PromiseBalance.TicksPerHour;
+            candidate.Magnitude = hours > RequestRules.MinHours ? 1 : 0;
+        }
+
         public static RequestCandidate Observe(ColonistPromises state, PromiseKind kind, int now)
         {
             var candidate = Candidate(state.Pawn, kind);
@@ -153,12 +166,7 @@ namespace ColonyPromises
             state.Deficits.Add(observation);
             if (candidate == null) return null;
             if (!RequestRules.Ready(observation.Ticks, state.Request != null || state.Active != null, now, state.CooldownUntilTick)) return null;
-            if (kind == PromiseKind.Leisure)
-            {
-                int hours = RequestRules.LeisureHours(observation.Ticks, observation.SevereTicks);
-                candidate.Terms.RequiredTicks = hours * PromiseBalance.TicksPerHour;
-                candidate.Magnitude = hours > RequestRules.MinHours ? 1 : 0;
-            }
+            PrepareTerms(candidate, observation);
             return candidate;
         }
 
@@ -185,13 +193,19 @@ namespace ColonyPromises
                     && candidate.Terms.MinimumHitPointsFraction == request.Terms.MinimumHitPointsFraction);
         }
 
-        public static ColonistRequest Offer(RequestCandidate candidate, int now) => new ColonistRequest
+        public static ColonistRequest Offer(RequestCandidate candidate, int now)
         {
-            Terms = candidate.Terms, ReasonKey = candidate.ReasonKey, Expectation = candidate.Expectation,
-            Magnitude = candidate.Magnitude, OfferedTick = now,
-            ExpiryTick = now + RequestRules.ResponseDays * PromiseBalance.TicksPerDay,
-            DeadlineDays = RequestRules.Deadline((int)candidate.Terms.Kind, candidate.Magnitude)
-        };
+            var terms = candidate.Terms;
+            terms.CreatedTick = terms.LastCheckTick = terms.LastLeisureCreditTick = now;
+            terms.DeadlineTick = now + RequestRules.ResponseDays * PromiseBalance.TicksPerDay;
+            return new ColonistRequest
+            {
+                Terms = terms, ReasonKey = candidate.ReasonKey, Expectation = candidate.Expectation,
+                Magnitude = candidate.Magnitude, OfferedTick = now, ExpiryTick = terms.DeadlineTick,
+                DeadlineDays = RequestRules.Deadline((int)terms.Kind, candidate.Magnitude),
+                Announced = false, RecoveryEnabled = true
+            };
+        }
 
         public static void ResetObservations(ColonistPromises state) => state.Deficits.Clear();
     }

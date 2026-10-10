@@ -20,7 +20,7 @@ namespace ColonyPromises
             int kind = (int)r.Kind;
             int magnitude = request.Magnitude;
             float factor = RewardFactor(state, r.Kind, tick);
-            r.SuccessMood = RequestRules.MoodReward(kind, magnitude) * factor;
+            r.SuccessMood = TrustRules.RewardMood(RequestRules.MoodReward(kind, magnitude), factor, state.Trust);
             r.SuccessTrust = PromiseBalance.ClampTrust(state.Trust + System.Math.Max(1,
                 (int)System.Math.Round(RequestRules.TrustReward(kind, magnitude) * factor))) - state.Trust;
             r.BrokenMood = RequestRules.BrokenBase(kind, magnitude)
@@ -81,7 +81,7 @@ namespace ColonyPromises
             int oldTrust = state.Trust;
             state.Trust = PromiseBalance.ClampTrust(oldTrust + trust);
             record.RecordConsequences(mood, state.Trust - oldTrust);
-            var memories = state.Pawn.needs?.mood?.thoughts?.memories;
+            var memories = state.Pawn?.needs?.mood?.thoughts?.memories;
             if (memories != null)
             {
                 var def = DefDatabase<ThoughtDef>.GetNamed(defName);

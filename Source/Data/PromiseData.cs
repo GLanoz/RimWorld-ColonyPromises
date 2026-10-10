@@ -119,6 +119,8 @@ namespace ColonyPromises
         public int Trust = PromiseBalance.InitialTrust;
         public int CooldownUntilTick;
         public int LastGenerationCheck = -1;
+        public int NextUnpromisedRecoveryTick;
+        public List<SuccessStamp> RecentRecoveries = new List<SuccessStamp>();
         public PromiseRecord Active;
         public ColonistRequest Request;
         public List<DeficitObservation> Deficits = new List<DeficitObservation>();
@@ -132,6 +134,8 @@ namespace ColonyPromises
             Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
             Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
+            Scribe_Values.Look(ref NextUnpromisedRecoveryTick, "nextUnpromisedRecoveryTick");
+            Scribe_Collections.Look(ref RecentRecoveries, "recentRecoveries", LookMode.Deep);
             Scribe_Deep.Look(ref Active, "active");
             Scribe_Deep.Look(ref Request, "request");
             Scribe_Collections.Look(ref Deficits, "deficits", LookMode.Deep);
@@ -143,6 +147,7 @@ namespace ColonyPromises
                 History = History ?? new List<PromiseRecord>();
                 RecentSuccesses = RecentSuccesses ?? new List<SuccessStamp>();
                 Deficits = Deficits ?? new List<DeficitObservation>();
+                RecentRecoveries = RecentRecoveries ?? new List<SuccessStamp>();
             }
         }
     }
@@ -152,6 +157,9 @@ namespace ColonyPromises
         public PromiseRecord Terms;
         public string ReasonKey;
         public ExpectationDef Expectation;
+        public bool Announced = true; // Missing old fields must not resend an announcement.
+        public bool ReminderSent;
+        public bool RecoveryEnabled; // Only newly generated requests opt in.
         public int OfferedTick;
         public int ExpiryTick;
         public int DeadlineDays;
@@ -159,6 +167,9 @@ namespace ColonyPromises
         public void ExposeData()
         {
             Scribe_Deep.Look(ref Terms, "terms");
+            Scribe_Values.Look(ref Announced, "announced", true);
+            Scribe_Values.Look(ref ReminderSent, "reminderSent");
+            Scribe_Values.Look(ref RecoveryEnabled, "recoveryEnabled");
             Scribe_Values.Look(ref ReasonKey, "reasonKey");
             Scribe_Defs.Look(ref Expectation, "expectation");
             Scribe_Values.Look(ref OfferedTick, "offeredTick");

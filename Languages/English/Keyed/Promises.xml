@@ -14,8 +14,8 @@
   <CP_BedroomConditions>Own a bed as its only assigned owner in a private bedroom rated at least “{0}”. No barracks or medical beds. Keep the same bed and room continuously for {1} verified hours. Leaving the map, changing rooms or losing eligibility resets the hold.</CP_BedroomConditions>
   <CP_LeisureConditions>Accumulate {0} actual recreation hours after making the promise. Counts recreation activity and deliberate leisure recognized by the game. Timetable assignments, travel to an activity, sleep, unconsciousness, hospital stays, drafted activity and forced idleness do not count.</CP_LeisureConditions>
   <CP_EquipmentConditions>Actually equip {0} of at least {1} quality and keep the same item equipped continuously for {2} verified hours. Inventory and stockpiles do not count. Removing the item or leaving the map resets the hold.</CP_EquipmentConditions>
-  <CP_Remaining>Time remaining: {0:0.00} days</CP_Remaining>
-  <CP_Progress>Verified progress: {0:0.00} / {1:0.00} hours</CP_Progress>
+  <CP_Remaining>Time remaining: {0} days</CP_Remaining>
+  <CP_Progress>Verified progress: {0} / {1} hours</CP_Progress>
   <CP_DeadlineRule>The deadline keeps running during illness, caravans and combat. Unverified time away from a map never counts. A broken promise is assessed at expiry.</CP_DeadlineRule>
   <CP_Withdraw>Withdraw promise…</CP_Withdraw>
   <CP_WithdrawConfirm>Withdraw this promise? Mood: {0} for {1} days; trust: {2}; wait {3} days before new requests can be observed.</CP_WithdrawConfirm>
@@ -24,14 +24,14 @@
   <CP_HistoryEntry>{0} — {1} {2}. {3}</CP_HistoryEntry>
   <CP_Ineligible>Only free adult player colonists with a mood need are eligible. Guests, prisoners and slaves are excluded.</CP_Ineligible>
   <CP_AlreadyActive>This colonist already has an active promise.</CP_AlreadyActive>
-  <CP_Cooldown>New requests may be observed in {0:0.00} days.</CP_Cooldown>
+  <CP_Cooldown>New requests may be observed in {0} days.</CP_Cooldown>
   <CP_InvalidParameters>The saved conditions are invalid or unavailable.</CP_InvalidParameters>
   <CP_MissingParameter>missing content</CP_MissingParameter>
   <CP_MissingColonist>Missing colonist</CP_MissingColonist>
   <CP_Result>{0}: {1} — {2}.</CP_Result>
   <CP_RequestTitle>Request: {0}</CP_RequestTitle>
-  <CP_ResponseTime>Respond within {0:0.00} days. If accepted, fulfill within {1} days.</CP_ResponseTime>
-  <CP_FixedConsequences>Success: {0:+0.##;-0.##;0} mood for {1} days; {2:+0;-0;0} trust. Broken: {3:+0;-0;0} mood for {4} days; {5:+0;-0;0} trust. Withdrawn: {6:+0;-0;0} mood for {7} days; {8:+0;-0;0} trust. Cooldown after resolution: {9} days. These values are fixed when accepted; repeated successes reduce rewards, never penalties.</CP_FixedConsequences>
+  <CP_ResponseTime>Respond within {0} days. If accepted, fulfill within {1} days.</CP_ResponseTime>
+  <CP_FixedConsequences>Success: {0} mood for {1} days; {2} trust. Broken: {3} mood for {4} days; {5} trust. Withdrawn: {6} mood for {7} days; {8} trust. Cooldown after resolution: {9} days. These values are fixed when accepted; repeated successes reduce rewards, never penalties.</CP_FixedConsequences>
   <CP_Accept>Promise to fulfill…</CP_Accept>
   <CP_AcceptConfirm>Promise to {0}:
 
@@ -54,11 +54,11 @@ Fulfill within {2} days after accepting.
   <CP_ReasonLeisure>Recreation has stayed below 35% for at least {1} observed days. Required hours reflect the duration and severity of this deficit.</CP_ReasonLeisure>
   <CP_ReasonEquipmentWorn>Apparel has remained below 50% durability for at least {1} observed days, with a usable replacement of the same type available on this map.</CP_ReasonEquipmentWorn>
   <CP_ReasonEquipmentQuality>An equipped item has remained below normal quality for at least {1} observed days, with a usable higher-quality copy of the same type available on this map.</CP_ReasonEquipmentQuality>
-  <CP_Durability>Maintain at least {0:0}% durability throughout the hold.</CP_Durability>
+  <CP_Durability>Maintain at least {0}% durability throughout the hold.</CP_Durability>
   <CP_LegacyPromise>Existing promise: its original conditions and previous consequence rules are preserved.</CP_LegacyPromise>
   <CP_Outcome_Declined>request declined without penalty</CP_Outcome_Declined>
   <CP_Outcome_Expired>unanswered request expired without penalty</CP_Outcome_Expired>
-  <CP_Outcome_SatisfiedUnaccepted>unaccepted request satisfied without reward</CP_Outcome_SatisfiedUnaccepted>
+  <CP_Outcome_SatisfiedUnaccepted>request satisfied without a promise</CP_Outcome_SatisfiedUnaccepted>
   <CP_StatusPromise>active promise</CP_StatusPromise>
   <CP_StatusRequest>open request</CP_StatusRequest>
   <CP_StatusWaiting>no request</CP_StatusWaiting>
@@ -107,4 +107,19 @@ Fulfill within {2} days after accepting.
   <CP_DebugNever>not recorded</CP_DebugNever>
   <CP_DebugTick>tick {0} (game day {1})</CP_DebugTick>
   <CP_DebugTarget>A suitable target can be formed: {0}.</CP_DebugTarget>
+  <CP_OpenPromises>Open Promises</CP_OpenPromises>
+  <CP_OpenRequests>Open requests: {0}</CP_OpenRequests>
+  <CP_RequestRow>{0} ? {1}; respond within {2} days</CP_RequestRow>
+  <CP_RequestLetterTitle>Request from {0}</CP_RequestLetterTitle>
+  <CP_RequestReminderTitle>Reply soon: {0}</CP_RequestReminderTitle>
+  <CP_RequestLetterText>{0} requests:
+
+{1}
+
+Response time remaining: {2} days. Open Promises to review the reason, exact consequences, and available choices.</CP_RequestLetterText>
+  <CP_RemindersSetting>Remind me half a day before an unanswered request expires</CP_RemindersSetting>
+  <CP_TrustImpact>Below {0} trust, new promises give smaller success mood rewards; current mood factor: {1}%. Success still restores trust. There is no permanent low-trust mood penalty.</CP_TrustImpact>
+  <CP_UnpromisedRecovery>Without accepting: meeting this open request can restore +{0} trust, with no mood reward. {1} Current verified progress: {2} hours. Complete before the response deadline. Recovery has separate cooldown and repeat limits.</CP_UnpromisedRecovery>
+  <CP_RecoveryHold>Keep the requested bed/room or equipped item valid continuously for {0} verified hours.</CP_RecoveryHold>
+  <CP_RecoveryLeisure>Accumulate {0} recognized recreation hours while this request is open and restore joy to at least 35%. Acceptance starts promise progress from zero.</CP_RecoveryLeisure>
 </LanguageData>

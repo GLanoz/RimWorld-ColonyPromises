@@ -16,16 +16,20 @@ namespace ColonyPromises
             RequestGenerator.ResetObservations(state);
         }
 
-        public static PromiseRecord Close(ColonistPromises state, PromiseOutcome outcome, int now)
+        public static PromiseRecord Close(ColonistPromises state, PromiseOutcome outcome, int now, bool recoverTrust = false)
         {
             var request = state.Request;
             if (request == null) return null;
+            int recovery = recoverTrust && outcome == PromiseOutcome.SatisfiedUnaccepted
+                ? TrustRecovery.Apply(state, request, now) : 0;
             state.Request = null;
             var r = request.Terms;
             r.CreatedTick = request.OfferedTick;
             r.RecordResolution(now);
             r.Outcome = outcome;
-            r.RecordConsequences(0, 0);
+            r.RecordConsequences(0, recovery);
+            r.StableThing = null;
+            r.ObservedRoom = null;
             state.CooldownUntilTick = now + RequestRules.UnacceptedCooldownDays * PromiseBalance.TicksPerDay;
             RequestGenerator.ResetObservations(state);
             return r;

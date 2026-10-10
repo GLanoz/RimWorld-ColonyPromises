@@ -175,13 +175,15 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        if (args.Length != 1 && !(args.Length == 2 && args[0] == "--generation-only")) throw new ArgumentException("Pass the absolute mod root.");
+        if (args.Length != 1 && !(args.Length == 2 && (args[0] == "--generation-only" || args[0] == "--features-only"))) throw new ArgumentException("Pass the absolute mod root.");
         string temporaryFile = Path.GetTempFileName();
         try {
             if (args.Length == 2)
             {
-                Console.WriteLine("Passed " + GenerationChecks.Run(args[1], temporaryFile)
-                    + " generation projection, queue fairness, scheduler, diagnostics, and isolated Scribe checks. Live maps remain unverified.");
+                Console.WriteLine("Passed " + (args[0] == "--features-only" ? FeatureChecks.Run(args[1], temporaryFile) : GenerationChecks.Run(args[1], temporaryFile))
+                    + (args[0] == "--features-only"
+                        ? " visibility, notification, low-trust, recovery, invalidation, and isolated Scribe checks. Live maps remain unverified."
+                        : " generation projection, queue fairness, scheduler, diagnostics, and isolated Scribe checks. Live maps remain unverified."));
                 return 0;
             }
             int count = HistoryChecks.Run(args[0], temporaryFile);

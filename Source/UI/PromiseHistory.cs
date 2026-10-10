@@ -13,7 +13,7 @@ namespace ColonyPromises
             string age = record.HasResolvedTick
                 ? Age(Math.Max(0L, (long)now - record.ResolvedTick) / (double)PromiseBalance.TicksPerDay, culture, ukrainian)
                 : "CP_HistoryTimeUnavailable".Translate().ToString();
-            bool noConsequences = record.Outcome != PromiseOutcome.Fulfilled
+            bool noConsequences = !(record.HasAppliedMood && record.AppliedMood != 0 || record.HasAppliedTrust && record.AppliedTrust != 0) && record.Outcome != PromiseOutcome.Fulfilled
                 && record.Outcome != PromiseOutcome.Broken && record.Outcome != PromiseOutcome.Withdrawn;
             string effects = noConsequences ? "CP_HistoryNoEffects".Translate().ToString()
                 : "CP_HistoryEffects".Translate(

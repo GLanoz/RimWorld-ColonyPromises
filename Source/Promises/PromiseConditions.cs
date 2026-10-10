@@ -121,6 +121,6 @@ namespace ColonyPromises
         public string Describe(PromiseRecord r) => "CP_EquipmentConditions".Translate(
             r.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
             r.MinimumQuality.GetLabel(), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour).ToString()
-            + (r.MinimumHitPointsFraction > 0 ? " " + "CP_Durability".Translate(r.MinimumHitPointsFraction * 100).ToString() : "");
+            + (r.MinimumHitPointsFraction > 0 ? " " + "CP_Durability".Translate(PromiseText.Number(r.MinimumHitPointsFraction * 100)).ToString() : "");
     }
 }

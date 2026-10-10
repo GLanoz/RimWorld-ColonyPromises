@@ -4,14 +4,6 @@ using Verse;
 
 namespace ColonyPromises
 {
-    public sealed class RequestEvaluation
-    {
-        public RequestCandidate Candidate;
-        public bool HasDeficit;
-        public string Reason;
-        public string Current;
-    }
-
     public static class RequestDiagnostics
     {
         public static string Describe(ColonistPromises state, PromiseKind kind, int now)
@@ -32,8 +24,7 @@ namespace ColonyPromises
             text += "\n" + "CP_DebugTarget".Translate((evaluation.Candidate == null ? "CP_DebugNo" : "CP_DebugYes").Translate());
             if (evaluation.Candidate == null) return text + "\n" + (evaluation.Reason ?? "CP_DebugNoGear").Translate();
             var terms = evaluation.Candidate.Terms;
-            if (kind == PromiseKind.Leisure)
-                terms.RequiredTicks = RequestRules.LeisureHours(observation.Ticks, observation.SevereTicks) * PromiseBalance.TicksPerHour;
+            RequestGenerator.PrepareTerms(evaluation.Candidate, observation);
             return text + "\n" + PromiseConditions.Get(kind).Describe(terms);
         }
     }

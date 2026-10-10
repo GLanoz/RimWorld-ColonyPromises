@@ -35,6 +35,21 @@ namespace ColonyPromises
         public static int FailureMood(int trust) => BrokenMood - (int)Math.Round(HighTrustExtraPenalty * ClampTrust(trust) / (double)MaxTrust, MidpointRounding.AwayFromZero);
     }
 
+    public static class TrustRules
+    {
+        public const int LowTrustThreshold = 40;
+        public const float ZeroTrustMoodFactor = 0.25f;
+        public const int RecoveryThreshold = 20;
+        public const int UnpromisedRecoveryTrust = 2;
+        public const int RecoveryCooldownDays = 10;
+        public const int RecoveryRepeatDays = 15;
+        public const int ReminderLeadTicks = PromiseBalance.TicksPerDay / 2;
+        public static float RewardMood(int baseMood, float repeatFactor, int trust) =>
+            (float)Math.Round(baseMood * repeatFactor * MoodFactor(trust), 2, MidpointRounding.AwayFromZero);
+        public static float MoodFactor(int trust) => ZeroTrustMoodFactor + (1 - ZeroTrustMoodFactor)
+            * Math.Min(LowTrustThreshold, PromiseBalance.ClampTrust(trust)) / LowTrustThreshold;
+    }
+
     public static class ProgressMath
     {
         // A missing observation never credits elapsed time retroactively.

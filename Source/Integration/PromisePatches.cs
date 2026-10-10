@@ -8,9 +8,19 @@ namespace ColonyPromises
 {
     public sealed class ColonyPromisesMod : Mod
     {
+        public static ColonyPromisesSettings Settings = new ColonyPromisesSettings();
         public ColonyPromisesMod(ModContentPack content) : base(content)
         {
+            Settings = GetSettings<ColonyPromisesSettings>();
             new Harmony("colonypromises.core").PatchAll();
+        }
+        public override string SettingsCategory() => "Colony Promises";
+        public override void DoSettingsWindowContents(UnityEngine.Rect inRect)
+        {
+            var listing = new Listing_Standard();
+            listing.Begin(inRect);
+            listing.CheckboxLabeled("CP_RemindersSetting".Translate(), ref Settings.RemindersEnabled);
+            listing.End();
         }
     }
 

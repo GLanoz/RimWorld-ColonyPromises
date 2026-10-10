@@ -14,6 +14,19 @@ namespace ColonyPromises
         private float contentHeight = 1000f;
         public override Vector2 RequestedTabSize => new Vector2(760f, 640f);
 
+        public static void OpenFor(Pawn target)
+        {
+            var def = DefDatabase<MainButtonDef>.GetNamed("CP_Promises");
+            Find.MainTabsRoot.SetCurrentTab(def);
+            ((MainTabWindow_Promises)def.TabWindow).SelectPawn(target);
+        }
+
+        public void SelectPawn(Pawn target)
+        {
+            pawn = target ?? Candidates().FirstOrDefault();
+            scroll = Vector2.zero;
+        }
+
         public override void PostOpen()
         {
             base.PostOpen();
@@ -57,14 +70,25 @@ namespace ColonyPromises
             float y = 0;
             float width = view.width;
             int now = Find.TickManager.TicksGame;
+            var requests = component.OpenRequests(now);
+            Label(ref y, width, "CP_OpenRequests".Translate(requests.Count));
+            foreach (var entry in requests)
+            {
+                if (Button(ref y, width, "CP_RequestRow".Translate(entry.Pawn.LabelShort,
+                    ("CP_Type_" + entry.Request.Terms.Kind).Translate(),
+                    PromiseText.Number((entry.Request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay))))
+                    SelectPawn(entry.Pawn);
+            }
+            Label(ref y, width, "CP_TrustImpact".Translate(TrustRules.LowTrustThreshold,
+                PromiseText.Number(TrustRules.MoodFactor(state.Trust) * 100)));
             if (state.Active != null)
             {
                 var r = state.Active;
                 Label(ref y, width, "CP_Active".Translate(("CP_Type_" + r.Kind).Translate()));
                 Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_InvalidParameters".Translate().ToString());
-                Label(ref y, width, "CP_Remaining".Translate(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay));
-                Label(ref y, width, "CP_Progress".Translate(r.ProgressTicks / (float)PromiseBalance.TicksPerHour, r.RequiredTicks / (float)PromiseBalance.TicksPerHour));
-                if (r.FrozenConsequences) Label(ref y, width, Consequences(r));
+                Label(ref y, width, "CP_Remaining".Translate(PromiseText.Number(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay)));
+                Label(ref y, width, "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)));
+                if (r.FrozenConsequences) Label(ref y, width, PromiseText.Consequences(r));
                 else Label(ref y, width, "CP_LegacyPromise".Translate());
                 Label(ref y, width, "CP_DeadlineRule".Translate());
                 if (Button(ref y, width, "CP_Withdraw".Translate()))
@@ -84,8 +108,14 @@ namespace ColonyPromises
                 Label(ref y, width, "CP_RequestTitle".Translate(("CP_Type_" + r.Kind).Translate()));
                 Label(ref y, width, request.ReasonKey.Translate(request.Expectation?.label ?? "", RequestRules.PersistentTicks / PromiseBalance.TicksPerDay));
                 Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
-                Label(ref y, width, "CP_ResponseTime".Translate(Math.Max(0, request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay, request.DeadlineDays));
-                Label(ref y, width, Consequences(r));
+                Label(ref y, width, "CP_ResponseTime".Translate(PromiseText.Number(Math.Max(0, request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay), request.DeadlineDays));
+                Label(ref y, width, PromiseText.Consequences(r));
+                if (TrustRecovery.Available(state, request, now))
+                    Label(ref y, width, "CP_UnpromisedRecovery".Translate(TrustRules.UnpromisedRecoveryTrust,
+                        r.Kind == PromiseKind.Leisure ? "CP_RecoveryLeisure".Translate(PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString()
+                            : "CP_RecoveryHold".Translate(PromiseText.Number(PromiseBalance.HoldTicks / (float)PromiseBalance.TicksPerHour)).ToString(),
+                        PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour)));
+
                 Label(ref y, width, "CP_DeadlineRule".Translate());
                 string error = component.AcceptanceError(pawn, request);
                 if (error != null) Label(ref y, width, error);
@@ -94,7 +124,7 @@ namespace ColonyPromises
                     var target = pawn;
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
                         "CP_AcceptConfirm".Translate(target.LabelShort, PromiseConditions.Get(r.Kind).Describe(r),
-                            request.DeadlineDays, Consequences(r), "CP_DeadlineRule".Translate()),
+                            request.DeadlineDays, PromiseText.Consequences(r), "CP_DeadlineRule".Translate()),
                         () => component.TryAccept(target, request)));
                 }
                 if (Button(ref y, width, "CP_Decline".Translate()))
@@ -107,7 +137,7 @@ namespace ColonyPromises
             else
             {
                 Label(ref y, width, "CP_NoRequest".Translate());
-                if (now < state.CooldownUntilTick) Label(ref y, width, "CP_Cooldown".Translate((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay));
+                if (now < state.CooldownUntilTick) Label(ref y, width, "CP_Cooldown".Translate(PromiseText.Number((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay)));
                 Label(ref y, width, "CP_RequestRules".Translate());
             }
             if (Prefs.DevMode)
@@ -146,10 +176,6 @@ namespace ColonyPromises
 
         private static string DebugTick(int tick) => tick < 0 ? "CP_DebugNever".Translate().ToString()
             : "CP_DebugTick".Translate(tick.ToString(), RequestGenerator.Number(tick / (float)PromiseBalance.TicksPerDay)).ToString();
-
-        private static string Consequences(PromiseRecord r) => "CP_FixedConsequences".Translate(
-            r.SuccessMood, r.SuccessDays, r.SuccessTrust, r.BrokenMood, r.BrokenDays, r.BrokenTrust,
-            r.WithdrawnMood, r.WithdrawnDays, r.WithdrawnTrust, r.CooldownDays);
 
         private static void Label(ref float y, float width, string text)
         {

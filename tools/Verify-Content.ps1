@@ -47,14 +47,14 @@ if (Compare-Object $englishKeys $ukrainianKeys) { throw 'Localization key sets d
 foreach ($key in $englishKeys) {
     $englishValue = $english.LanguageData.SelectSingleNode($key).InnerText
     $ukrainianValue = $ukrainian.LanguageData.SelectSingleNode($key).InnerText
-    if ($key -like 'CP_History*' -and ($englishValue -match '\{\d+:' -or $ukrainianValue -match '\{\d+:')) {
-        throw "History must use plain RimWorld placeholders; format numbers before translation: $key"
+    if (($englishValue -match '\{\d+:' -or $ukrainianValue -match '\{\d+:')) {
+        throw "UI must use plain RimWorld placeholders; format numbers before translation: $key"
     }
     $enSlots = @([regex]::Matches($englishValue, '\{(\d+)(?:[^}]*)\}') | ForEach-Object { $_.Groups[1].Value } | Sort-Object)
     $ukSlots = @([regex]::Matches($ukrainianValue, '\{(\d+)(?:[^}]*)\}') | ForEach-Object { $_.Groups[1].Value } | Sort-Object)
     if (Compare-Object $enSlots $ukSlots) { throw "Placeholder mismatch in $key" }
 }
-foreach ($source in Get-ChildItem -LiteralPath (Join-Path $modRoot 'Source') -Filter '*.cs') {
+foreach ($source in Get-ChildItem -LiteralPath (Join-Path $modRoot 'Source') -Filter '*.cs' -Recurse) {
     $code = Get-Content -LiteralPath $source.FullName -Raw
     foreach ($match in [regex]::Matches($code, '"(CP_[A-Za-z0-9]+)"\.Translate')) {
         if ($match.Groups[1].Value -notin $englishKeys) { throw "Missing localization: $($match.Groups[1].Value)" }
