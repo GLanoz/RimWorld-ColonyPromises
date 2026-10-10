@@ -260,7 +260,7 @@ namespace ColonyPromises
             state.Active = null;
             if (state.Pawn != null) active.Remove(state.Pawn);
             r.Outcome = outcome;
-            r.ResolvedTick = now;
+            r.RecordResolution(now);
             r.StableThing = null;
             r.ObservedRoom = null;
             state.RecentSuccesses.RemoveAll(s => now - s.Tick > PromiseBalance.RepeatWindowDays * PromiseBalance.TicksPerDay);
