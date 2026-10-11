@@ -96,9 +96,13 @@ namespace ColonyPromises
                 return;
             }
             bool observable = RequestMaintenance.Observable(pawn);
+            if (observable && !DlcCompatibility.PendingCompatible(pawn, request.Terms))
+            { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             bool satisfied = observable && RequestMaintenance.Satisfied(pawn, request);
             bool recovery = TrustRecovery.Available(state, request, now);
             var terms = request.Terms;
+            if (terms.Kind == PromiseKind.Equipment && !terms.NeedBasedEquipment)
+            { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             if (terms.Kind == PromiseKind.Bedroom && (!terms.HousingBased || observable && !satisfied && !RequestGenerator.Relevant(pawn, request)))
             { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             var condition = PromiseConditions.Get(terms.Kind);

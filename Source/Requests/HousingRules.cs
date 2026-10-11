@@ -23,7 +23,7 @@ namespace ColonyPromises
         private static readonly string[] situations = { "Greedy", "WantToSleepWithSpouseOrLover", "Ascetic", "Jealous" };
         private static readonly string[] unsupportedMemories = { "SleptInCold", "SleptInHeat", "SleepDisturbed" };
         public static bool SupportedCause(string cause) => memories.Contains(cause)
-            || cause == "Greedy" || cause == "WantToSleepWithSpouseOrLover";
+            || cause == "Greedy" || cause == "WantToSleepWithSpouseOrLover" || DlcCompatibility.RoyalCause(cause);
 
         public static bool MemoryProblem(string cause, bool usableBed, bool materialBed, bool outdoors,
             bool correctRoomRole, float projectedMood, bool ascetic) => cause == "SleptOnGround" ? !usableBed || !materialBed
@@ -53,7 +53,8 @@ namespace ColonyPromises
                     Current = NegativeEvidence(mood, current, negative != null, witness != null), Supported = true,
                     MinimumStage = name == "SleptInBedroom" ? NeutralStage(pawn, def, 0) : 1 });
             }
-            foreach (string name in situations)
+            foreach (string name in situations.Concat(ModsConfig.RoyaltyActive
+                ? new[] { "TitleBedroomRequirementsNotMet", "TitleNoPersonalBedroom" } : new string[0]))
             {
                 var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(name);
                 if (def == null) continue;
@@ -63,7 +64,7 @@ namespace ColonyPromises
                 thought.RecalculateState();
                 if (!thought.Active || thought.MoodOffset() >= 0) continue;
                 result.Add(new HousingIssue { Pawn = pawn, Cause = name, Mood = thought.MoodOffset(), Current = true,
-                    Supported = name == "Greedy" || name == "WantToSleepWithSpouseOrLover",
+                    Supported = name == "Greedy" || name == "WantToSleepWithSpouseOrLover" || DlcCompatibility.RoyalCause(name),
                     MinimumStage = name == "Greedy" ? NeutralStage(pawn, def, 1) : 1 });
             }
             foreach (var memory in activeMemories ?? new List<Thought_Memory>())
@@ -144,7 +145,7 @@ namespace ColonyPromises
             { evaluation.Reason = "CP_HousingUnsupported"; return null; }
             if (first.story?.traits?.HasTrait(TraitDefOf.Ascetic) == true || second?.story?.traits?.HasTrait(TraitDefOf.Ascetic) == true)
             { evaluation.Reason = second == null ? "CP_HousingUnsupported" : "CP_PairConflictingNeeds"; return null; }
-            bool barracks = current.All(i => i.Cause != "WantToSleepWithSpouseOrLover")
+            bool barracks = current.All(i => i.Cause != "WantToSleepWithSpouseOrLover" && !DlcCompatibility.RoyalCause(i.Cause))
                 && first.ownership?.OwnedBed?.GetRoom()?.Role == RoomRoleDefOf.Barracks
                 && (second == null || first.ownership?.OwnedBed == second.ownership?.OwnedBed);
             int target = current.Max(i => i.MinimumStage);
@@ -168,6 +169,11 @@ namespace ColonyPromises
             var terms = new PromiseRecord { Kind = PromiseKind.Bedroom, ParticipantA = second == null ? null : first,
                 ParticipantB = second, RoomStage = target, RequiresBarracks = barracks, HousingBased = true,
                 RequiresConstructedBed = current.Any(i => i.Cause == "SleptOnGround"), RequiredTicks = PromiseBalance.HoldTicks };
+            var requirements = new List<BedroomRequirement>();
+            if (!DlcCompatibility.CaptureBedroom(first, requirements)
+                || second != null && !DlcCompatibility.CaptureBedroom(second, requirements))
+            { evaluation.Reason = "CP_RoyalBedroomUnsupported"; return null; }
+            if (requirements.Count > 0) { terms.BedroomRequirements = requirements; terms.RequiresBarracks = false; }
             var observed = PromiseConditions.Get(PromiseKind.Bedroom).Observe(first, terms);
             if (observed.Satisfied) { evaluation.Reason = "CP_DebugSatisfied"; return null; }
             var room = first.ownership?.OwnedBed?.GetRoom();
@@ -175,7 +181,8 @@ namespace ColonyPromises
             evaluation.HasDeficit = true;
             evaluation.Reason = null;
             string prefix = "housing-v2:" + (second == null ? first.thingIDNumber.ToString() : SharedBedroomRules.PairKey(first, second))
-                + ":" + barracks + ":" + target + ":" + terms.RequiresConstructedBed + "|";
+                + ":" + terms.RequiresBarracks + ":" + target + ":" + terms.RequiresConstructedBed
+                + (requirements.Count == 0 ? "" : ":royal:" + string.Join("/", requirements.Select(r => r.Kind + ":" + r.Value + ":" + string.Join(",", r.Names)))) + "|";
             string saved = GameComponent_Promises.Current?.PeekState(first).Deficits.FirstOrDefault(d => d.Kind == PromiseKind.Bedroom)?.Signature;
             var anchor = current.FirstOrDefault(i => saved == prefix + i.Pawn.thingIDNumber + "=" + i.Cause)
                 ?? current.OrderBy(i => i.Pawn.thingIDNumber).ThenBy(i => i.Cause).First();

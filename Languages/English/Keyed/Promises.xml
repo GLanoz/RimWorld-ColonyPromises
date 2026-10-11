@@ -2,7 +2,7 @@
 <LanguageData>
   <CP_SelectColonist>Select a colonist</CP_SelectColonist>
   <CP_NoColonists>No eligible colonists. Promises are available to free adult player colonists, excluding guests, prisoners and slaves.</CP_NoColonists>
-  <CP_Trust>{0} — leadership trust: {1}/{2}</CP_Trust>
+  <CP_Trust>{0} — trust: {1}/{2}</CP_Trust>
   <CP_Type_Bedroom>Private bedroom</CP_Type_Bedroom>
   <CP_Type_Leisure>Recreation</CP_Type_Leisure>
   <CP_Type_Equipment>Equipment</CP_Type_Equipment>
@@ -10,15 +10,17 @@
   <CP_Outcome_Broken>broken</CP_Outcome_Broken>
   <CP_Outcome_Withdrawn>withdrawn</CP_Outcome_Withdrawn>
   <CP_Outcome_Closed>closed without penalty</CP_Outcome_Closed>
-  <CP_Active>Active promise: {0}</CP_Active>
-  <CP_BedroomConditions>Own a bed as its only assigned owner in a private bedroom rated at least “{0}”. No barracks or medical beds. Keep the same bed and room continuously for {1} verified hours. Leaving the map, changing rooms or losing eligibility resets the hold.</CP_BedroomConditions>
-  <CP_LeisureConditions>Accumulate {0} actual recreation hours after making the promise. Counts recreation activity and deliberate leisure recognized by the game. Timetable assignments, travel to an activity, sleep, unconsciousness, hospital stays, drafted activity and forced idleness do not count.</CP_LeisureConditions>
-  <CP_EquipmentConditions>Actually equip {0} of at least {1} quality and keep the same item equipped continuously for {2} verified hours. Inventory and stockpiles do not count. Removing the item or leaving the map resets the hold.</CP_EquipmentConditions>
-  <CP_Remaining>Time remaining: {0} days</CP_Remaining>
-  <CP_Progress>Verified progress: {0} / {1} hours</CP_Progress>
-  <CP_DeadlineRule>The deadline keeps running during illness, caravans and combat. Unverified time away from a map never counts. A broken promise is assessed at expiry.</CP_DeadlineRule>
-  <CP_Withdraw>Withdraw promise…</CP_Withdraw>
-  <CP_WithdrawConfirm>Withdraw this promise? Mood: {0} for {1} days; trust: {2}; wait {3} days before new requests can be observed.</CP_WithdrawConfirm>
+  <CP_Active>Promised: {0}</CP_Active>
+  <CP_BedroomConditions>Assign a usable, non-medical bed to this colonist alone, in a private bedroom rated at least “{0}”. No other room owners. Keep the same bed and room for {1} continuous hours. Changing either, losing ownership or leaving the map interrupts progress.</CP_BedroomConditions>
+  <CP_LeisureConditions>Spend {0} hours actually taking part in recreation after accepting. Scheduling recreation or walking to it does not count. Neither do sleep, unconsciousness, hospital stays, drafted activity or forced idleness.</CP_LeisureConditions>
+  <CP_EquipmentConditions>Equip {0}, {1} quality or better, and keep the same item equipped for {2} continuous hours. Stored or carried items do not count. Removing it or leaving the map interrupts progress.</CP_EquipmentConditions>
+  <CP_Remaining>Deadline in {0} days.</CP_Remaining>
+  <CP_Progress>Progress: {0} / {1} hours</CP_Progress>
+  <CP_DeadlineRule>Illness, caravans and combat do not pause the deadline. Time away does not count toward progress.</CP_DeadlineRule>
+  <CP_Withdraw>Withdraw…</CP_Withdraw>
+  <CP_WithdrawConfirm>Withdraw this promise?
+Mood: {0} for {1} days; trust: {2}.
+Next request: after {3} days.</CP_WithdrawConfirm>
   <CP_History>Recent history</CP_History>
   <CP_NoHistory>No completed requests or promises.</CP_NoHistory>
   <CP_HistoryEntry>{0} — {1} {2}. {3}</CP_HistoryEntry>
@@ -30,12 +32,12 @@
   <CP_MissingColonist>Missing colonist</CP_MissingColonist>
   <CP_Result>{0}: {1} — {2}.</CP_Result>
   <CP_RequestTitle>Request: {0}</CP_RequestTitle>
-  <CP_ResponseTime>Respond within {0} days. If accepted, fulfill within {1} days.</CP_ResponseTime>
-  <CP_FixedConsequences>Success: {0} mood for {1} days; {2} trust.
+  <CP_ResponseTime>Reply within {0} days. Fulfill within {1} days of accepting.</CP_ResponseTime>
+  <CP_FixedConsequences>Reward: {0} mood for {1} days; {2} trust.
 Broken: {3} mood for {4} days; {5} trust.
 Withdrawn: {6} mood for {7} days; {8} trust.
-Cooldown after resolution: {9} days.</CP_FixedConsequences>
-  <CP_Accept>Promise to fulfill…</CP_Accept>
+Next request after {9} days.</CP_FixedConsequences>
+  <CP_Accept>Make a promise…</CP_Accept>
   <CP_AcceptConfirm>Promise to {0}:
 
 {1}
@@ -46,11 +48,11 @@ Fulfill within {2} days after accepting.
 
 {4}</CP_AcceptConfirm>
   <CP_Decline>Decline…</CP_Decline>
-  <CP_DeclineConfirm>Decline this request? No mood or trust penalty. New requests require a {0}-day cooldown and a fresh persistent deficit.</CP_DeclineConfirm>
+  <CP_DeclineConfirm>Decline this request? No mood or trust penalty. New requests can appear after {0} days.</CP_DeclineConfirm>
   <CP_NoRequest>No open request or active promise.</CP_NoRequest>
   <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining or ignoring a request has no penalty. Trust stays between 0 and 100 and gives no permanent mood bonus.</CP_RequestRules>
   <CP_RequestUnavailable>This request is no longer open or its response time has expired.</CP_RequestUnavailable>
-  <CP_RequestOutdated>This request is not currently relevant or verifiable. Acceptance requires a current unmet need and usable replacement stock for equipment.</CP_RequestOutdated>
+  <CP_RequestOutdated>This request can no longer be accepted. Its need or available solution has changed.</CP_RequestOutdated>
   <CP_NewRequest>{0} requests: {1}. Review it in Promises.</CP_NewRequest>
   <CP_ReasonBedroomMissing>No qualifying private bedroom for at least {1} observed days. Current expectations: {0}.</CP_ReasonBedroomMissing>
   <CP_ReasonBedroomImprove>The private bedroom has remained below the target for at least {1} observed days. Current expectations: {0}; the request asks for a limited improvement.</CP_ReasonBedroomImprove>
@@ -58,7 +60,7 @@ Fulfill within {2} days after accepting.
   <CP_ReasonEquipmentWorn>Apparel has remained below 50% durability for at least {1} observed days, with a usable replacement of the same type available on this map.</CP_ReasonEquipmentWorn>
   <CP_ReasonEquipmentQuality>An equipped item has remained below normal quality for at least {1} observed days, with a usable higher-quality copy of the same type available on this map.</CP_ReasonEquipmentQuality>
   <CP_Durability>Maintain at least {0}% durability throughout the hold.</CP_Durability>
-  <CP_LegacyPromise>Existing promise: its original conditions and previous consequence rules are preserved.</CP_LegacyPromise>
+  <CP_LegacyPromise>This older promise keeps its original reward rules.</CP_LegacyPromise>
   <CP_Outcome_Declined>request declined without penalty</CP_Outcome_Declined>
   <CP_Outcome_Expired>unanswered request expired without penalty</CP_Outcome_Expired>
   <CP_Outcome_SatisfiedUnaccepted>request satisfied without a promise</CP_Outcome_SatisfiedUnaccepted>
@@ -115,14 +117,14 @@ Fulfill within {2} days after accepting.
   <CP_RequestRow>{0} ? {1}; respond within {2} days</CP_RequestRow>
   <CP_RequestLetterTitle>Request from {0}</CP_RequestLetterTitle>
   <CP_RequestReminderTitle>Reply soon: {0}</CP_RequestReminderTitle>
-  <CP_RequestLetterText>{0} requests:
+  <CP_RequestLetterText>{0} asks for:
 
 {1}
 
-Response time remaining: {2} days. Open Promises to review the reason, exact consequences, and available choices.</CP_RequestLetterText>
+Reply within {2} days. Open Promises to accept or decline.</CP_RequestLetterText>
   <CP_RemindersSetting>Remind me half a day before an unanswered request expires</CP_RemindersSetting>
   <CP_TrustImpact>Below {0} trust, new promises give smaller success mood rewards; current mood factor: {1}%. Success still restores trust. There is no permanent low-trust mood penalty.</CP_TrustImpact>
-  <CP_UnpromisedRecovery>Without accepting: meeting this open request can restore +{0} trust, with no mood reward. {1} Current verified progress: {2} hours. Complete before the response deadline. Recovery has separate cooldown and repeat limits.</CP_UnpromisedRecovery>
+  <CP_UnpromisedRecovery>Meeting this request without promising can restore +{0} trust, with no mood bonus. {1} Progress: {2} hours. Finish before the reply deadline. Recovery has its own cooldown and repeat limit.</CP_UnpromisedRecovery>
   <CP_RecoveryHold>Keep the requested bed/room or equipped item valid continuously for {0} verified hours.</CP_RecoveryHold>
   <CP_RecoveryLeisure>Accumulate {0} recognized recreation hours while this request is open and restore joy to at least 35%. Acceptance starts promise progress from zero.</CP_RecoveryLeisure>
   <CP_TabRequests>Requests</CP_TabRequests>
@@ -146,7 +148,7 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
   <CP_PairNames>{0} and {1}</CP_PairNames>
   <CP_SharedWith>Have a shared bedroom with {0}.</CP_SharedWith>
   <CP_OpenPartner>View {0}</CP_OpenPartner>
-  <CP_SharedBedroomConditions>Both participants must own the same non-medical bed with at least two sleeping slots, in a private bedroom rated at least “{0}”. Only these two may own the bed or room; both must be allowed to use it. Hold the same bed and room for {1} verified hours.</CP_SharedBedroomConditions>
+  <CP_SharedBedroomConditions>Assign both partners the same usable, non-medical bed with two or more sleeping slots, in a private bedroom rated at least “{0}”. No other bed or room owners. Both must be allowed to use it. Keep the same bed and room for {1} continuous hours.</CP_SharedBedroomConditions>
   <CP_ShortSharedBedroom>Shared private bedroom: at least “{0}”, held for one day.</CP_ShortSharedBedroom>
   <CP_PairAmbiguous>Multiple or non-reciprocal romantic partners: no unambiguous pair. No new bedroom request is generated.</CP_PairAmbiguous>
   <CP_PairSelected>Shared-bedroom partner: {0}.</CP_PairSelected>
@@ -161,14 +163,13 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
   <CP_PairReasonBarracks>The partners share a bed in a barracks and have lacked a qualifying private bedroom for at least {1} observed days.</CP_PairReasonBarracks>
   <CP_PairReasonPrivate>The common bed has not provided a qualifying private bedroom for at least {1} observed days.</CP_PairReasonPrivate>
   <CP_PairReasonImprove>The shared private bedroom has remained below the pair's target for at least {1} observed days.</CP_PairReasonImprove>
-  <CP_PersonalEffects>{0}:
-{1}</CP_PersonalEffects>
+  <CP_PersonalEffects>{0}: {1}</CP_PersonalEffects>
   <CP_SharedWithdrawConfirm>Withdraw the shared promise for {0}?
 
 {1}
 {2}</CP_SharedWithdrawConfirm>
   <CP_PersonalWithdrawal>{0}: {1} mood for {2} days; {3} trust; cooldown {4} days.</CP_PersonalWithdrawal>
-  <CP_SharedDeclineConfirm>Decline the shared request for {0}? Neither participant receives a mood or trust penalty. Both start a {1}-day request cooldown.</CP_SharedDeclineConfirm>
+  <CP_SharedDeclineConfirm>Decline the request from {0}? No mood or trust penalty. Both wait {1} days before new requests.</CP_SharedDeclineConfirm>
   <CP_SharedResult>{0}: shared bedroom — {1}.</CP_SharedResult>
   <CP_SharedHistoryType>{0} with {1}</CP_SharedHistoryType>
   <CP_PairRecovery>{0}: may recover +{1} trust without accepting, after {2} continuous verified hours before the response deadline. No mood reward. Shared progress: {3} hours; personal recovery limits apply.</CP_PairRecovery>
@@ -199,4 +200,95 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
   <CP_BarracksConditions>Your own assigned, usable non-medical colonist bed in enclosed barracks rated at least {0}, continuously for {1} hours. Other room owners are allowed; medical beds are excluded.</CP_BarracksConditions>
   <CP_SharedBarracksConditions>The same usable non-medical colonist bed with at least two sleeping slots, owned by exactly the two participants, in enclosed barracks rated at least {0}, continuously for {1} hours. Other room owners are allowed; medical beds are excluded.</CP_SharedBarracksConditions>
   <CP_ConstructedBed>The bed must have a material cost; a free sleeping spot does not qualify.</CP_ConstructedBed>
+  <CP_NeedSleeping>Observation is paused while the pawn is asleep or cannot be observed.</CP_NeedSleeping>
+  <CP_JoyEffect>Current recreation-related mood effect: {0}. Low recreation need is sufficient evidence without a negative thought.</CP_JoyEffect>
+  <CP_GearNoCause>No supported current equipment complaint. Low quality or missing equipment alone is not a need.</CP_GearNoCause>
+  <CP_GearNoSolution>A current need exists, but no usable solution with reachable stock or a verified recipe, workbench, crafter and materials could be found.</CP_GearNoSolution>
+  <CP_GearEvidence>{0}: mood {1}; current conditions confirm it: {2}.</CP_GearEvidence>
+  <CP_GearPiece>Problem item: {0}; condition {1}%.</CP_GearPiece>
+  <CP_GearCause_ApparelDamaged>Damaged clothing</CP_GearCause_ApparelDamaged>
+  <CP_GearCause_Naked>Unwanted nudity</CP_GearCause_Naked>
+  <CP_GearCause_BrawlerUnhappy>Brawler carrying a ranged weapon</CP_GearCause_BrawlerUnhappy>
+  <CP_GearReason_ApparelDamaged>Damaged clothing caused {1} mood during {2} observed days. Replace the worn {0}. This request concerns that piece only; other damaged clothing may still cause dissatisfaction.</CP_GearReason_ApparelDamaged>
+  <CP_GearReason_Naked>Unwanted nudity caused {1} mood during {2} observed days. Wearing {0} can provide the missing basic body coverage.</CP_GearReason_Naked>
+  <CP_GearReason_BrawlerUnhappy>A ranged weapon conflicts with this brawler's fighting preference ({1} mood during {2} observed days). Equip {0} as their primary melee weapon.</CP_GearReason_BrawlerUnhappy>
+  <CP_GearStock>Solution available in reachable, permitted stock.</CP_GearStock>
+  <CP_GearCraft>Solution can be made at {0}; recipe, crafter and materials are available.</CP_GearCraft>
+  <CP_GearIdeology>Core's Naked thought is disabled with Ideology. Ideology-specific dress and nudity complaints are not converted into equipment requests.</CP_GearIdeology>
+  <CP_QualityNotRequired>no quality requirement</CP_QualityNotRequired>
+  <CP_GearConditions>Equip {0} ({1}) and keep the same item equipped for {2} continuous hours. Stored or carried items do not count. Removing it or leaving the map interrupts progress.</CP_GearConditions>
+  <CP_GearCoverage>Wear it to cover the missing basic body areas. The colonist must no longer be nude; other clothing must remain compatible.</CP_GearCoverage>
+  <CP_GearMelee>Use it as the primary melee weapon. The colonist must be able to wield it.</CP_GearMelee>
+  <CP_GearShort>Equip {0} ({1}) and hold it for one day.</CP_GearShort>
+  <CP_SortName>By name</CP_SortName>
+  <CP_SortPromises>Active promises first</CP_SortPromises>
+  <CP_GroupActivePromise>Has an active promise ({0})</CP_GroupActivePromise>
+  <CP_GroupNoPromise>No active promise ({0})</CP_GroupNoPromise>
+  <CP_SharedReasonContext>This is one shared request for {0}.</CP_SharedReasonContext>
+  <CP_SharedReasonRecorded>Recorded reasons for the request:</CP_SharedReasonRecorded>
+  <CP_SharedReasonBoth>{0} both reported the same problem: {1}.</CP_SharedReasonBoth>
+  <CP_SharedReasonPerson>{0} reported {1} (observed mood effect: {2}).</CP_SharedReasonPerson>
+  <CP_SharedReasonCurrent>{0} is also currently affected by {1} (mood effect: {2}). This is additional current evidence, not a separate promise.</CP_SharedReasonCurrent>
+  <CP_SharedReasonUnknown>The original dissatisfaction details are unavailable in this record. The displayed conditions describe the shared requirement.</CP_SharedReasonUnknown>
+  <CP_CardSharedBedroom>Shared bedroom with {0}</CP_CardSharedBedroom>
+  <CP_CardSharedBarracks>Better shared barracks with {0}</CP_CardSharedBarracks>
+  <CP_CardClothing>New clothing</CP_CardClothing>
+  <CP_CardWeapon>Melee weapon</CP_CardWeapon>
+  <CP_CardReasonUnknown>The original reason is unavailable. The requested conditions are shown below.</CP_CardReasonUnknown>
+  <CP_CardReasonLeisure>There has not been enough time for recreation.</CP_CardReasonLeisure>
+  <CP_CardReason_ApparelDamaged>The worn {0} needs replacing.</CP_CardReason_ApparelDamaged>
+  <CP_CardReason_Naked>The colonist is unhappy about being naked.</CP_CardReason_Naked>
+  <CP_CardReason_BrawlerUnhappy>This brawler dislikes using a ranged weapon.</CP_CardReason_BrawlerUnhappy>
+  <CP_CardReason_SleptInBedroom>The bedroom is not good enough.</CP_CardReason_SleptInBedroom>
+  <CP_CardReason_SleptInBarracks>The barracks are not good enough.</CP_CardReason_SleptInBarracks>
+  <CP_CardReason_SleptOnGround>Sleeping on the ground is causing discomfort.</CP_CardReason_SleptOnGround>
+  <CP_CardReason_SleptOutside>Sleeping outdoors is causing discomfort.</CP_CardReason_SleptOutside>
+  <CP_CardReason_Greedy>The bedroom falls short of this colonist&apos;s expectations.</CP_CardReason_Greedy>
+  <CP_CardReason_WantToSleepWithSpouseOrLover>The colonist is unhappy about sleeping apart from their partner.</CP_CardReason_WantToSleepWithSpouseOrLover>
+  <CP_CardCause_SleptInBedroom>{0} is unhappy with their bedroom.</CP_CardCause_SleptInBedroom>
+  <CP_CardCause_SleptInBedroom_Pair>{0} are unhappy with their bedroom.</CP_CardCause_SleptInBedroom_Pair>
+  <CP_CardCause_SleptInBarracks>{0} is unhappy with the barracks.</CP_CardCause_SleptInBarracks>
+  <CP_CardCause_SleptInBarracks_Pair>{0} are unhappy with the barracks.</CP_CardCause_SleptInBarracks_Pair>
+  <CP_CardCause_SleptOnGround>{0} has been sleeping on the ground.</CP_CardCause_SleptOnGround>
+  <CP_CardCause_SleptOnGround_Pair>{0} have been sleeping on the ground.</CP_CardCause_SleptOnGround_Pair>
+  <CP_CardCause_SleptOutside>{0} is unhappy about sleeping outdoors.</CP_CardCause_SleptOutside>
+  <CP_CardCause_SleptOutside_Pair>{0} are unhappy about sleeping outdoors.</CP_CardCause_SleptOutside_Pair>
+  <CP_CardCause_Greedy>{0} wants a better bedroom.</CP_CardCause_Greedy>
+  <CP_CardCause_Greedy_Pair>{0} want a better bedroom.</CP_CardCause_Greedy_Pair>
+  <CP_CardCause_WantToSleepWithSpouseOrLover>{0} is unhappy about sleeping apart from their partner.</CP_CardCause_WantToSleepWithSpouseOrLover>
+  <CP_CardCause_WantToSleepWithSpouseOrLover_Pair>{0} are unhappy about sleeping apart.</CP_CardCause_WantToSleepWithSpouseOrLover_Pair>
+  <CP_CardBedroomAction>Assign a bed in a private bedroom rated at least “{0}”. Keep the same bed and room for {1} continuous hours.</CP_CardBedroomAction>
+  <CP_CardSharedBedroomAction>Assign both partners a double bed in a private bedroom rated at least “{0}”. Keep the same bed and room for {1} continuous hours.</CP_CardSharedBedroomAction>
+  <CP_CardBarracksAction>Assign a bed in barracks rated at least “{0}”. Keep the same bed and room for {1} continuous hours.</CP_CardBarracksAction>
+  <CP_CardSharedBarracksAction>Assign both partners a double bed in barracks rated at least “{0}”. Keep the same bed and room for {1} continuous hours.</CP_CardSharedBarracksAction>
+  <CP_CardBuiltBed>A sleeping spot will not do.</CP_CardBuiltBed>
+  <CP_CardLeisure>Provide {0} hours of actual recreation.</CP_CardLeisure>
+  <CP_CardWear>Wear {0}{1}{2} for {3} continuous hours.</CP_CardWear>
+  <CP_CardEquip>Equip {0}{1}{2} for {3} continuous hours.</CP_CardEquip>
+  <CP_CardPrimary>Use {0}{1}{2} as the primary melee weapon for {3} continuous hours.</CP_CardPrimary>
+  <CP_CardQuality>, {0} quality or better</CP_CardQuality>
+  <CP_CardCondition>, at least {0}% condition</CP_CardCondition>
+  <CP_CardCoverage>The clothing must cover the missing basic body areas.</CP_CardCoverage>
+  <CP_CardReward>Reward: {0} mood for {1} days; {2} trust.</CP_CardReward>
+  <CP_CardAway>Progress is paused while away from the map.</CP_CardAway>
+  <CP_CardPartnerAway>Progress is paused until both partners are on the same map.</CP_CardPartnerAway>
+  <CP_CardNotResting>No recreation is taking place right now.</CP_CardNotResting>
+  <CP_CardRoomPending>The room does not meet the promise yet.</CP_CardRoomPending>
+  <CP_CardGearPending>The requested item is not equipped or does not meet the requirements.</CP_CardGearPending>
+  <CP_CardRecoveryPerson>{0}: {1}</CP_CardRecoveryPerson>
+  <CP_CardPenalties>Broken: {0} mood for {1} days; {2} trust.
+Withdrawn: {3} mood for {4} days; {5} trust.
+Next request: after {6} days.</CP_CardPenalties>
+  <CP_CardCause_TitleNoPersonalBedroom_Pair>{0} need a personal bedroom for their titles.</CP_CardCause_TitleNoPersonalBedroom_Pair>
+  <CP_CardReason_TitleBedroomRequirementsNotMet>The bedroom does not meet the title requirements of this colonist.</CP_CardReason_TitleBedroomRequirementsNotMet>
+  <CP_RoyalBedroomConditions>Title requirements: {0}.</CP_RoyalBedroomConditions>
+  <CP_CardCause_TitleNoPersonalBedroom>{0} needs a personal bedroom for their title.</CP_CardCause_TitleNoPersonalBedroom>
+  <CP_RoyalBedroomUnsupported>This title has bedroom requirements that cannot be safely represented by a request.</CP_RoyalBedroomUnsupported>
+  <CP_DlcGearNoSolution>No obtainable replacement fits the equipment, role and beliefs of this colonist. Check clothing compatibility, title requirements, materials and availability.</CP_DlcGearNoSolution>
+  <CP_HousingCause_TitleNoPersonalBedroom>No bedroom suitable for the title</CP_HousingCause_TitleNoPersonalBedroom>
+  <CP_CardCause_TitleBedroomRequirementsNotMet>{0} needs a bedroom that meets their title requirements.</CP_CardCause_TitleBedroomRequirementsNotMet>
+  <CP_CardCause_TitleBedroomRequirementsNotMet_Pair>{0} need a bedroom that meets their title requirements.</CP_CardCause_TitleBedroomRequirementsNotMet_Pair>
+  <CP_NoHumanLeather>Do not use human leather.</CP_NoHumanLeather>
+  <CP_HousingCause_TitleBedroomRequirementsNotMet>Bedroom below title requirements</CP_HousingCause_TitleBedroomRequirementsNotMet>
+  <CP_CardReason_TitleNoPersonalBedroom>This title calls for a personal bedroom.</CP_CardReason_TitleNoPersonalBedroom>
 </LanguageData>

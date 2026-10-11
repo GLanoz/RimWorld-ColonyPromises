@@ -47,7 +47,7 @@ namespace ColonyPromises
             string names = state.Shared == null ? state.Pawn.LabelShort : SharedPromiseText.Names(state.Shared.First, state.Shared.Second);
             var letter = (ChoiceLetter_Request)LetterMaker.MakeLetter(
                 (reminder ? "CP_RequestReminderTitle" : "CP_RequestLetterTitle").Translate(names),
-                "CP_RequestLetterText".Translate(names, PromiseConditions.Get(request.Terms.Kind).Describe(request.Terms),
+                "CP_RequestLetterText".Translate(names, PromiseCardText.Conditions(request.Terms),
                     PromiseText.Number(System.Math.Max(0, request.ExpiryTick - Find.TickManager.TicksGame) / (float)PromiseBalance.TicksPerDay)),
                 DefDatabase<LetterDef>.GetNamed("CP_RequestLetter"), new LookTargets(state.Pawn));
             letter.Pawn = state.Pawn;

@@ -12,7 +12,7 @@ namespace ColonyPromises
             var observationState = evaluation.Candidate?.Terms.IsShared == true
                 ? GameComponent_Promises.Current?.PeekState(evaluation.Candidate.Terms.ParticipantA) ?? state : state;
             var saved = observationState.Deficits.FirstOrDefault(d => d.Kind == kind);
-            var observation = RequestGenerator.Project(saved, evaluation.Candidate, kind, now,
+            var observation = RequestGenerator.ProjectEvaluation(saved, evaluation, kind, now,
                 kind == PromiseKind.Leisure && state.Pawn?.needs?.joy?.CurLevel < RequestRules.SevereJoy);
             bool blocked = state.Request != null || state.Active != null || now < state.CooldownUntilTick
                 || !PromiseConditions.Eligible(state.Pawn);

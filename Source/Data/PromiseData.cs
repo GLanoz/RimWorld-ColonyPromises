@@ -26,6 +26,15 @@ namespace ColonyPromises
         public int RoomStage;
         public ThingDef EquipmentDef;
         public QualityCategory MinimumQuality;
+        public bool QualityOptional;
+        public bool NeedBasedEquipment;
+        public string EquipmentCause;
+        public float CauseMood;
+        public Thing ProblemThing;
+        public bool RequireCoverage;
+        public bool RequireMelee;
+        public List<BedroomRequirement> BedroomRequirements;
+        public bool AvoidHumanLeather;
         public int LastCheckTick = -1;
         public int LastLeisureCreditTick;
         public bool PreviouslySatisfied;
@@ -94,6 +103,15 @@ namespace ColonyPromises
             Scribe_Values.Look(ref RoomStage, "roomStage");
             Scribe_Defs.Look(ref EquipmentDef, "equipmentDef");
             Scribe_Values.Look(ref MinimumQuality, "minimumQuality");
+            Scribe_Values.Look(ref QualityOptional, "qualityOptional");
+            Scribe_Values.Look(ref NeedBasedEquipment, "needBasedEquipment");
+            Scribe_Values.Look(ref EquipmentCause, "equipmentCause");
+            Scribe_Values.Look(ref CauseMood, "causeMood");
+            Scribe_References.Look(ref ProblemThing, "problemThing");
+            Scribe_Values.Look(ref RequireCoverage, "requireCoverage");
+            Scribe_Values.Look(ref RequireMelee, "requireMelee");
+            Scribe_Collections.Look(ref BedroomRequirements, "bedroomRequirements", LookMode.Deep);
+            Scribe_Values.Look(ref AvoidHumanLeather, "avoidHumanLeather");
             Scribe_Values.Look(ref LastCheckTick, "lastCheckTick", -1);
             Scribe_Values.Look(ref LastLeisureCreditTick, "lastLeisureCreditTick");
             Scribe_Values.Look(ref PreviouslySatisfied, "previouslySatisfied");
@@ -220,6 +238,7 @@ namespace ColonyPromises
         public string Signature;
         public int Ticks;
         public int SevereTicks;
+        public bool ObservationPaused;
         public int LastTick = -1;
         public int StartTick = -1;
         public void ExposeData()
@@ -228,6 +247,7 @@ namespace ColonyPromises
             Scribe_Values.Look(ref Signature, "signature");
             Scribe_Values.Look(ref Ticks, "ticks");
             Scribe_Values.Look(ref SevereTicks, "severeTicks");
+            Scribe_Values.Look(ref ObservationPaused, "observationPaused");
             Scribe_Values.Look(ref LastTick, "lastTick", -1);
             Scribe_Values.Look(ref StartTick, "startTick", -1);
         }

@@ -14,6 +14,8 @@ namespace ColonyPromises
         public string Reason;
         public string Current;
         public List<HousingIssue> HousingIssues;
+        public string DeficitSignature;
+        public bool ObservationPaused;
     }
 
     public sealed class RequestCandidate
@@ -37,23 +39,12 @@ namespace ColonyPromises
             if (result.Reason != null) return result;
             if (!pawn.Spawned || pawn.Suspended) result.Reason = "CP_DebugAbsent";
             else if (!pawn.Map.IsPlayerHome) result.Reason = "CP_DebugHome";
-            else if (pawn.Downed || pawn.InMentalState || pawn.Drafted) result.Reason = "CP_DebugBusy";
+            else if (kind != PromiseKind.Leisure && (pawn.Downed || pawn.InMentalState || pawn.Drafted)) result.Reason = "CP_DebugBusy";
             if (result.Reason != null) return result;
             switch (kind)
             {
                 case PromiseKind.Bedroom: result.Candidate = Bedroom(pawn, result); break;
-                case PromiseKind.Leisure:
-                    result.Current = pawn.needs?.joy == null ? "CP_DebugNoJoy".Translate().ToString()
-                        : "CP_DebugJoy".Translate(Number(pawn.needs.joy.CurLevel * 100), Number(RequestRules.LowJoy * 100)).ToString();
-                    if (pawn.needs?.joy == null) result.Reason = "CP_DebugNoJoy";
-                    else if (pawn.needs.joy.CurLevel >= RequestRules.LowJoy) result.Reason = "CP_DebugSatisfied";
-                    else
-                    {
-                        result.HasDeficit = true;
-                        result.Candidate = new RequestCandidate { Terms = new PromiseRecord { Kind = kind },
-                            Signature = "joy", ReasonKey = "CP_ReasonLeisure" };
-                    }
-                    break;
+                case PromiseKind.Leisure: result.Candidate = LeisureNeeds.Evaluate(pawn, result); break;
                 case PromiseKind.Equipment: result.Candidate = Equipment(pawn, result); break;
             }
             if (kind == PromiseKind.Bedroom && result.HousingIssues == null)
@@ -76,50 +67,28 @@ namespace ColonyPromises
             return HousingRules.Candidate(pawn, null, result);
         }
 
-        private static RequestCandidate Equipment(Pawn pawn, RequestEvaluation result)
+        private static RequestCandidate Equipment(Pawn pawn, RequestEvaluation result) => EquipmentNeeds.Evaluate(pawn, result);
+
+        public static RequestCandidate ObservationCandidate(RequestEvaluation evaluation, PromiseKind kind) => evaluation.Candidate
+            ?? (evaluation.DeficitSignature == null ? null : new RequestCandidate {
+                Terms = new PromiseRecord { Kind = kind }, Signature = evaluation.DeficitSignature });
+
+        public static DeficitObservation ProjectEvaluation(DeficitObservation saved, RequestEvaluation evaluation,
+            PromiseKind kind, int now, bool severe)
         {
-            // Only improve an item the pawn already uses. Loaded defs are discovered via actual stock.
-            IEnumerable<Thing> used = pawn.apparel?.WornApparel.Cast<Thing>() ?? Enumerable.Empty<Thing>();
-            if (!pawn.WorkTagIsDisabled(WorkTags.Violent))
-                used = used.Concat(pawn.equipment?.AllEquipmentListForReading.Cast<Thing>() ?? Enumerable.Empty<Thing>());
-            var stock = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver);
-            var descriptions = new List<string>();
-            bool deficient = false;
-            result.Reason = "CP_DebugNoGear";
-            foreach (var item in used.OrderBy(t => t.thingIDNumber))
+            var candidate = ObservationCandidate(evaluation, kind);
+            var result = Project(saved, candidate, kind, now, severe);
+            if (kind != PromiseKind.Leisure || candidate == null) return result;
+            bool continuous = saved != null && saved.Signature == candidate.Signature && saved.LastTick >= 0
+                && now >= saved.LastTick && now - saved.LastTick <= RequestRules.ObservationInterval;
+            if (evaluation.ObservationPaused || saved?.ObservationPaused == true)
             {
-                if (!EquipmentCondition.IsSupported(item.def) || !item.TryGetQuality(out var quality)) continue;
-                if (item.def.IsApparel && (Trait(pawn, TraitDefOf.Nudist) || !ApparelUtility.HasPartsToWear(pawn, item.def))) continue;
-                if (item.def.IsRangedWeapon && Trait(pawn, TraitDefOf.Brawler)) continue;
-                descriptions.Add("CP_DebugItem".Translate(item.LabelCap.ToString(), quality.GetLabel(),
-                    Number(item.HitPoints * 100f / item.MaxHitPoints)).ToString());
-                bool worn = item.def.IsApparel && item.HitPoints / (float)item.MaxHitPoints < RequestRules.WornFraction;
-                bool poor = quality < QualityCategory.Normal;
-                if (!worn && !poor) continue;
-                deficient = true;
-                result.HasDeficit = true;
-                var targetQuality = poor ? (QualityCategory)((int)quality + 1) : quality;
-                float durability = item.def.IsApparel ? RequestRules.ReplacementFraction : 0;
-                bool available = stock.Any(t => t.def == item.def && t.Spawned && !t.IsForbidden(pawn)
-                    && t.TryGetQuality(out var q) && q >= targetQuality
-                    && (durability <= 0 || t.HitPoints / (float)t.MaxHitPoints >= durability)
-                    && EquipmentUtility.CanEquip(t, pawn)
-                    && pawn.CanReach(t, PathEndMode.Touch, Danger.Some));
-                result.Current = string.Join("; ", descriptions);
-                if (!available) { result.Reason = "CP_DebugStock"; continue; }
-                result.Reason = null;
-                return new RequestCandidate
-                {
-                    Terms = new PromiseRecord { Kind = PromiseKind.Equipment, EquipmentDef = item.def,
-                        MinimumQuality = targetQuality, MinimumHitPointsFraction = durability, RequiredTicks = PromiseBalance.HoldTicks },
-                    Signature = "gear:" + item.thingIDNumber + ":" + (int)targetQuality + ":" + worn,
-                    ReasonKey = worn ? "CP_ReasonEquipmentWorn" : "CP_ReasonEquipmentQuality",
-                    Magnitude = worn && poor ? 1 : 0
-                };
+                result.Ticks = continuous ? saved.Ticks : 0;
+                result.SevereTicks = continuous ? saved.SevereTicks : 0;
+                result.StartTick = continuous ? saved.StartTick : now;
             }
-            result.Current = string.Join("; ", descriptions);
-            if (!deficient && descriptions.Count > 0) result.Reason = "CP_DebugSatisfied";
-            return null;
+            result.ObservationPaused = evaluation.ObservationPaused;
+            return result;
         }
 
         public static DeficitObservation Project(DeficitObservation saved, RequestCandidate candidate, PromiseKind kind, int now, bool severe)
@@ -165,7 +134,7 @@ namespace ColonyPromises
                 state.Deficits.RemoveAll(d => d.Kind == kind);
                 return null;
             }
-            var observation = Project(state.Deficits.FirstOrDefault(d => d.Kind == kind), candidate, kind, now,
+            var observation = ProjectEvaluation(state.Deficits.FirstOrDefault(d => d.Kind == kind), evaluation, kind, now,
                 kind == PromiseKind.Leisure && state.Pawn.needs?.joy?.CurLevel < RequestRules.SevereJoy);
             state.Deficits.RemoveAll(d => d.Kind == kind);
             state.Deficits.Add(observation);
@@ -199,8 +168,15 @@ namespace ColonyPromises
                 return target != null && target.Terms.RoomStage == terms.RoomStage
                     && target.Terms.RequiresBarracks == terms.RequiresBarracks
                     && target.Terms.RequiresConstructedBed == terms.RequiresConstructedBed
+                      && DlcCompatibility.SameBedroomRequirements(target.Terms, terms)
                     && HousingRules.OriginalCauseCurrent(request, evaluation.HousingIssues);
             }
+            if (request.Terms.Kind == PromiseKind.Equipment) return EquipmentNeeds.CauseCurrent(pawn, request.Terms)
+                && EquipmentNeeds.UsableDefinition(pawn, request.Terms)
+                  && DlcCompatibility.ApparelDefinition(pawn, request.Terms.EquipmentDef)
+                  && (!request.Terms.EquipmentDef.IsApparel || !DlcCompatibility.AvoidHumanLeather(pawn) || request.Terms.AvoidHumanLeather)
+                && EquipmentNeeds.CanObtain(pawn, request.Terms, out _);
+            if (request.Terms.Kind == PromiseKind.Leisure) return LeisureNeeds.HasDeficit(pawn);
             if (condition.UsesContinuousHold && condition.Observe(pawn, request.Terms).Satisfied) return false;
             if (request.Terms.IsShared)
             {

@@ -38,7 +38,7 @@ public static class FeatureChecks
         UnityEngine.Debug.unityLogger.logHandler = new ManagedLog();
         // The standalone host has no LoadedModManager. Supply only this fixture's saved types.
         typeof(GenTypes).GetField("allTypesCached", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null,
-            new List<Type> { typeof(SuccessStamp), typeof(PromiseRecord), typeof(ColonistRequest), typeof(ColonistPromises) });
+            new List<Type> { typeof(SuccessStamp), typeof(PromiseRecord), typeof(ColonistRequest), typeof(ColonistPromises), typeof(BedroomRequirement) });
         typeof(BackCompatibility).GetField("conversionChain", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null,
             new List<BackCompatibilityConverter>());
         var typeCache = (System.Collections.IDictionary)typeof(GenTypes).GetField("typeCache", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
@@ -230,6 +230,6 @@ public static class FeatureChecks
                     "Letter contents render with plain numeric placeholders in " + folder);
             }
         } finally { Current.Game = oldGame; LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
-        return checks + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path);
+        return checks + CardChecks.Run(root) + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path) + NeedsChecks.Run(root, path) + DlcChecks.Run(root, path);
     }
 }

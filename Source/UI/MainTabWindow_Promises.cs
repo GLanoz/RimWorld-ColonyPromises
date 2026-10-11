@@ -11,6 +11,7 @@ namespace ColonyPromises
     {
         private Pawn pawn;
         private bool colonistsTab;
+        private bool sortByName; // Session-local; the default groups active promises first.
         private bool moreExpanded;
         private bool diagnosticsExpanded;
         private Vector2 requestsScroll;
@@ -29,6 +30,24 @@ namespace ColonyPromises
         internal static string StatusKey(ColonistPromises state, int now, bool visibleRequest) =>
             state.Active != null ? "CP_ListPromise" : visibleRequest ? "CP_ListRequest"
             : now < state.CooldownUntilTick ? "CP_ListWaiting" : "CP_ListNone";
+
+        internal sealed class ColonistGroup
+        {
+            public string HeadingKey;
+            public List<Pawn> Members;
+        }
+
+        internal static List<ColonistGroup> GroupColonists(IEnumerable<Pawn> candidates,
+            Func<Pawn, ColonistPromises> stateFor, bool byName)
+        {
+            var ordered = candidates.OrderBy(p => p.LabelShort, StringComparer.Create(PromiseText.Culture, true))
+                .ThenBy(p => p.thingIDNumber).ToList();
+            if (byName) return new List<ColonistGroup> { new ColonistGroup { Members = ordered } };
+            return new[] { true, false }.Select(active => new ColonistGroup {
+                HeadingKey = active ? "CP_GroupActivePromise" : "CP_GroupNoPromise",
+                Members = ordered.Where(p => (stateFor(p).Active != null) == active).ToList()
+            }).Where(g => g.Members.Count > 0).ToList();
+        }
 
         public static void OpenFor(Pawn target)
         {
@@ -134,8 +153,8 @@ namespace ColonyPromises
                 return (record.RequiresBarracks ? "CP_ShortBarracks" : record.IsShared ? "CP_ShortSharedBedroom" : "CP_ShortBedroom").Translate(BedroomCondition.RoomLabel(record.RoomStage));
             if (record.Kind == PromiseKind.Leisure)
                 return "CP_ShortLeisure".Translate(PromiseText.Number(record.RequiredTicks / (float)PromiseBalance.TicksPerHour));
-            return "CP_ShortEquipment".Translate(record.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
-                record.MinimumQuality.GetLabel()).ToString()
+            return (record.QualityOptional ? "CP_GearShort" : "CP_ShortEquipment").Translate(record.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
+                record.QualityOptional ? "CP_QualityNotRequired".Translate().ToString() : record.MinimumQuality.GetLabel()).ToString()
                 + (record.MinimumHitPointsFraction > 0 ? " " + "CP_ShortDurability".Translate(
                     PromiseText.Number(record.MinimumHitPointsFraction * 100)).ToString() : "");
         }
@@ -145,24 +164,44 @@ namespace ColonyPromises
             var shown = new List<Pawn>(candidates);
             if (Prefs.DevMode && pawn != null && !shown.Contains(pawn)) shown.Add(pawn);
             float listWidth = Math.Min(260, rect.width * 0.28f);
-            var listRect = new Rect(rect.x, rect.y, listWidth, rect.height);
+            string sortLabel = (sortByName ? "CP_SortName" : "CP_SortPromises").Translate();
+            float sortHeight = Math.Max(32, Text.CalcHeight(sortLabel, Math.Max(1, listWidth - 16)) + 12);
+            if (Widgets.ButtonText(new Rect(rect.x, rect.y, listWidth, sortHeight), sortLabel))
+                Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption> {
+                    new FloatMenuOption("CP_SortName".Translate(), () => sortByName = true),
+                    new FloatMenuOption("CP_SortPromises".Translate(), () => sortByName = false)
+                }));
+            var listRect = new Rect(rect.x, rect.y + sortHeight + 6, listWidth, Math.Max(1, rect.height - sortHeight - 6));
             float width = Math.Max(1, listWidth - 20);
             var visible = new HashSet<Pawn>(component.OpenRequests(now).Select(s => s.Pawn));
             foreach (var entry in component.OpenRequests(now).Where(s => s.Shared != null)) visible.Add(entry.Shared.Second);
-            var labels = shown.Select(p => new KeyValuePair<Pawn, string>(p,
-                p.LabelShort + "\n" + StatusKey(component.PeekState(p), now, visible.Contains(p)).Translate())).ToList();
-            colonistHeight = labels.Sum(entry => Math.Max(64, Text.CalcHeight(entry.Value, Math.Max(1, width - 16)) + 20));
+            var groups = GroupColonists(shown, component.PeekState, sortByName);
+            Func<Pawn, string> label = p => p.LabelShort + "\n" + StatusKey(component.PeekState(p), now, visible.Contains(p)).Translate();
+            Func<string, float> rowHeight = text => Math.Max(64, Text.CalcHeight(text, Math.Max(1, width - 16)) + 20);
+            Func<ColonistGroup, float> headingHeight = g => g.HeadingKey == null ? 0
+                : Text.CalcHeight(g.HeadingKey.Translate(g.Members.Count), Math.Max(1, width - 16)) + 16;
+            colonistHeight = groups.Sum(g => headingHeight(g) + g.Members.Sum(p => rowHeight(label(p))));
             Widgets.BeginScrollView(listRect, ref colonistsScroll, new Rect(0, 0, width, colonistHeight));
             float y = 0;
-            foreach (var entry in labels)
+            foreach (var group in groups)
             {
-                float height = Math.Max(64, Text.CalcHeight(entry.Value, Math.Max(1, width - 16)) + 20);
-                var row = new Rect(0, y, width, height - 4);
-                if (entry.Key == pawn) Widgets.DrawHighlightSelected(row);
-                Widgets.DrawHighlightIfMouseover(row);
-                Widgets.Label(new Rect(8, y + 6, Math.Max(1, width - 16), row.height - 12), entry.Value);
-                if (Widgets.ButtonInvisible(row)) SelectPawn(entry.Key);
-                y += height;
+                if (group.HeadingKey != null)
+                {
+                    float height = headingHeight(group);
+                    Widgets.Label(new Rect(8, y + 4, Math.Max(1, width - 16), height - 8), group.HeadingKey.Translate(group.Members.Count));
+                    y += height;
+                }
+                foreach (var member in group.Members)
+                {
+                    string text = label(member);
+                    float height = rowHeight(text);
+                    var row = new Rect(0, y, width, height - 4);
+                    if (member == pawn) Widgets.DrawHighlightSelected(row);
+                    Widgets.DrawHighlightIfMouseover(row);
+                    Widgets.Label(new Rect(8, y + 6, Math.Max(1, width - 16), row.height - 12), text);
+                    if (Widgets.ButtonInvisible(row)) SelectPawn(member);
+                    y += height;
+                }
             }
             Widgets.EndScrollView();
             var detailRect = new Rect(rect.x + listWidth + 12, rect.y, Math.Max(1, rect.width - listWidth - 12), rect.height);
@@ -177,23 +216,19 @@ namespace ColonyPromises
             Widgets.BeginScrollView(rect, ref detailsScroll, new Rect(0, 0, width, Math.Max(rect.height, detailHeight)));
             float y = 0;
             Label(ref y, width, "CP_Trust".Translate(pawn.LabelShort, state.Trust, PromiseBalance.MaxTrust));
-            if (state.Shared != null)
-            {
-                var other = state.Pawn == state.Shared.First ? state.Shared.Second : state.Shared.First;
-                Label(ref y, width, ((state.Active ?? state.Request?.Terms)?.RequiresBarracks == true
-                    ? "CP_SharedBarracksWith" : "CP_SharedWith").Translate(other.LabelShort));
-                if (Button(ref y, width, "CP_OpenPartner".Translate(other.LabelShort))) { SelectPawn(other); Widgets.EndScrollView(); return; }
-            }
+            var other = SharedPromiseText.PartnerFor(state.Shared, pawn);
+            PromiseRecord displayed = null;
+            ColonistRequest displayedRequest = null;
             if (state.Active != null)
             {
-                var r = state.Active;
-                Label(ref y, width, "CP_Active".Translate(PromiseText.Type(r)));
-                Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_InvalidParameters".Translate().ToString());
-                Label(ref y, width, "CP_Remaining".Translate(PromiseText.Number(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay)));
+                var r = displayed = state.Active;
+                Label(ref y, width, "CP_Active".Translate(PromiseCardText.Title(r, pawn)));
+                Label(ref y, width, PromiseCardText.Conditions(r));
                 Label(ref y, width, "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)));
-                if (r.FrozenConsequences) Label(ref y, width, SharedPromiseText.Consequences(component, state, r, state.Active == null ? state.Request : null, now));
-                else Label(ref y, width, "CP_LegacyPromise".Translate());
-                Label(ref y, width, "CP_DeadlineCompact".Translate());
+                Label(ref y, width, "CP_Remaining".Translate(PromiseText.Number(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay)));
+                string blocked = PromiseCardText.ProgressBlock(pawn, r);
+                if (blocked != null) Label(ref y, width, blocked);
+                Label(ref y, width, SharedPromiseText.Rewards(component, state, r, null, now));
                 if (Button(ref y, width, "CP_Withdraw".Translate()))
                 {
                     var target = pawn;
@@ -203,26 +238,13 @@ namespace ColonyPromises
             }
             else if (state.Request != null && RequestMaintenance.Visible(state, now))
             {
-                var request = state.Request;
-                var r = PromiseConsequences.Preview(state, request, now);
-                Label(ref y, width, "CP_RequestTitle".Translate(PromiseText.Type(r)));
-                Label(ref y, width, HousingRules.Reason(request) ?? request.ReasonKey.Translate(request.Expectation?.label ?? "", RequestRules.PersistentTicks / PromiseBalance.TicksPerDay).ToString());
-                Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
+                var request = displayedRequest = state.Request;
+                var r = displayed = PromiseConsequences.Preview(state, request, now);
+                Label(ref y, width, PromiseCardText.Title(r, pawn));
+                Label(ref y, width, PromiseCardText.Reason(request));
+                Label(ref y, width, PromiseCardText.Conditions(r));
                 Label(ref y, width, "CP_ResponseTime".Translate(PromiseText.Number(Math.Max(0, request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay), request.DeadlineDays));
-                Label(ref y, width, SharedPromiseText.Consequences(component, state, r, state.Active == null ? state.Request : null, now));
-                if (state.Shared == null && TrustRecovery.Available(state, request, now))
-                    Label(ref y, width, "CP_UnpromisedRecovery".Translate(TrustRules.UnpromisedRecoveryTrust,
-                        r.Kind == PromiseKind.Leisure ? "CP_RecoveryLeisure".Translate(PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString()
-                            : "CP_RecoveryHold".Translate(PromiseText.Number(PromiseBalance.HoldTicks / (float)PromiseBalance.TicksPerHour)).ToString(),
-                        PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour)));
-
-                if (state.Shared != null)
-                    foreach (var participant in new[] { state.Shared.First, state.Shared.Second })
-                        if (TrustRecovery.Available(component.PeekState(participant), request, now))
-                            Label(ref y, width, "CP_PairRecovery".Translate(participant.LabelShort, TrustRules.UnpromisedRecoveryTrust,
-                                PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour,
-                                PromiseText.Number(request.Terms.ProgressTicks / (float)PromiseBalance.TicksPerHour)));
-                Label(ref y, width, "CP_DeadlineCompact".Translate());
+                Label(ref y, width, SharedPromiseText.Rewards(component, state, r, request, now));
                 string error = component.AcceptanceError(pawn, request);
                 if (error != null) Label(ref y, width, error);
                 if (error == null && Button(ref y, width, "CP_Accept".Translate()))
@@ -230,15 +252,16 @@ namespace ColonyPromises
                     var target = pawn;
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
                         "CP_AcceptConfirm".Translate(state.Shared == null ? target.LabelShort : SharedPromiseText.Names(state.Shared.First, state.Shared.Second), PromiseConditions.Get(r.Kind).Describe(r),
-                            request.DeadlineDays, SharedPromiseText.Consequences(component, state, r, state.Active == null ? state.Request : null, now), "CP_DeadlineRule".Translate()),
+                            request.DeadlineDays, SharedPromiseText.Consequences(component, state, r, request, now), "CP_DeadlineRule".Translate()),
                         () => component.TryAccept(target, request)));
                 }
                 if (Button(ref y, width, "CP_Decline".Translate()))
                 {
                     var target = pawn;
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-                        (state.Shared == null ? "CP_DeclineConfirm".Translate(RequestRules.UnacceptedCooldownDays).ToString()
-                            : "CP_SharedDeclineConfirm".Translate(SharedPromiseText.Names(state.Shared.First, state.Shared.Second), RequestRules.UnacceptedCooldownDays).ToString()), () => component.Decline(target, request)));
+                        state.Shared == null ? "CP_DeclineConfirm".Translate(RequestRules.UnacceptedCooldownDays).ToString()
+                            : "CP_SharedDeclineConfirm".Translate(SharedPromiseText.Names(state.Shared.First, state.Shared.Second), RequestRules.UnacceptedCooldownDays).ToString(),
+                        () => component.Decline(target, request)));
                 }
             }
             else
@@ -249,11 +272,29 @@ namespace ColonyPromises
             if (Button(ref y, width, (moreExpanded ? "- " : "+ ") + "CP_More".Translate())) moreExpanded = !moreExpanded;
             if (moreExpanded)
             {
+                if (displayed != null)
+                {
+                    Label(ref y, width, PromiseConditions.Get(displayed.Kind)?.Describe(displayed) ?? "CP_InvalidParameters".Translate().ToString());
+                    if (displayed.SuccessDays > 0) Label(ref y, width, SharedPromiseText.Penalties(component, state, displayed, displayedRequest, now));
+                    else Label(ref y, width, "CP_LegacyPromise".Translate());
+                    Label(ref y, width, "CP_DeadlineRule".Translate());
+                }
+                if (displayedRequest != null)
+                {
+                    foreach (var participant in state.Shared == null ? new[] { pawn } : new[] { state.Shared.First, state.Shared.Second })
+                        if (TrustRecovery.Available(component.PeekState(participant), displayedRequest, now))
+                            Label(ref y, width, "CP_CardRecoveryPerson".Translate(participant.LabelShort, "CP_UnpromisedRecovery".Translate(TrustRules.UnpromisedRecoveryTrust,
+                                displayed.Kind == PromiseKind.Leisure ? "CP_RecoveryLeisure".Translate(PromiseText.Number(displayed.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString()
+                                    : "CP_RecoveryHold".Translate(PromiseText.Number(displayed.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString(),
+                                PromiseText.Number(displayed.ProgressTicks / (float)PromiseBalance.TicksPerHour)).ToString()));
+                }
                 Label(ref y, width, "CP_TrustImpact".Translate(TrustRules.LowTrustThreshold,
                     PromiseText.Number(TrustRules.MoodFactor(state.Trust) * 100)));
                 Label(ref y, width, "CP_RepeatRules".Translate(PromiseBalance.RepeatWindowDays));
                 Label(ref y, width, "CP_RequestRules".Translate());
             }
+            if (other != null && Button(ref y, width, "CP_OpenPartner".Translate(other.LabelShort)))
+            { SelectPawn(other); Widgets.EndScrollView(); return; }
             if (Prefs.DevMode && Button(ref y, width, (diagnosticsExpanded ? "- " : "+ ") + "CP_DebugTitle".Translate()))
                 diagnosticsExpanded = !diagnosticsExpanded;
             if (Prefs.DevMode && diagnosticsExpanded)
@@ -283,7 +324,7 @@ namespace ColonyPromises
             foreach (var r in state.History)
             {
                 Label(ref y, width, PromiseHistory.Format(r, now));
-                Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
+                Label(ref y, width, PromiseCardText.Conditions(r));
             }
             detailHeight = y + 8;
             Widgets.EndScrollView();

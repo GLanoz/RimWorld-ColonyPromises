@@ -1,5 +1,7 @@
 # Colony Promises
 
+Version **0.2.1** for RimWorld **1.6**.
+
 Colonists ask for a better bedroom, time for recreation, or improved equipment after a need has remained unmet. You can accept a request as a promise, decline it, or leave it unanswered. Keeping and breaking promises affects mood and trust in the colony's leadership, without changing personal relationships between colonists.
 
 ## Requirements and installation
@@ -8,13 +10,15 @@ Colonists ask for a better bedroom, time for recreation, or improved equipment a
 - **Harmony**, enabled and loaded before Colony Promises.
 - No DLC required. English and Ukrainian interfaces are included.
 
+Optional Royalty and Ideology rules are handled when those expansions are active. They have been checked against local game APIs and isolated fixtures, not tested in a running game. Biotech, Anomaly and Odyssey use the existing checks for actual needs, thought eligibility and usable equipment; no extra request types are added.
+
 Copy the ready-to-use Colony Promises folder into RimWorld's `Mods` folder. It should contain `About/`, `Defs/`, `Languages/`, `LoadFolders.xml`, and `1.6/Assemblies/ColonyPromises.dll`. Enable Harmony and Colony Promises, keep Harmony before Colony Promises in the load order, then restart. Harmony is a separate dependency; its DLL and the game's DLLs are not included.
 
 ## Receiving and answering requests
 
 Only free adult humanlike player colonists with a mood need can make requests. Guests, quest lodgers, prisoners, and slaves are excluded. Each colonist can have **one open request or one active promise**.
 
-A qualifying unmet need must be observed for **two game days** on a player home map. Evidence restarts when the need is satisfied, the colonist becomes unavailable for observation, or the relevant conditions change. Drafted, downed, suspended, and mentally disturbed colonists do not build this evidence. Low general mood alone does not cause a request.
+A qualifying unmet need must be observed for **two game days** on a player home map. Evidence restarts when the need is satisfied, the relevant cause changes, or observation has an unknown gap. Drafted, downed, suspended, and mentally disturbed colonists do not add evidence. Recreation observation can pause during known sleep or incapacity. Low general mood alone does not cause a request.
 
 New requests appear at least **half a day apart across the whole colony**, including different home maps. Longer-standing deficits have priority, so a busy colony can delay an individual request. You have **two days** to respond once it appears.
 
@@ -25,7 +29,7 @@ Select a colonist and open **Promises** on the bottom bar, or use **Open Promise
 - **Leave unanswered:** it expires without a penalty. Satisfying it before acceptance normally gives no reward; limited recovery at very low trust is described below.
 - **Withdraw an accepted promise:** confirm the displayed penalty. Withdrawal is less costly than breaking it.
 
-An unaccepted request also closes without penalty when it becomes obsolete, such as when its required replacement equipment is no longer available. Already-satisfied requests cannot be accepted for a reward.
+An unaccepted request also closes without penalty when it becomes obsolete, such as when its cause is repaired or every supported route to its equipment target becomes unavailable. Losing ready stock alone does not invalidate a verified manufacturing solution. Already-satisfied requests cannot be accepted for a reward.
 
 ## What colonists request
 
@@ -41,11 +45,15 @@ A private-bedroom promise requires the sole assigned owner of a usable non-medic
 
 Temperature complaints, disturbed sleep, jealousy of another bedroom, and an Ascetic's dislike of a room that is too impressive are not converted into arbitrary quality targets. The current promise cannot reliably guarantee those solutions; Development diagnostics explain the limitation.
 
+With **Royalty**, an actual negative thought about a missing personal bedroom or unmet title requirements can start the same two-day observation. New bedroom requests include the relevant title requirements: room area, flooring, furniture, exact impressiveness and excluded building types. A high room category alone is insufficient. Shared rooms must meet both partners' applicable requirements. These conditions are fixed when the request is formed and are shown before acceptance; later promotion does not rewrite an accepted promise. Unsupported custom title requirements block the request rather than producing a partial solution.
+
 ### Shared bedrooms
 
 A romantic pair can make **one shared bedroom request**, occupying both colonists' request slots. Both must be eligible and able to share a bed under the game's rules, including any active restrictions on shared sleeping. Neither may already have a request, promise, or cooldown. The pair needs two observed days of an unmet bedroom requirement and takes one place in the colony's offer queue.
 
-Confirmed dissatisfaction of **one partner is enough**. The reason names that person and their observed penalty, without claiming the other partner is dissatisfied. The target must address that problem and avoid a known conflicting requirement for either person. Having separate beds alone is insufficient: the game's sleeping-apart thought can be inactive when partners already share a room. Already resolved problems create no request. Pairs involving an Ascetic, ambiguous multiple partners, or no usable loaded double-bed type do not receive shared or conflicting new individual bedroom requests; Development diagnostics explain the blocker.
+Shared reasons name the affected partner. When both share the same problem, one sentence describes it; different problems receive separate short explanations. The title and partner button follow the selected colonist. Missing original cause data receives a neutral explanation rather than an assumed complaint.
+
+Confirmed dissatisfaction of **one partner is enough**. The reason names that person without claiming the other partner is dissatisfied. The target must address that problem and avoid a known conflicting requirement for either person. Having separate beds alone is insufficient: the game's sleeping-apart thought can be inactive when partners already share a room. Already resolved problems create no request. Pairs involving an Ascetic, ambiguous multiple partners, or no usable loaded double-bed type do not receive shared or conflicting new individual bedroom requests; Development diagnostics explain the blocker.
 
 Assign **exactly these two colonists to the same non-medical colonist bed with at least two sleeping slots**. Both must be able to use it. Follow the displayed room requirement: a private Bedroom excludes other room owners; an explicit shared-barracks improvement permits them. Both exclude medical beds. Keep the same qualifying bed and room for a continuous day. They do not need to sleep at the same time. Removing either owner, changing the bed, or losing qualifying conditions resets the common progress.
 
@@ -57,19 +65,25 @@ The Requests list, button count, offer letter, and reminder include the shared r
 
 Recreation requests require the recreation need to stay below **35%** for two observed days. The target starts at **4 hours** of actual recreation. It rises by two hours if at least a day of the observed deficit was below 15%, and by another two if the deficit lasted at least three days while waiting for an offer, up to **8 hours**.
 
+Only conscious, awake observation on the home map adds deficit time. Known sleep and incapacity pause that time without erasing earlier evidence; an unverified gap or absence restarts observation. A recreation-related mood penalty can confirm the problem, but the low need is sufficient. Requests concern time for recreation, not a new variety of activities.
+
 Recognized games, social relaxation, skygazing, and recreational walking count. Scheduling recreation, travelling to an activity, sleeping, being downed, medical confinement, drafting, mental breaks, and forced idleness do not. Accepted promises accumulate activity from acceptance onward, across multiple sessions.
 
 ### Equipment
 
-Equipment requests improve an item the colonist already wears or wields. Simply lacking a weapon or clothing is not enough.
+Equipment requests require a current negative effect caused by a supported equipment problem for two observed days. General unhappiness, low quality, combat skills, and missing equipment alone do not create them.
 
-- An item below Normal quality calls for the **same type, one quality step higher**.
-- Apparel below **50% durability** calls for the same type at no worse quality and at least **80% durability**.
-- Apparel both worn and poor must meet both improvements. All requested apparel replacements must remain at least 80% durable throughout the hold, including requests prompted only by quality.
+- **Damaged clothing:** replace a specific worn piece with the same type at **80% condition or better**. The game's complaint excludes locked clothing and items that do not care about damage. The request addresses that piece; other damaged clothing can still cause dissatisfaction.
+- **Unwanted nudity:** provide one compatible garment covering the missing basic body areas. A nude colonist who has no supported negative effect does not request clothing. Core's nudity complaint is disabled with Ideology; ideology-specific dress complaints are currently unsupported.
 
-A usable replacement must already exist as reachable, non-forbidden loose stock on the home map. Core and loaded-mod items can qualify if they have quality. Nonviolent colonists do not request weapons, brawlers do not request ranged weapons, and nudists do not request apparel. Body-part and equipping restrictions also apply.
+With Royalty or Ideology, a replacement cannot remove the only garment satisfying an active title or role requirement. Relevant desired clothing and gender-specific nudity preferences also constrain new targets. If the colonist's beliefs reject human-leather clothing, the request explicitly excludes that material, including when checking available manufacturing supplies. These safeguards do not turn every ideological clothing complaint into a new request. Royalty's clothing-quality preference does not add a quality floor to a worn-clothing request.
+- **Brawler with a ranged weapon:** provide a usable melee primary weapon. A better ranged weapon does not solve this problem. Nonviolent colonists never request weapons.
 
-The **same physical item must remain equipped for one game day**. Storage and inventory do not count. Comparisons stay within the same item type; higher quality does not make an unrelated weapon a preferred replacement.
+These new requests have **no minimum quality requirement**. Apparel condition must remain at least 80% throughout the hold; a higher-quality worn item does not qualify. Body structure, wearing restrictions, locked apparel, and equipment usability are checked.
+
+A solution may be reachable, permitted loose stock or an item the colony can manufacture with an unlocked recipe, usable workbench, suitable crafter, and available materials. Core and loaded-mod items can qualify. Unsupported production routes and speculative future trades are not assumed feasible. Lack of stock does not erase the underlying need; diagnostics distinguish a need from an available solution.
+
+The **same physical item must remain equipped for one game day**. Storage and inventory do not count. Clothing for nudity must provide the required coverage, and a melee weapon must be the primary weapon. Accepted terms remain binding after the original negative effect disappears.
 
 ## Deadlines and consequences
 
@@ -110,7 +124,7 @@ Recovery happens once per request, at most once per colonist every **10 days**, 
 
 The Promises button shows the number of current unanswered requests. Inside the window, **Requests** lists only unanswered requests, ordered by the nearest response deadline. Each row shows the colonist, request type, a short requirement, and time remaining. Click it to open that colonist's details in **Colonists**; request letters take you there too.
 
-**Colonists** has a permanent list on the left, with request, active-promise, cooldown, or no-request status. The selected colonist's trust, conditions, exact consequences, response time or active progress, actions, and personal history appear on the right. Lists and details scroll independently. Ordinary reopening retains the last internal tab and valid selection for the current session; a departed colonist is replaced by an available selection. Acceptance, refusal, and withdrawal use confirmation dialogs. General trust and repeat rules are available under **More details**.
+**Colonists** has a permanent list on the left, with request, active-promise, cooldown, or no-request status. The selected colonist's trust, conditions, exact consequences, response time or active progress, actions, and personal history appear on the right. The list defaults to **Active promises first**, with counted groups for colonists with and without an active promise; each group is sorted by name. Both participants in an accepted shared promise belong to the first group. Pending requests do not count as active promises. Choose **By name** for one alphabetical list. Sorting updates as promises change, retaining the selection and scroll position; the chosen mode remains on reopening during the session. Lists and details scroll independently. Ordinary reopening retains the last internal tab and valid selection for the current session; a departed colonist is replaced by an available selection. Acceptance, refusal, and withdrawal use confirmation dialogs. Request cards show the reason, required action, response and fulfillment times, and exact rewards. Shared cards list each partner's reward separately. Active promises show the requirement, progress, deadline, reward, and any known reason progress is paused. **More details** contains penalties, cooldowns, full requirements, and general trust and repeat rules. Acceptance confirmations include the complete requirement, deadline, rewards, and penalties.
 
 History shows the result, elapsed time, and mood and trust changes actually applied, including trust clamping. Later balance or trust changes do not recalculate history. Results without consequences say so; missing information in older records is marked unavailable.
 
@@ -128,8 +142,10 @@ Existing promises retain their saved requirements, progress, deadlines, trust, h
 
 Accepted housing promises remain binding even if their original negative thought disappears. Older unanswered housing requests based only on expectations close as obsolete without penalties or rewards; fresh requests need new confirmed housing evidence and two observed days. Old expectation-only observation time is not treated as evidence of dissatisfaction.
 
-Equipment requests consider existing loose stock, not recipes, traders, inventory, or future purchases. Custom recreation may not count, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
+Older unanswered equipment requests based on quality also close without consequences. Old equipment observation time cannot establish a current complaint. Already accepted equipment promises keep their quality requirements, progress, deadlines, and effects.
 
-Release builds and automated checks pass, and history display has been verified in-game by the player. Request generation, notifications, interface layout, full save loading and migration, and mod combinations still need in-game testing. Adding the mod to an existing save is implemented but has not been verified on a real save; safe removal is also unverified. Compilation and isolated checks do not establish correct gameplay behavior.
+Equipment requests support ready stock and verified ordinary manufacturing recipes. They do not forecast traders or future purchases, solve multi-item clothing sets, or cover ideology-specific dress complaints. Custom recipes and recreation may be unsupported, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
+
+Release builds and automated checks pass, and history display has been verified in-game by the player. DLC branch fixtures cover Core alone, each expansion switch individually and combined switches; they do not load complete DLC configurations. No DLC configuration has been tested in-game for this update. Request generation, notifications, interface layout, full save loading and migration, and mod combinations still need in-game testing. Adding the mod to an existing save is implemented but has not been verified on a real save; safe removal is also unverified. Compilation and isolated checks do not establish correct gameplay behavior.
 
 For implementation, build instructions, verification tools, and manual scenarios, see the [technical documentation](docs/API.md).

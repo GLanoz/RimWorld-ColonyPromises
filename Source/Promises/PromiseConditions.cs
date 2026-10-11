@@ -67,7 +67,8 @@ namespace ColonyPromises
             if (room == null || !room.ProperRoom || room.PsychologicallyOutdoors
                 || room.Role != (r.RequiresBarracks ? RoomRoleDefOf.Barracks : RoomRoleDefOf.Bedroom)
                 || room.ContainedBeds.Any(b => b.Medical) || !r.RequiresBarracks && room.Owners.Any(owner => owner != pawn)) return result;
-            result.Satisfied = RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) >= r.RoomStage;
+            result.Satisfied = RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) >= r.RoomStage
+                && DlcCompatibility.BedroomMet(room, pawn, r);
             result.Thing = bed;
             result.Room = room;
             return result;
@@ -75,7 +76,7 @@ namespace ColonyPromises
 
         public string Describe(PromiseRecord r) => (r.RequiresBarracks ? (r.IsShared ? "CP_SharedBarracksConditions" : "CP_BarracksConditions")
             : r.IsShared ? "CP_SharedBedroomConditions" : "CP_BedroomConditions").Translate(RoomLabel(r.RoomStage), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour)
-            + (r.RequiresConstructedBed ? "\n" + "CP_ConstructedBed".Translate().ToString() : "");
+            + (r.RequiresConstructedBed ? "\n" + "CP_ConstructedBed".Translate().ToString() : "") + DlcCompatibility.BedroomText(r);
         public static string RoomLabel(int stage) => stage >= 0 && stage < RoomStatDefOf.Impressiveness.scoreStages.Count
             ? RoomStatDefOf.Impressiveness.scoreStages[stage].label : "CP_MissingParameter".Translate().ToString();
     }
@@ -105,10 +106,10 @@ namespace ColonyPromises
     {
         public PromiseKind Kind => PromiseKind.Equipment;
         public bool UsesContinuousHold => true;
-        public bool ValidParameters(PromiseRecord r) => IsSupported(r.EquipmentDef)
+        public bool ValidParameters(PromiseRecord r) => (r.QualityOptional ? IsEquippable(r.EquipmentDef) : IsSupported(r.EquipmentDef))
             && (int)r.MinimumQuality >= 0 && (int)r.MinimumQuality < QualityUtility.QualityCount;
-        public static bool IsSupported(ThingDef def) => def != null && def.PlayerAcquirable
-            && (def.IsWeapon || def.IsApparel) && def.HasComp(typeof(CompQuality));
+        public static bool IsEquippable(ThingDef def) => def != null && def.PlayerAcquirable && (def.IsWeapon || def.IsApparel);
+        public static bool IsSupported(ThingDef def) => IsEquippable(def) && def.HasComp(typeof(CompQuality));
 
         public ConditionObservation Observe(Pawn pawn, PromiseRecord r)
         {
@@ -117,16 +118,18 @@ namespace ColonyPromises
             IEnumerable<Thing> equipped = r.EquipmentDef.IsApparel
                 ? pawn.apparel?.WornApparel.Cast<Thing>() ?? Enumerable.Empty<Thing>()
                 : pawn.equipment?.AllEquipmentListForReading.Cast<Thing>() ?? Enumerable.Empty<Thing>();
-            var matching = equipped.Where(t => t.def == r.EquipmentDef && t.TryGetQuality(out var quality) && quality >= r.MinimumQuality
-                && (r.MinimumHitPointsFraction <= 0 || t.HitPoints / (float)t.MaxHitPoints >= r.MinimumHitPointsFraction)).ToList();
+            var matching = equipped.Where(t => EquipmentNeeds.Matches(pawn, t, r)).ToList();
             result.Thing = matching.FirstOrDefault(t => t == r.StableThing) ?? matching.FirstOrDefault();
             result.Satisfied = result.Thing != null;
             return result;
         }
 
-        public string Describe(PromiseRecord r) => "CP_EquipmentConditions".Translate(
+        public string Describe(PromiseRecord r) => (r.QualityOptional ? "CP_GearConditions" : "CP_EquipmentConditions").Translate(
             r.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
-            r.MinimumQuality.GetLabel(), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour).ToString()
-            + (r.MinimumHitPointsFraction > 0 ? " " + "CP_Durability".Translate(PromiseText.Number(r.MinimumHitPointsFraction * 100)).ToString() : "");
+            r.QualityOptional ? "CP_QualityNotRequired".Translate().ToString() : r.MinimumQuality.GetLabel(), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour).ToString()
+            + (r.RequireCoverage ? "\n" + "CP_GearCoverage".Translate().ToString() : "")
+            + (r.RequireMelee ? "\n" + "CP_GearMelee".Translate().ToString() : "")
+            + (r.MinimumHitPointsFraction > 0 ? " " + "CP_Durability".Translate(PromiseText.Number(r.MinimumHitPointsFraction * 100)).ToString() : "")
+            + (r.AvoidHumanLeather ? " " + "CP_NoHumanLeather".Translate().ToString() : "");
     }
 }

@@ -2,7 +2,7 @@
 <LanguageData>
   <CP_SelectColonist>Оберіть колоніста</CP_SelectColonist>
   <CP_NoColonists>Немає відповідних колоністів. Обіцянки доступні вільним дорослим колоністам гравця, крім гостей, полонених і рабів.</CP_NoColonists>
-  <CP_Trust>{0} — довіра до керівництва: {1}/{2}</CP_Trust>
+  <CP_Trust>{0} — довіра: {1}/{2}</CP_Trust>
   <CP_Type_Bedroom>Окрема спальня</CP_Type_Bedroom>
   <CP_Type_Leisure>Відпочинок</CP_Type_Leisure>
   <CP_Type_Equipment>Спорядження</CP_Type_Equipment>
@@ -10,15 +10,17 @@
   <CP_Outcome_Broken>порушено</CP_Outcome_Broken>
   <CP_Outcome_Withdrawn>відкликано</CP_Outcome_Withdrawn>
   <CP_Outcome_Closed>закрито без штрафу</CP_Outcome_Closed>
-  <CP_Active>Активна обіцянка: {0}</CP_Active>
-  <CP_BedroomConditions>Мати ліжко як його єдиний призначений власник в окремій спальні рівня не нижче «{0}». Бараки та медичні ліжка не зараховуються. Утримувати те саме ліжко й кімнату безперервно протягом {1} перевірених годин. Вихід із карти, зміна кімнати або втрата відповідності умовам скидає прогрес.</CP_BedroomConditions>
-  <CP_LeisureConditions>Накопичити {0} годин фактичного відпочинку після видачі обіцянки. Зараховуються розваги та свідоме дозвілля, які розпізнає гра. Розклад, дорога до розваги, сон, непритомність, перебування в лікарні, бойовий режим і вимушена бездіяльність не зараховуються.</CP_LeisureConditions>
-  <CP_EquipmentConditions>Фактично екіпірувати {0} якості не нижче «{1}» і безперервно утримувати той самий предмет протягом {2} перевірених годин. Інвентар і склад не зараховуються. Зняття предмета або вихід із карти скидає прогрес.</CP_EquipmentConditions>
-  <CP_Remaining>Залишок часу: {0} днів</CP_Remaining>
-  <CP_Progress>Перевірений прогрес: {0} / {1} годин</CP_Progress>
-  <CP_DeadlineRule>Термін продовжує спливати під час хвороби, каравану та бою. Неперевірений час поза картою не зараховується. Порушення визначається після завершення терміну.</CP_DeadlineRule>
-  <CP_Withdraw>Відкликати обіцянку…</CP_Withdraw>
-  <CP_WithdrawConfirm>Відкликати цю обіцянку? Настрій: {0} на {1} дн.; довіра: {2}; очікування {3} дн. до спостереження для нових прохань.</CP_WithdrawConfirm>
+  <CP_Active>Обіцяно: {0}</CP_Active>
+  <CP_BedroomConditions>Призначте колоністу придатне немедичне ліжко в окремій спальні рівня «{0}» або вище. Він має бути єдиним власником ліжка й кімнати. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви. Заміна, втрата власності або вихід із карти переривають прогрес.</CP_BedroomConditions>
+  <CP_LeisureConditions>Накопичте {0} годин справжніх розваг після прийняття обіцянки. Розваги в розкладі та дорога до них не зараховуються. Сон, непритомність, лікування, призов і вимушене байдикування також не рахуються.</CP_LeisureConditions>
+  <CP_EquipmentConditions>Екіпіруйте {0} якості {1} або вище й залиште цей самий предмет екіпірованим протягом {2} годин без перерви. Речі на складі або в інвентарі не зараховуються. Зняття предмета або вихід із карти переривають прогрес.</CP_EquipmentConditions>
+  <CP_Remaining>До завершення строку: {0} днів.</CP_Remaining>
+  <CP_Progress>Прогрес: {0} / {1} годин</CP_Progress>
+  <CP_DeadlineRule>Хвороба, караван і бій не зупиняють строк. Час поза картою не додає прогресу.</CP_DeadlineRule>
+  <CP_Withdraw>Відкликати…</CP_Withdraw>
+  <CP_WithdrawConfirm>Відкликати обіцянку?
+Настрій: {0} на {1} днів; довіра: {2}.
+Наступне прохання: через {3} днів.</CP_WithdrawConfirm>
   <CP_History>Нещодавня історія</CP_History>
   <CP_NoHistory>Немає завершених прохань чи обіцянок.</CP_NoHistory>
   <CP_HistoryEntry>{0} — {1} {2}. {3}</CP_HistoryEntry>
@@ -30,12 +32,12 @@
   <CP_MissingColonist>Відсутній колоніст</CP_MissingColonist>
   <CP_Result>{0}: {1} — {2}.</CP_Result>
   <CP_RequestTitle>Прохання: {0}</CP_RequestTitle>
-  <CP_ResponseTime>Час для відповіді: {0} дн. Після прийняття виконайте за {1} дн.</CP_ResponseTime>
-  <CP_FixedConsequences>Виконання: {0} настрою на {1} дн.; {2} довіри.
-Порушення: {3} настрою на {4} дн.; {5} довіри.
-Відкликання: {6} настрою на {7} дн.; {8} довіри.
-Очікування після завершення: {9} дн.</CP_FixedConsequences>
-  <CP_Accept>Пообіцяти виконати…</CP_Accept>
+  <CP_ResponseTime>Відповідь — протягом {0} днів. Виконання — за {1} днів після прийняття.</CP_ResponseTime>
+  <CP_FixedConsequences>Винагорода: {0} настрою на {1} днів; {2} довіри.
+Порушення: {3} настрою на {4} днів; {5} довіри.
+Відкликання: {6} настрою на {7} днів; {8} довіри.
+Наступне прохання — після {9} днів.</CP_FixedConsequences>
+  <CP_Accept>Пообіцяти…</CP_Accept>
   <CP_AcceptConfirm>Обіцяти колоністу {0}:
 
 {1}
@@ -46,11 +48,11 @@
 
 {4}</CP_AcceptConfirm>
   <CP_Decline>Відмовити…</CP_Decline>
-  <CP_DeclineConfirm>Відмовити в цьому проханні? Без штрафу настрою чи довіри. Нове прохання потребує {0} дн. очікування та нового стійкого дефіциту.</CP_DeclineConfirm>
+  <CP_DeclineConfirm>Відмовити в проханні? Без штрафу до настрою чи довіри. Нові прохання можливі після {0} днів.</CP_DeclineConfirm>
   <CP_NoRequest>Немає відкритого прохання чи активної обіцянки.</CP_NoRequest>
   <CP_RequestRules>Прохання виникають поступово після двох днів спостережуваного дефіциту. Довільно обирати вимоги не можна. Відмова або відсутність відповіді не дають штрафу. Довіра має межі 0–100 і не дає постійного бонусу настрою.</CP_RequestRules>
   <CP_RequestUnavailable>Це прохання вже закрите або час для відповіді сплив.</CP_RequestUnavailable>
-  <CP_RequestOutdated>Це прохання зараз неактуальне або його неможливо перевірити. Для прийняття потрібна незадоволена потреба, а для спорядження — доступна придатна заміна.</CP_RequestOutdated>
+  <CP_RequestOutdated>Це прохання більше не можна прийняти: потреба або доступне рішення змінилися.</CP_RequestOutdated>
   <CP_NewRequest>{0} висловлює прохання: {1}. Перегляньте його у вкладці «Обіцянки».</CP_NewRequest>
   <CP_ReasonBedroomMissing>Немає відповідної власної спальні щонайменше {1} дні спостереження. Поточні очікування: {0}.</CP_ReasonBedroomMissing>
   <CP_ReasonBedroomImprove>Власна спальня щонайменше {1} дні спостереження нижче цільового рівня. Поточні очікування: {0}; прохання передбачає обмежене покращення.</CP_ReasonBedroomImprove>
@@ -58,7 +60,7 @@
   <CP_ReasonEquipmentWorn>Одяг щонайменше {1} дні спостереження має менше 50% міцності, а на карті є доступна придатна заміна того самого типу.</CP_ReasonEquipmentWorn>
   <CP_ReasonEquipmentQuality>Екіпірований предмет щонайменше {1} дні спостереження має якість нижче нормальної, а на карті є доступний придатний екземпляр того самого типу кращої якості.</CP_ReasonEquipmentQuality>
   <CP_Durability>Протягом утримання зберігайте щонайменше {0}% міцності.</CP_Durability>
-  <CP_LegacyPromise>Обіцянка попередньої версії: збережено початкові умови та попередні правила наслідків.</CP_LegacyPromise>
+  <CP_LegacyPromise>Для цієї давньої обіцянки збережено початкові правила винагороди.</CP_LegacyPromise>
   <CP_Outcome_Declined>у проханні відмовлено без штрафу</CP_Outcome_Declined>
   <CP_Outcome_Expired>прохання без відповіді спливло без штрафу</CP_Outcome_Expired>
   <CP_Outcome_SatisfiedUnaccepted>прохання задоволено без обіцянки</CP_Outcome_SatisfiedUnaccepted>
@@ -119,10 +121,10 @@
 
 {1}
 
-Залишок часу на відповідь: {2} дня. Відкрийте обіцянки, щоб переглянути причину, точні наслідки й доступні дії.</CP_RequestLetterText>
+Відповідь — протягом {2} днів. Відкрийте «Обіцянки», щоб прийняти прохання або відмовити.</CP_RequestLetterText>
   <CP_RemindersSetting>Нагадувати за пів дня до завершення строку відповіді</CP_RemindersSetting>
   <CP_TrustImpact>При довірі нижче {0} нові обіцянки дають менший бонус настрою за виконання; поточний множник настрою: {1}%. Виконання продовжує відновлювати довіру. Постійного штрафу настрою за низьку довіру немає.</CP_TrustImpact>
-  <CP_UnpromisedRecovery>Без прийняття: задоволення цього відкритого прохання може відновити +{0} довіри без бонусу настрою. {1} Поточний підтверджений прогрес: {2} години. Завершіть до спливання строку відповіді. Для відновлення діють окремі очікування й обмеження повторів.</CP_UnpromisedRecovery>
+  <CP_UnpromisedRecovery>Виконання прохання без обіцянки може відновити +{0} довіри, без бонусу настрою. {1} Прогрес: {2} годин. Устигніть до завершення строку відповіді. Для відновлення діють окреме очікування й обмеження повторів.</CP_UnpromisedRecovery>
   <CP_RecoveryHold>Утримуйте потрібне ліжко й кімнату або екіпірований предмет у відповідному стані безперервно протягом {0} підтверджених годин.</CP_RecoveryHold>
   <CP_RecoveryLeisure>Накопичте {0} годин визнаних грою розваг, поки це прохання відкрите, і відновіть потребу розваг принаймні до 35%. Прийняття починає прогрес обіцянки з нуля.</CP_RecoveryLeisure>
   <CP_TabRequests>Прохання</CP_TabRequests>
@@ -146,7 +148,7 @@
   <CP_PairNames>{0} та {1}</CP_PairNames>
   <CP_SharedWith>Мати спільну спальню з {0}.</CP_SharedWith>
   <CP_OpenPartner>Переглянути: {0}</CP_OpenPartner>
-  <CP_SharedBedroomConditions>Обом учасникам має бути призначене те саме немедичне ліжко щонайменше з двома місцями у приватній спальні рівня не нижче «{0}». Власниками ліжка й кімнати можуть бути лише ці двоє; обом має бути дозволено користуватися ліжком. Утримуйте те саме ліжко й кімнату протягом {1} підтверджених годин.</CP_SharedBedroomConditions>
+  <CP_SharedBedroomConditions>Призначте обом партнерам те саме придатне немедичне ліжко з двома або більше місцями в окремій спальні рівня «{0}» або вище. Ліжко й кімната не повинні мати інших власників. Обоє мають право користуватися ліжком. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви.</CP_SharedBedroomConditions>
   <CP_ShortSharedBedroom>Спільна приватна спальня: щонайменше «{0}», утримувати одну добу.</CP_ShortSharedBedroom>
   <CP_PairAmbiguous>Кілька романтичних партнерів або невзаємний зв’язок: однозначної пари немає. Нове прохання про спальню не створюється.</CP_PairAmbiguous>
   <CP_PairSelected>Партнер для спільної спальні: {0}.</CP_PairSelected>
@@ -161,14 +163,13 @@
   <CP_PairReasonBarracks>Партнери ділять ліжко в бараку й щонайменше {1} дні спостереження не мають відповідної приватної спальні.</CP_PairReasonBarracks>
   <CP_PairReasonPrivate>Спільне ліжко щонайменше {1} дні спостереження не забезпечує відповідної приватної спальні.</CP_PairReasonPrivate>
   <CP_PairReasonImprove>Спільна приватна спальня щонайменше {1} дні спостереження залишається нижче цільового рівня пари.</CP_PairReasonImprove>
-  <CP_PersonalEffects>{0}:
-{1}</CP_PersonalEffects>
+  <CP_PersonalEffects>{0}: {1}</CP_PersonalEffects>
   <CP_SharedWithdrawConfirm>Відкликати спільну обіцянку для {0}?
 
 {1}
 {2}</CP_SharedWithdrawConfirm>
   <CP_PersonalWithdrawal>{0}: {1} настрою на {2} дн.; {3} довіри; очікування {4} дн.</CP_PersonalWithdrawal>
-  <CP_SharedDeclineConfirm>Відмовити у спільному проханні для {0}? Жоден учасник не отримує штрафу настрою чи довіри. Для обох починається {1} дн. очікування.</CP_SharedDeclineConfirm>
+  <CP_SharedDeclineConfirm>Відмовити парі {0}? Без штрафу до настрою чи довіри. Обоє чекатимуть {1} днів до нових прохань.</CP_SharedDeclineConfirm>
   <CP_SharedResult>{0}: спільна спальня — {1}.</CP_SharedResult>
   <CP_SharedHistoryType>{0} з {1}</CP_SharedHistoryType>
   <CP_PairRecovery>{0}: можливе відновлення +{1} довіри без прийняття після {2} безперервних підтверджених годин до спливання строку відповіді. Без бонусу настрою. Спільний прогрес: {3} год.; діють особисті обмеження відновлення.</CP_PairRecovery>
@@ -199,4 +200,95 @@
   <CP_BarracksConditions>Власне призначене придатне немедичне ліжко колоніста в закритому бараку з рівнем щонайменше {0}, безперервно протягом {1} годин. Інші мешканці кімнати дозволені; медичні ліжка виключені.</CP_BarracksConditions>
   <CP_SharedBarracksConditions>Те саме придатне немедичне ліжко колоністів із щонайменше двома спальними місцями та рівно двома учасниками-власниками в закритому бараку з рівнем щонайменше {0}, безперервно протягом {1} годин. Інші мешканці кімнати дозволені; медичні ліжка виключені.</CP_SharedBarracksConditions>
   <CP_ConstructedBed>Ліжко повинне мати вартість у матеріалах; безкоштовне спальне місце не підходить.</CP_ConstructedBed>
+  <CP_NeedSleeping>Спостереження призупинене, поки колоніст спить або його стан неможливо перевірити.</CP_NeedSleeping>
+  <CP_JoyEffect>Поточний вплив потреби розваг на настрій: {0}. Низька потреба розваг є достатнім доказом навіть без негативної думки.</CP_JoyEffect>
+  <CP_GearNoCause>Немає підтриманого актуального невдоволення спорядженням. Низька якість або відсутність предмета самі по собі не є потребою.</CP_GearNoCause>
+  <CP_GearNoSolution>Актуальна потреба є, але не знайдено придатного рішення на доступному складі або перевіреного рецепта з верстатом, майстром і матеріалами.</CP_GearNoSolution>
+  <CP_GearEvidence>{0}: настрій {1}; поточні умови підтверджують причину: {2}.</CP_GearEvidence>
+  <CP_GearPiece>Проблемний предмет: {0}; стан {1}%.</CP_GearPiece>
+  <CP_GearCause_ApparelDamaged>Зношений одяг</CP_GearCause_ApparelDamaged>
+  <CP_GearCause_Naked>Небажана оголеність</CP_GearCause_Naked>
+  <CP_GearCause_BrawlerUnhappy>Забіяка з дистанційною зброєю</CP_GearCause_BrawlerUnhappy>
+  <CP_GearReason_ApparelDamaged>Зношений одяг спричиняв {1} настрою протягом {2} днів спостереження. Замініть зношений предмет: {0}. Прохання стосується лише цієї речі; інший зношений одяг може й надалі викликати невдоволення.</CP_GearReason_ApparelDamaged>
+  <CP_GearReason_Naked>Небажана оголеність спричиняла {1} настрою протягом {2} днів спостереження. Предмет «{0}» може забезпечити потрібне покриття тіла.</CP_GearReason_Naked>
+  <CP_GearReason_BrawlerUnhappy>Дистанційна зброя суперечить уподобанням забіяки ({1} настрою протягом {2} днів спостереження). Екіпіруйте «{0}» як основну зброю ближнього бою.</CP_GearReason_BrawlerUnhappy>
+  <CP_GearStock>Придатна річ є на доступному складі й не заборонена.</CP_GearStock>
+  <CP_GearCraft>Предмет можна виготовити на верстаті «{0}»: доступні рецепт, майстер і матеріали.</CP_GearCraft>
+  <CP_GearIdeology>З Ideology стандартна думка Naked не діє. Специфічне невдоволення одягом чи оголеністю за ідеологією не перетворюється на прохання про спорядження.</CP_GearIdeology>
+  <CP_QualityNotRequired>без вимоги якості</CP_QualityNotRequired>
+  <CP_GearConditions>Екіпіруйте {0} ({1}) й залиште цей самий предмет екіпірованим протягом {2} годин без перерви. Речі на складі або в інвентарі не зараховуються. Зняття предмета або вихід із карти переривають прогрес.</CP_GearConditions>
+  <CP_GearCoverage>Одяг має закривати потрібні ділянки тіла, щоб колоніст більше не був оголеним. Решта одягу має залишатися сумісною.</CP_GearCoverage>
+  <CP_GearMelee>Використовуйте цей предмет як основну зброю ближнього бою. Колоніст має бути здатним ним користуватися.</CP_GearMelee>
+  <CP_GearShort>Екіпіруйте «{0}» ({1}) та утримуйте протягом доби.</CP_GearShort>
+  <CP_SortName>За ім’ям</CP_SortName>
+  <CP_SortPromises>Активні обіцянки спочатку</CP_SortPromises>
+  <CP_GroupActivePromise>З активною обіцянкою ({0})</CP_GroupActivePromise>
+  <CP_GroupNoPromise>Без активної обіцянки ({0})</CP_GroupNoPromise>
+  <CP_SharedReasonContext>Це одне спільне прохання для пари: {0}.</CP_SharedReasonContext>
+  <CP_SharedReasonRecorded>Зафіксовані причини прохання:</CP_SharedReasonRecorded>
+  <CP_SharedReasonBoth>{0}: обох турбувала одна проблема — {1}.</CP_SharedReasonBoth>
+  <CP_SharedReasonPerson>{0}: зафіксоване невдоволення — {1} (спостережений вплив на настрій: {2}).</CP_SharedReasonPerson>
+  <CP_SharedReasonCurrent>{0}: зараз також підтверджено невдоволення — {1} (вплив на настрій: {2}). Це додаткові поточні дані, а не окрема обіцянка.</CP_SharedReasonCurrent>
+  <CP_SharedReasonUnknown>У цьому записі немає достатніх даних про початкове невдоволення. Показані умови описують спільну вимогу.</CP_SharedReasonUnknown>
+  <CP_CardSharedBedroom>Спільна спальня з {0}</CP_CardSharedBedroom>
+  <CP_CardSharedBarracks>Кращий спільний барак з {0}</CP_CardSharedBarracks>
+  <CP_CardClothing>Новий одяг</CP_CardClothing>
+  <CP_CardWeapon>Зброя ближнього бою</CP_CardWeapon>
+  <CP_CardReasonUnknown>Початкова причина невідома. Потрібні умови наведено нижче.</CP_CardReasonUnknown>
+  <CP_CardReasonLeisure>Останнім часом бракує відпочинку та розваг.</CP_CardReasonLeisure>
+  <CP_CardReason_ApparelDamaged>Зношений предмет «{0}» потребує заміни.</CP_CardReason_ApparelDamaged>
+  <CP_CardReason_Naked>Оголеність викликає невдоволення.</CP_CardReason_Naked>
+  <CP_CardReason_BrawlerUnhappy>Забіяці не подобається користуватися дистанційною зброєю.</CP_CardReason_BrawlerUnhappy>
+  <CP_CardReason_SleptInBedroom>Якість спальні не влаштовує колоніста.</CP_CardReason_SleptInBedroom>
+  <CP_CardReason_SleptInBarracks>Якість барака не влаштовує колоніста.</CP_CardReason_SleptInBarracks>
+  <CP_CardReason_SleptOnGround>Доводиться спати на землі.</CP_CardReason_SleptOnGround>
+  <CP_CardReason_SleptOutside>Сон надворі викликає невдоволення.</CP_CardReason_SleptOutside>
+  <CP_CardReason_Greedy>Колоніст очікує кращої спальні.</CP_CardReason_Greedy>
+  <CP_CardReason_WantToSleepWithSpouseOrLover>Колоніста засмучує сон окремо від партнера.</CP_CardReason_WantToSleepWithSpouseOrLover>
+  <CP_CardCause_SleptInBedroom>{0} скаржиться на якість спальні.</CP_CardCause_SleptInBedroom>
+  <CP_CardCause_SleptInBedroom_Pair>{0} незадоволені якістю спальні.</CP_CardCause_SleptInBedroom_Pair>
+  <CP_CardCause_SleptInBarracks>{0} скаржиться на якість барака.</CP_CardCause_SleptInBarracks>
+  <CP_CardCause_SleptInBarracks_Pair>{0} незадоволені якістю барака.</CP_CardCause_SleptInBarracks_Pair>
+  <CP_CardCause_SleptOnGround>{0} доводиться спати на землі.</CP_CardCause_SleptOnGround>
+  <CP_CardCause_SleptOnGround_Pair>{0} доводиться спати на землі.</CP_CardCause_SleptOnGround_Pair>
+  <CP_CardCause_SleptOutside>{0} скаржиться на сон надворі.</CP_CardCause_SleptOutside>
+  <CP_CardCause_SleptOutside_Pair>{0} незадоволені сном надворі.</CP_CardCause_SleptOutside_Pair>
+  <CP_CardCause_Greedy>{0} хоче кращу спальню.</CP_CardCause_Greedy>
+  <CP_CardCause_Greedy_Pair>{0} хочуть кращу спальню.</CP_CardCause_Greedy_Pair>
+  <CP_CardCause_WantToSleepWithSpouseOrLover>{0} засмучує сон окремо від партнера.</CP_CardCause_WantToSleepWithSpouseOrLover>
+  <CP_CardCause_WantToSleepWithSpouseOrLover_Pair>{0} незадоволені тим, що сплять окремо.</CP_CardCause_WantToSleepWithSpouseOrLover_Pair>
+  <CP_CardBedroomAction>Призначте ліжко в окремій спальні рівня «{0}» або вище. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви.</CP_CardBedroomAction>
+  <CP_CardSharedBedroomAction>Призначте парі двоспальне ліжко в окремій спальні рівня «{0}» або вище. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви.</CP_CardSharedBedroomAction>
+  <CP_CardBarracksAction>Призначте ліжко в бараку рівня «{0}» або вище. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви.</CP_CardBarracksAction>
+  <CP_CardSharedBarracksAction>Призначте парі двоспальне ліжко в бараку рівня «{0}» або вище. Збережіть те саме ліжко й кімнату протягом {1} годин без перерви.</CP_CardSharedBarracksAction>
+  <CP_CardBuiltBed>Місце для сну не підходить.</CP_CardBuiltBed>
+  <CP_CardLeisure>Забезпечте {0} годин фактичного відпочинку й розваг.</CP_CardLeisure>
+  <CP_CardWear>Носіть «{0}»{1}{2} безперервно протягом {3} годин.</CP_CardWear>
+  <CP_CardEquip>Тримайте екіпірованим «{0}»{1}{2} безперервно протягом {3} годин.</CP_CardEquip>
+  <CP_CardPrimary>Використовуйте «{0}»{1}{2} як основну зброю ближнього бою протягом {3} годин без перерви.</CP_CardPrimary>
+  <CP_CardQuality>, якість — {0} або вище</CP_CardQuality>
+  <CP_CardCondition>, стан — щонайменше {0}%</CP_CardCondition>
+  <CP_CardCoverage>Одяг має забезпечувати потрібне покриття тіла.</CP_CardCoverage>
+  <CP_CardReward>Винагорода: {0} настрою на {1} днів; {2} довіри.</CP_CardReward>
+  <CP_CardAway>Прогрес призупинено до повернення на карту.</CP_CardAway>
+  <CP_CardPartnerAway>Прогрес призупинено, поки обоє не перебуватимуть на одній карті.</CP_CardPartnerAway>
+  <CP_CardNotResting>Зараз колоніст не відпочиває.</CP_CardNotResting>
+  <CP_CardRoomPending>Кімната поки не відповідає обіцянці.</CP_CardRoomPending>
+  <CP_CardGearPending>Потрібний предмет не екіпірований або не відповідає умовам.</CP_CardGearPending>
+  <CP_CardRecoveryPerson>{0}: {1}</CP_CardRecoveryPerson>
+  <CP_CardPenalties>Порушення: {0} настрою на {1} днів; {2} довіри.
+Відкликання: {3} настрою на {4} днів; {5} довіри.
+Наступне прохання: через {6} днів.</CP_CardPenalties>
+  <CP_CardCause_TitleNoPersonalBedroom_Pair>{0} потребують власної спальні відповідно до титулів.</CP_CardCause_TitleNoPersonalBedroom_Pair>
+  <CP_CardReason_TitleBedroomRequirementsNotMet>Спальня не відповідає вимогам титулу колоніста.</CP_CardReason_TitleBedroomRequirementsNotMet>
+  <CP_RoyalBedroomConditions>Вимоги титулу: {0}.</CP_RoyalBedroomConditions>
+  <CP_CardCause_TitleNoPersonalBedroom>{0} потребує власної спальні відповідно до титулу.</CP_CardCause_TitleNoPersonalBedroom>
+  <CP_RoyalBedroomUnsupported>Вимоги цього титулу до спальні неможливо коректно відобразити в проханні.</CP_RoyalBedroomUnsupported>
+  <CP_DlcGearNoSolution>Немає доступної заміни, яка узгоджується зі спорядженням, роллю та переконаннями колоніста. Перевірте сумісність одягу, вимоги титулу, матеріали та доступність.</CP_DlcGearNoSolution>
+  <CP_HousingCause_TitleNoPersonalBedroom>Немає спальні, придатної для титулу</CP_HousingCause_TitleNoPersonalBedroom>
+  <CP_CardCause_TitleBedroomRequirementsNotMet>{0} потребує спальні, яка відповідає вимогам титулу.</CP_CardCause_TitleBedroomRequirementsNotMet>
+  <CP_CardCause_TitleBedroomRequirementsNotMet_Pair>{0} потребують спальні, яка відповідає вимогам їхніх титулів.</CP_CardCause_TitleBedroomRequirementsNotMet_Pair>
+  <CP_NoHumanLeather>Не використовуйте людську шкіру.</CP_NoHumanLeather>
+  <CP_HousingCause_TitleBedroomRequirementsNotMet>Спальня не відповідає титулу</CP_HousingCause_TitleBedroomRequirementsNotMet>
+  <CP_CardReason_TitleNoPersonalBedroom>Титул колоніста вимагає власної спальні.</CP_CardReason_TitleNoPersonalBedroom>
 </LanguageData>

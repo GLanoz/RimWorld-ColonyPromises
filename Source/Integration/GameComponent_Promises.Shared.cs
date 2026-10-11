@@ -116,6 +116,8 @@ namespace ColonyPromises
             }
             bool observable = validity == SharedPairValidity.Valid && RequestMaintenance.Observable(shared.First)
                 && RequestMaintenance.Observable(shared.Second) && shared.First.Map == shared.Second.Map;
+            if (observable && !DlcCompatibility.PendingCompatible(shared.First, terms))
+            { ResolveShared(shared, PromiseOutcome.Obsolete, now); return; }
             bool satisfied = observable && SharedBedroomRules.Observe(terms).Satisfied;
             if (!terms.HousingBased || observable && !satisfied && !RequestGenerator.Relevant(shared.First, shared.Request))
             { ResolveShared(shared, PromiseOutcome.Obsolete, now); return; }

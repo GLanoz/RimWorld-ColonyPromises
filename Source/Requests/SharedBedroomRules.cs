@@ -88,7 +88,8 @@ namespace ColonyPromises
             if (!validRoom || terms.RequiresConstructedBed && CostListCalculator.CostListAdjusted(bed).Count == 0) return result;
             result.Thing = bed;
             result.Room = room;
-            result.Satisfied = RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) >= terms.RoomStage;
+            result.Satisfied = RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) >= terms.RoomStage
+                && DlcCompatibility.BedroomMet(room, a, terms);
             return result;
         }
     }
