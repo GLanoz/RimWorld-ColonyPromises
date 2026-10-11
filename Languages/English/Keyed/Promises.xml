@@ -142,4 +142,61 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
   <CP_More>More details</CP_More>
   <CP_RepeatRules>Values are fixed at acceptance. Fulfilled promises of the same type in the last {0} days reduce later positive rewards. Penalties are never reduced.</CP_RepeatRules>
   <CP_DeadlineCompact>Illness, caravans, and combat do not pause the deadline.</CP_DeadlineCompact>
+  <CP_Type_SharedBedroom>Shared bedroom</CP_Type_SharedBedroom>
+  <CP_PairNames>{0} and {1}</CP_PairNames>
+  <CP_SharedWith>Have a shared bedroom with {0}.</CP_SharedWith>
+  <CP_OpenPartner>View {0}</CP_OpenPartner>
+  <CP_SharedBedroomConditions>Both participants must own the same non-medical bed with at least two sleeping slots, in a private bedroom rated at least “{0}”. Only these two may own the bed or room; both must be allowed to use it. Hold the same bed and room for {1} verified hours.</CP_SharedBedroomConditions>
+  <CP_ShortSharedBedroom>Shared private bedroom: at least “{0}”, held for one day.</CP_ShortSharedBedroom>
+  <CP_PairAmbiguous>Multiple or non-reciprocal romantic partners: no unambiguous pair. No new bedroom request is generated.</CP_PairAmbiguous>
+  <CP_PairSelected>Shared-bedroom partner: {0}.</CP_PairSelected>
+  <CP_PairIneligible>The partner is not an eligible free adult player colonist.</CP_PairIneligible>
+  <CP_PairSharingForbidden>The game's bed-sharing rules do not allow this pair to share a bed.</CP_PairSharingForbidden>
+  <CP_PairConflictingNeeds>At least one partner is Ascetic; this version cannot form a shared impressiveness target that respects both participants.</CP_PairConflictingNeeds>
+  <CP_PairUnobservable>Both partners must be available for observation on the same player home map.</CP_PairUnobservable>
+  <CP_PairNoBed>No loaded, player-acquirable bed with two sleeping slots can accommodate both partners.</CP_PairNoBed>
+  <CP_PairSlotBlocked>A participant already has a request, promise, shared commitment, or cooldown.</CP_PairSlotBlocked>
+  <CP_PairRoomTarget>Expectations: {0} and {1}. Shared desired bedroom: {2}.</CP_PairRoomTarget>
+  <CP_PairReasonSeparate>The partners have had separate beds or no common assigned bed for at least {1} observed days.</CP_PairReasonSeparate>
+  <CP_PairReasonBarracks>The partners share a bed in a barracks and have lacked a qualifying private bedroom for at least {1} observed days.</CP_PairReasonBarracks>
+  <CP_PairReasonPrivate>The common bed has not provided a qualifying private bedroom for at least {1} observed days.</CP_PairReasonPrivate>
+  <CP_PairReasonImprove>The shared private bedroom has remained below the pair's target for at least {1} observed days.</CP_PairReasonImprove>
+  <CP_PersonalEffects>{0}:
+{1}</CP_PersonalEffects>
+  <CP_SharedWithdrawConfirm>Withdraw the shared promise for {0}?
+
+{1}
+{2}</CP_SharedWithdrawConfirm>
+  <CP_PersonalWithdrawal>{0}: {1} mood for {2} days; {3} trust; cooldown {4} days.</CP_PersonalWithdrawal>
+  <CP_SharedDeclineConfirm>Decline the shared request for {0}? Neither participant receives a mood or trust penalty. Both start a {1}-day request cooldown.</CP_SharedDeclineConfirm>
+  <CP_SharedResult>{0}: shared bedroom — {1}.</CP_SharedResult>
+  <CP_SharedHistoryType>{0} with {1}</CP_SharedHistoryType>
+  <CP_PairRecovery>{0}: may recover +{1} trust without accepting, after {2} continuous verified hours before the response deadline. No mood reward. Shared progress: {3} hours; personal recovery limits apply.</CP_PairRecovery>
+  <CP_HousingNoEvidence>No verified negative housing thought or still-current confirmed sleep problem. Missing rooms and expectations alone do not qualify.</CP_HousingNoEvidence>
+  <CP_HousingUnsupported>This housing problem cannot be covered by a minimum-quality bedroom or barracks promise.</CP_HousingUnsupported>
+  <CP_HousingUnverified>unverified for this unsupported requirement</CP_HousingUnverified>
+  <CP_HousingEvidence>{0}: {1}; observed mood effect: {2}; {3}; current conditions confirm it: {4}.</CP_HousingEvidence>
+  <CP_HousingMemory>active sleep memory</CP_HousingMemory>
+  <CP_HousingWitness>previous sleep memory; effect at last confirmation</CP_HousingWitness>
+  <CP_HousingSituation>active situational thought</CP_HousingSituation>
+  <CP_HousingReason>Confirmed housing dissatisfaction.</CP_HousingReason>
+  <CP_HousingPersonalReason>{0} is troubled by {1} (observed mood: {2}). The current problem has been observed for at least {3} days.</CP_HousingPersonalReason>
+  <CP_HousingCause_SleptInBedroom>a negative bedroom sleep experience</CP_HousingCause_SleptInBedroom>
+  <CP_HousingCause_SleptInBarracks>a negative barracks sleep experience</CP_HousingCause_SleptInBarracks>
+  <CP_HousingCause_SleptOnGround>sleeping on the ground or a free sleeping spot</CP_HousingCause_SleptOnGround>
+  <CP_HousingCause_SleptOutside>sleeping outdoors</CP_HousingCause_SleptOutside>
+  <CP_HousingCause_Greedy>an unmet Greedy room requirement</CP_HousingCause_Greedy>
+  <CP_HousingCause_WantToSleepWithSpouseOrLover>sleeping apart from a romantic partner</CP_HousingCause_WantToSleepWithSpouseOrLover>
+  <CP_HousingCause_Ascetic>a room too impressive for an Ascetic</CP_HousingCause_Ascetic>
+  <CP_HousingCause_Jealous>jealousy of another bedroom</CP_HousingCause_Jealous>
+  <CP_HousingCause_SleptInCold>sleeping in the cold</CP_HousingCause_SleptInCold>
+  <CP_HousingCause_SleptInHeat>sleeping in the heat</CP_HousingCause_SleptInHeat>
+  <CP_HousingCause_SleepDisturbed>disturbed sleep</CP_HousingCause_SleepDisturbed>
+  <CP_Type_Barracks>Barracks improvement</CP_Type_Barracks>
+  <CP_Type_SharedBarracks>Shared barracks improvement</CP_Type_SharedBarracks>
+  <CP_ShortBarracks>Barracks: at least {0}</CP_ShortBarracks>
+  <CP_SharedBarracksWith>Improve shared housing with {0}.</CP_SharedBarracksWith>
+  <CP_BarracksConditions>Your own assigned, usable non-medical colonist bed in enclosed barracks rated at least {0}, continuously for {1} hours. Other room owners are allowed; medical beds are excluded.</CP_BarracksConditions>
+  <CP_SharedBarracksConditions>The same usable non-medical colonist bed with at least two sleeping slots, owned by exactly the two participants, in enclosed barracks rated at least {0}, continuously for {1} hours. Other room owners are allowed; medical beds are excluded.</CP_SharedBarracksConditions>
+  <CP_ConstructedBed>The bed must have a material cost; a free sleeping spot does not qualify.</CP_ConstructedBed>
 </LanguageData>

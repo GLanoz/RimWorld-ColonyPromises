@@ -9,7 +9,9 @@ namespace ColonyPromises
         public static string Describe(ColonistPromises state, PromiseKind kind, int now)
         {
             var evaluation = RequestGenerator.Evaluate(state.Pawn, kind);
-            var saved = state.Deficits.FirstOrDefault(d => d.Kind == kind);
+            var observationState = evaluation.Candidate?.Terms.IsShared == true
+                ? GameComponent_Promises.Current?.PeekState(evaluation.Candidate.Terms.ParticipantA) ?? state : state;
+            var saved = observationState.Deficits.FirstOrDefault(d => d.Kind == kind);
             var observation = RequestGenerator.Project(saved, evaluation.Candidate, kind, now,
                 kind == PromiseKind.Leisure && state.Pawn?.needs?.joy?.CurLevel < RequestRules.SevereJoy);
             bool blocked = state.Request != null || state.Active != null || now < state.CooldownUntilTick

@@ -12,7 +12,7 @@ namespace ColonyPromises
         private readonly Dictionary<Pawn, ColonistPromises> byPawn = new Dictionary<Pawn, ColonistPromises>();
         private readonly Dictionary<Pawn, ColonistPromises> active = new Dictionary<Pawn, ColonistPromises>();
         private readonly Dictionary<Pawn, ColonistPromises> open = new Dictionary<Pawn, ColonistPromises>();
-        public List<ColonistPromises> OpenRequests(int now) => open.Values.Where(s => RequestMaintenance.Visible(s, now))
+        public List<ColonistPromises> OpenRequests(int now) => open.Values.Where(s => (s.Shared == null || s.Pawn == s.Shared.First) && RequestMaintenance.Visible(s, now))
             .OrderBy(s => s.Request.OfferedTick).ThenBy(s => s.Pawn.thingIDNumber).ToList();
         private int nextCheck;
         private int nextObservation;
@@ -37,11 +37,17 @@ namespace ColonyPromises
 
         public override void ExposeData()
         {
+            Scribe_Collections.Look(ref sharedBedrooms, "sharedBedrooms", LookMode.Deep);
+            Scribe_Values.Look(ref nextSharedId, "nextSharedId", 1);
             Scribe_Collections.Look(ref colonists, "colonyPromises", LookMode.Deep);
             Scribe_Values.Look(ref nextObservation, "nextRequestObservation");
             Scribe_Values.Look(ref nextOffer, "nextRequestOffer");
             Scribe_Values.Look(ref lastObservation, "lastRequestObservation", -1);
-            if (Scribe.mode == LoadSaveMode.PostLoadInit) colonists = colonists ?? new List<ColonistPromises>();
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                colonists = colonists ?? new List<ColonistPromises>();
+                sharedBedrooms = sharedBedrooms ?? new List<SharedBedroomCommitment>();
+            }
         }
 
         public override void FinalizeInit()
@@ -49,6 +55,8 @@ namespace ColonyPromises
             byPawn.Clear();
             active.Clear();
             open.Clear();
+            foreach (var state in colonists.Where(s => s?.Shared != null))
+            { state.Active = null; state.Request = null; state.Shared = null; }
             foreach (var state in colonists.Where(s => s?.Pawn != null))
             {
                 byPawn[state.Pawn] = state;
@@ -67,6 +75,7 @@ namespace ColonyPromises
             }
             foreach (var state in colonists.Where(s => s != null && s.Pawn == null && s.Active != null).ToList())
                 Resolve(state, PromiseOutcome.Closed, Find.TickManager.TicksGame);
+            RestoreSharedBedrooms();
             nextCheck = Find.TickManager.TicksGame;
             if (nextOffer == 0) nextOffer = nextCheck + RequestRules.OfferSpacing;
         }
@@ -84,6 +93,7 @@ namespace ColonyPromises
         {
             if (!PromiseConditions.Eligible(pawn)) return "CP_Ineligible".Translate();
             var state = StateFor(pawn);
+            if (state.Shared != null) return SharedAcceptanceError(state.Shared, request, Find.TickManager.TicksGame);
             if (state.Active != null) return "CP_AlreadyActive".Translate();
             int now = Find.TickManager.TicksGame;
             if (request == null || state.Request != request || now >= request.ExpiryTick) return "CP_RequestUnavailable".Translate();
@@ -102,6 +112,7 @@ namespace ColonyPromises
             }
             int now = Find.TickManager.TicksGame;
             var state = StateFor(pawn);
+            if (state.Shared != null) { AcceptShared(state.Shared, now); return true; }
             RequestLifecycle.Accept(state, request, now);
             open.Remove(pawn);
             active[pawn] = state;
@@ -119,6 +130,7 @@ namespace ColonyPromises
 
         public void CloseRequest(ColonistPromises state, PromiseOutcome outcome, int now, bool recoverTrust = false)
         {
+            if (state.Shared != null) { ResolveShared(state.Shared, outcome, now, recoverTrust); return; }
             var record = RequestLifecycle.Close(state, outcome, now, recoverTrust);
             if (record == null) return;
             if (state.Pawn != null) open.Remove(state.Pawn);
@@ -130,6 +142,14 @@ namespace ColonyPromises
         {
             if (!active.TryGetValue(pawn, out var state) || state.Active != expected) return;
             int now = Find.TickManager.TicksGame;
+            if (state.Shared != null)
+            {
+                var shared = state.Shared;
+                CheckShared(shared, now);
+                if (!shared.Resolved && shared.Active == expected && now < expected.DeadlineTick)
+                    ResolveShared(shared, PromiseOutcome.Withdrawn, now);
+                return;
+            }
             Check(state, now);
             if (state.Active == expected && now < expected.DeadlineTick) Resolve(state, PromiseOutcome.Withdrawn, now);
         }
@@ -143,8 +163,9 @@ namespace ColonyPromises
                 nextObservation = now + RequestRules.ObservationInterval;
             }
             if (now < nextCheck) return;
-            foreach (var state in active.Values.ToList()) Check(state, now);
-            foreach (var state in open.Values.ToList()) CheckOpenRequest(state, now);
+            foreach (var state in active.Values.Where(s => s.Shared == null).ToList()) Check(state, now);
+            foreach (var state in open.Values.Where(s => s.Shared == null).ToList()) CheckOpenRequest(state, now);
+            foreach (var shared in sharedBedrooms.ToList()) CheckShared(shared, now);
             nextCheck = now + PromiseBalance.CheckInterval;
             foreach (var state in active.Values) nextCheck = Math.Min(nextCheck, state.Active.DeadlineTick);
             foreach (var state in open.Values) nextCheck = Math.Min(nextCheck, state.Request.ExpiryTick);
@@ -203,6 +224,12 @@ namespace ColonyPromises
 
         public void CheckLifecycle(Pawn pawn)
         {
+            if (Scribe.mode == LoadSaveMode.Inactive && byPawn.TryGetValue(pawn, out var participant) && participant.Shared != null)
+            {
+                if (SharedBedroomRules.Validity(participant.Shared.First, participant.Shared.Second) == SharedPairValidity.Invalid)
+                    ResolveShared(participant.Shared, PromiseOutcome.Closed, Find.TickManager.TicksGame);
+                return;
+            }
             if (Scribe.mode == LoadSaveMode.Inactive && byPawn.TryGetValue(pawn, out var saved)
                 && saved.Request != null && (pawn.Dead || pawn.Destroyed || pawn.Faction != Faction.OfPlayer))
                 CloseRequest(saved, PromiseOutcome.Closed, Find.TickManager.TicksGame);
@@ -235,7 +262,7 @@ namespace ColonyPromises
             r.ObservedRoom = null;
             state.RecentSuccesses.RemoveAll(s => now - s.Tick > PromiseBalance.RepeatWindowDays * PromiseBalance.TicksPerDay);
             PromiseConsequences.Apply(state, r, outcome, now);
-            RequestGenerator.ResetObservations(state);
+            RequestGenerator.ResetObservations(state, true);
             AddHistory(state, r);
             NotifyResult(state, r);
         }

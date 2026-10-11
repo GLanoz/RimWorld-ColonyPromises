@@ -142,4 +142,61 @@
   <CP_More>Докладніше</CP_More>
   <CP_RepeatRules>Значення фіксуються при прийнятті. Виконані обіцянки того самого типу за останні {0} дн. зменшують наступну позитивну винагороду. Штрафи не зменшуються.</CP_RepeatRules>
   <CP_DeadlineCompact>Хвороба, караван і бій не призупиняють термін.</CP_DeadlineCompact>
+  <CP_Type_SharedBedroom>Спільна спальня</CP_Type_SharedBedroom>
+  <CP_PairNames>{0} та {1}</CP_PairNames>
+  <CP_SharedWith>Мати спільну спальню з {0}.</CP_SharedWith>
+  <CP_OpenPartner>Переглянути: {0}</CP_OpenPartner>
+  <CP_SharedBedroomConditions>Обом учасникам має бути призначене те саме немедичне ліжко щонайменше з двома місцями у приватній спальні рівня не нижче «{0}». Власниками ліжка й кімнати можуть бути лише ці двоє; обом має бути дозволено користуватися ліжком. Утримуйте те саме ліжко й кімнату протягом {1} підтверджених годин.</CP_SharedBedroomConditions>
+  <CP_ShortSharedBedroom>Спільна приватна спальня: щонайменше «{0}», утримувати одну добу.</CP_ShortSharedBedroom>
+  <CP_PairAmbiguous>Кілька романтичних партнерів або невзаємний зв’язок: однозначної пари немає. Нове прохання про спальню не створюється.</CP_PairAmbiguous>
+  <CP_PairSelected>Партнер для спільної спальні: {0}.</CP_PairSelected>
+  <CP_PairIneligible>Партнер не є придатним вільним дорослим колоністом гравця.</CP_PairIneligible>
+  <CP_PairSharingForbidden>Правила гри не дозволяють цій парі спільний сон.</CP_PairSharingForbidden>
+  <CP_PairConflictingNeeds>Принаймні один партнер — аскет; у цій версії неможливо сформувати спільну вимогу до вражаючості, що врахує обох.</CP_PairConflictingNeeds>
+  <CP_PairUnobservable>Обидва партнери мають бути доступні для спостереження на тій самій домашній карті гравця.</CP_PairUnobservable>
+  <CP_PairNoBed>Серед завантажених доступних гравцю ліжок немає такого, що має два спальні місця й підходить обом партнерам.</CP_PairNoBed>
+  <CP_PairSlotBlocked>В одного з учасників вже є прохання, обіцянка, спільне зобов’язання або період очікування.</CP_PairSlotBlocked>
+  <CP_PairRoomTarget>Очікування: {0} та {1}. Бажаний рівень спільної спальні: {2}.</CP_PairRoomTarget>
+  <CP_PairReasonSeparate>Партнери щонайменше {1} дні спостереження мають окремі ліжка або не мають спільного призначеного ліжка.</CP_PairReasonSeparate>
+  <CP_PairReasonBarracks>Партнери ділять ліжко в бараку й щонайменше {1} дні спостереження не мають відповідної приватної спальні.</CP_PairReasonBarracks>
+  <CP_PairReasonPrivate>Спільне ліжко щонайменше {1} дні спостереження не забезпечує відповідної приватної спальні.</CP_PairReasonPrivate>
+  <CP_PairReasonImprove>Спільна приватна спальня щонайменше {1} дні спостереження залишається нижче цільового рівня пари.</CP_PairReasonImprove>
+  <CP_PersonalEffects>{0}:
+{1}</CP_PersonalEffects>
+  <CP_SharedWithdrawConfirm>Відкликати спільну обіцянку для {0}?
+
+{1}
+{2}</CP_SharedWithdrawConfirm>
+  <CP_PersonalWithdrawal>{0}: {1} настрою на {2} дн.; {3} довіри; очікування {4} дн.</CP_PersonalWithdrawal>
+  <CP_SharedDeclineConfirm>Відмовити у спільному проханні для {0}? Жоден учасник не отримує штрафу настрою чи довіри. Для обох починається {1} дн. очікування.</CP_SharedDeclineConfirm>
+  <CP_SharedResult>{0}: спільна спальня — {1}.</CP_SharedResult>
+  <CP_SharedHistoryType>{0} з {1}</CP_SharedHistoryType>
+  <CP_PairRecovery>{0}: можливе відновлення +{1} довіри без прийняття після {2} безперервних підтверджених годин до спливання строку відповіді. Без бонусу настрою. Спільний прогрес: {3} год.; діють особисті обмеження відновлення.</CP_PairRecovery>
+  <CP_HousingNoEvidence>Немає підтвердженої негативної житлової думки або досі актуальної підтвердженої проблеми зі сном. Відсутності кімнати й самих очікувань недостатньо.</CP_HousingNoEvidence>
+  <CP_HousingUnsupported>Цю житлову проблему неможливо покрити обіцянкою спальні чи бараку з мінімальним рівнем якості.</CP_HousingUnsupported>
+  <CP_HousingUnverified>не перевірено для цієї непідтримуваної вимоги</CP_HousingUnverified>
+  <CP_HousingEvidence>{0}: {1}; зафіксований ефект настрою: {2}; {3}; поточні умови підтверджують проблему: {4}.</CP_HousingEvidence>
+  <CP_HousingMemory>активний спогад після сну</CP_HousingMemory>
+  <CP_HousingWitness>попередній спогад після сну; ефект при останньому підтвердженні</CP_HousingWitness>
+  <CP_HousingSituation>активна ситуативна думка</CP_HousingSituation>
+  <CP_HousingReason>Підтверджене невдоволення житлом.</CP_HousingReason>
+  <CP_HousingPersonalReason>{0}: турбує {1} (зафіксований ефект настрою: {2}). Поточна проблема спостерігається щонайменше {3} дні.</CP_HousingPersonalReason>
+  <CP_HousingCause_SleptInBedroom>негативне враження від сну в спальні</CP_HousingCause_SleptInBedroom>
+  <CP_HousingCause_SleptInBarracks>негативне враження від сну в бараку</CP_HousingCause_SleptInBarracks>
+  <CP_HousingCause_SleptOnGround>сон на землі або безкоштовному спальному місці</CP_HousingCause_SleptOnGround>
+  <CP_HousingCause_SleptOutside>сон надворі</CP_HousingCause_SleptOutside>
+  <CP_HousingCause_Greedy>незадоволена вимога жадібного колоніста до кімнати</CP_HousingCause_Greedy>
+  <CP_HousingCause_WantToSleepWithSpouseOrLover>роздільний сон із романтичним партнером</CP_HousingCause_WantToSleepWithSpouseOrLover>
+  <CP_HousingCause_Ascetic>надто вражаюча кімната для аскета</CP_HousingCause_Ascetic>
+  <CP_HousingCause_Jealous>заздрість до іншої спальні</CP_HousingCause_Jealous>
+  <CP_HousingCause_SleptInCold>сон у холоді</CP_HousingCause_SleptInCold>
+  <CP_HousingCause_SleptInHeat>сон у спеці</CP_HousingCause_SleptInHeat>
+  <CP_HousingCause_SleepDisturbed>потривожений сон</CP_HousingCause_SleepDisturbed>
+  <CP_Type_Barracks>Покращення бараку</CP_Type_Barracks>
+  <CP_Type_SharedBarracks>Покращення спільного бараку</CP_Type_SharedBarracks>
+  <CP_ShortBarracks>Барак: щонайменше {0}</CP_ShortBarracks>
+  <CP_SharedBarracksWith>Покращити спільне житло з {0}.</CP_SharedBarracksWith>
+  <CP_BarracksConditions>Власне призначене придатне немедичне ліжко колоніста в закритому бараку з рівнем щонайменше {0}, безперервно протягом {1} годин. Інші мешканці кімнати дозволені; медичні ліжка виключені.</CP_BarracksConditions>
+  <CP_SharedBarracksConditions>Те саме придатне немедичне ліжко колоністів із щонайменше двома спальними місцями та рівно двома учасниками-власниками в закритому бараку з рівнем щонайменше {0}, безперервно протягом {1} годин. Інші мешканці кімнати дозволені; медичні ліжка виключені.</CP_SharedBarracksConditions>
+  <CP_ConstructedBed>Ліжко повинне мати вартість у матеріалах; безкоштовне спальне місце не підходить.</CP_ConstructedBed>
 </LanguageData>

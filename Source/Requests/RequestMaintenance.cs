@@ -19,6 +19,20 @@ namespace ColonyPromises
         public static bool Visible(ColonistPromises state, int now)
         {
             if (!IsOpen(state, now)) return false;
+            if (state.Request.Terms.Kind == PromiseKind.Bedroom && !state.Request.Terms.HousingBased) return false;
+            if (state.Shared != null)
+            {
+                var shared = state.Shared;
+                var validity = SharedBedroomRules.Validity(shared.First, shared.Second);
+                if (validity == SharedPairValidity.Invalid) return false;
+                if (validity == SharedPairValidity.Unknown || !Observable(shared.First) || !Observable(shared.Second)
+                    || shared.First.Map != shared.Second.Map) return true;
+                if (!Satisfied(state.Pawn, state.Request)) return RequestGenerator.Relevant(shared.First, state.Request);
+                var component = GameComponent_Promises.Current;
+                return component != null ? TrustRecovery.Available(component.PeekState(shared.First), shared.Request, now)
+                    || TrustRecovery.Available(component.PeekState(shared.Second), shared.Request, now)
+                    : TrustRecovery.Available(state, shared.Request, now);
+            }
             if (!Observable(state.Pawn)) return true; // Absence is not proof of obsolescence.
             if (Satisfied(state.Pawn, state.Request)) return TrustRecovery.Available(state, state.Request, now);
             return RequestGenerator.Relevant(state.Pawn, state.Request);

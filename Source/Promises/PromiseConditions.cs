@@ -55,21 +55,27 @@ namespace ColonyPromises
 
         public ConditionObservation Observe(Pawn pawn, PromiseRecord r)
         {
+            if (r.IsShared) return ValidParameters(r) ? SharedBedroomRules.Observe(r) : new ConditionObservation();
             var result = new ConditionObservation();
             if (!PromiseConditions.Observable(pawn) || !ValidParameters(r)) return result;
             var bed = pawn.ownership?.OwnedBed;
             if (bed == null || !bed.Spawned || bed.Map != pawn.Map || bed.Medical || !bed.ForColonists
                 || bed.OwnersForReading.Count != 1 || !bed.IsOwner(pawn)) return result;
+            if (r.HousingBased && (!HousingRules.BedAvailable(pawn, bed)
+                || r.RequiresConstructedBed && CostListCalculator.CostListAdjusted(bed).Count == 0)) return result;
             var room = bed.GetRoom();
-            if (room == null || !room.ProperRoom || room.PsychologicallyOutdoors || room.Role != RoomRoleDefOf.Bedroom
-                || room.ContainedBeds.Any(b => b.Medical) || room.Owners.Any(owner => owner != pawn)) return result;
+            if (room == null || !room.ProperRoom || room.PsychologicallyOutdoors
+                || room.Role != (r.RequiresBarracks ? RoomRoleDefOf.Barracks : RoomRoleDefOf.Bedroom)
+                || room.ContainedBeds.Any(b => b.Medical) || !r.RequiresBarracks && room.Owners.Any(owner => owner != pawn)) return result;
             result.Satisfied = RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) >= r.RoomStage;
             result.Thing = bed;
             result.Room = room;
             return result;
         }
 
-        public string Describe(PromiseRecord r) => "CP_BedroomConditions".Translate(RoomLabel(r.RoomStage), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour);
+        public string Describe(PromiseRecord r) => (r.RequiresBarracks ? (r.IsShared ? "CP_SharedBarracksConditions" : "CP_BarracksConditions")
+            : r.IsShared ? "CP_SharedBedroomConditions" : "CP_BedroomConditions").Translate(RoomLabel(r.RoomStage), PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour)
+            + (r.RequiresConstructedBed ? "\n" + "CP_ConstructedBed".Translate().ToString() : "");
         public static string RoomLabel(int stage) => stage >= 0 && stage < RoomStatDefOf.Impressiveness.scoreStages.Count
             ? RoomStatDefOf.Impressiveness.scoreStages[stage].label : "CP_MissingParameter".Translate().ToString();
     }

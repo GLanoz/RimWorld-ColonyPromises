@@ -44,9 +44,10 @@ namespace ColonyPromises
         public static void Send(ColonistPromises state, bool reminder)
         {
             var request = state.Request;
+            string names = state.Shared == null ? state.Pawn.LabelShort : SharedPromiseText.Names(state.Shared.First, state.Shared.Second);
             var letter = (ChoiceLetter_Request)LetterMaker.MakeLetter(
-                (reminder ? "CP_RequestReminderTitle" : "CP_RequestLetterTitle").Translate(state.Pawn.LabelShort),
-                "CP_RequestLetterText".Translate(state.Pawn.LabelShort, PromiseConditions.Get(request.Terms.Kind).Describe(request.Terms),
+                (reminder ? "CP_RequestReminderTitle" : "CP_RequestLetterTitle").Translate(names),
+                "CP_RequestLetterText".Translate(names, PromiseConditions.Get(request.Terms.Kind).Describe(request.Terms),
                     PromiseText.Number(System.Math.Max(0, request.ExpiryTick - Find.TickManager.TicksGame) / (float)PromiseBalance.TicksPerDay)),
                 DefDatabase<LetterDef>.GetNamed("CP_RequestLetter"), new LookTargets(state.Pawn));
             letter.Pawn = state.Pawn;

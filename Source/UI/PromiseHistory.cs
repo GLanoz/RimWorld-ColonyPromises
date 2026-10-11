@@ -20,7 +20,10 @@ namespace ColonyPromises
                     record.HasAppliedMood ? Signed(record.AppliedMood, culture) : "CP_HistoryValueUnavailable".Translate().ToString(),
                     record.HasAppliedTrust ? Signed(record.AppliedTrust, culture) : "CP_HistoryValueUnavailable".Translate().ToString()).ToString();
             // RimWorld's NamedArgument formatter expects plain placeholders, not .NET format clauses.
-            return "CP_HistoryEntry".Translate(("CP_Type_" + record.Kind).Translate(),
+            string type = PromiseText.Type(record);
+            if (record.IsShared) type = "CP_SharedHistoryType".Translate(type,
+                record.HistoryPartnerLabel ?? "CP_MissingColonist".Translate().ToString());
+            return "CP_HistoryEntry".Translate(type,
                 ("CP_Outcome_" + record.Outcome).Translate(), age, effects).ToString();
         }
 

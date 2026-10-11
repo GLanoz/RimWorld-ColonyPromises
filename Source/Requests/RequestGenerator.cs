@@ -13,6 +13,7 @@ namespace ColonyPromises
         public bool HasDeficit;
         public string Reason;
         public string Current;
+        public List<HousingIssue> HousingIssues;
     }
 
     public sealed class RequestCandidate
@@ -20,6 +21,7 @@ namespace ColonyPromises
         public PromiseRecord Terms;
         public string Signature;
         public string ReasonKey;
+        public List<HousingWitness> HousingReasons;
         public ExpectationDef Expectation;
         public int Magnitude;
     }
@@ -54,6 +56,13 @@ namespace ColonyPromises
                     break;
                 case PromiseKind.Equipment: result.Candidate = Equipment(pawn, result); break;
             }
+            if (kind == PromiseKind.Bedroom && result.HousingIssues == null)
+            {
+                result.HousingIssues = HousingRules.Evaluate(pawn);
+                var partners = SharedBedroomRules.Partners(pawn);
+                if (partners.Count == 1 && PromiseConditions.Eligible(partners[0])) result.HousingIssues.AddRange(HousingRules.Evaluate(partners[0]));
+                result.Current = (result.Current == null ? "" : result.Current + "\n") + HousingRules.Describe(result.HousingIssues);
+            }
             return result;
         }
 
@@ -63,26 +72,8 @@ namespace ColonyPromises
 
         private static RequestCandidate Bedroom(Pawn pawn, RequestEvaluation result)
         {
-            if (Trait(pawn, TraitDefOf.Ascetic)) { result.Reason = "CP_DebugAscetic"; return null; }
-            var expectation = ExpectationsUtility.CurrentExpectationFor(pawn);
-            if (expectation == null) { result.Reason = "CP_DebugExpectation"; return null; }
-            int desired = RequestRules.BedroomStage(expectation.order, Trait(pawn, TraitDefOf.Greedy),
-                RoomStatDefOf.Impressiveness.scoreStages.Count);
-            var current = new BedroomCondition().Observe(pawn, new PromiseRecord { RoomStage = 0 });
-            int stage = current.Satisfied ? RoomStatDefOf.Impressiveness.GetScoreStageIndex(current.Room.GetStat(RoomStatDefOf.Impressiveness)) : -1;
-            int target = stage < 0 ? desired : RequestRules.RoomTarget(stage, desired);
-            result.Current = "CP_DebugRoom".Translate(stage < 0 ? "CP_DebugNoBedroom".Translate().ToString()
-                : BedroomCondition.RoomLabel(stage), expectation.label, BedroomCondition.RoomLabel(desired)).ToString();
-            if (target < 0) { result.Reason = "CP_DebugSatisfied"; return null; }
-            result.HasDeficit = true;
-            return new RequestCandidate
-            {
-                Terms = new PromiseRecord { Kind = PromiseKind.Bedroom, RoomStage = target, RequiredTicks = PromiseBalance.HoldTicks },
-                Signature = "room:" + target,
-                ReasonKey = stage < 0 ? "CP_ReasonBedroomMissing" : "CP_ReasonBedroomImprove",
-                Expectation = expectation,
-                Magnitude = stage < 0 || target - stage >= 2 ? 1 : 0
-            };
+            if (SharedBedroomRules.TryEvaluate(pawn, result, out var shared)) return shared;
+            return HousingRules.Candidate(pawn, null, result);
         }
 
         private static RequestCandidate Equipment(Pawn pawn, RequestEvaluation result)
@@ -159,7 +150,21 @@ namespace ColonyPromises
 
         public static RequestCandidate Observe(ColonistPromises state, PromiseKind kind, int now)
         {
-            var candidate = Candidate(state.Pawn, kind);
+            var evaluation = Evaluate(state.Pawn, kind);
+            var candidate = evaluation.Candidate;
+            if (kind == PromiseKind.Bedroom && evaluation.HousingIssues != null)
+                foreach (var group in evaluation.HousingIssues.GroupBy(i => i.Pawn))
+                {
+                    var participant = group.Key == state.Pawn ? state : GameComponent_Promises.Current?.StateFor(group.Key);
+                    if (participant != null) participant.HousingWitnesses = HousingRules.Witnesses(group);
+                }
+            if (kind == PromiseKind.Bedroom && evaluation.HousingIssues != null
+                && !evaluation.HousingIssues.Any(i => i.Pawn == state.Pawn)) state.HousingWitnesses.Clear();
+            if (candidate?.Terms.IsShared == true && candidate.Terms.ParticipantA != state.Pawn)
+            {
+                state.Deficits.RemoveAll(d => d.Kind == kind);
+                return null;
+            }
             var observation = Project(state.Deficits.FirstOrDefault(d => d.Kind == kind), candidate, kind, now,
                 kind == PromiseKind.Leisure && state.Pawn.needs?.joy?.CurLevel < RequestRules.SevereJoy);
             state.Deficits.RemoveAll(d => d.Kind == kind);
@@ -184,7 +189,26 @@ namespace ColonyPromises
             if (request?.Terms == null) return false;
             var condition = PromiseConditions.Get(request.Terms.Kind);
             if (condition == null || !condition.ValidParameters(request.Terms)) return false;
+            if (request.Terms.Kind == PromiseKind.Bedroom)
+            {
+                var terms = request.Terms;
+                if (!terms.HousingBased) return false;
+                var evaluation = new RequestEvaluation();
+                var target = HousingRules.Candidate(terms.IsShared ? terms.ParticipantA : pawn,
+                    terms.IsShared ? terms.ParticipantB : null, evaluation);
+                return target != null && target.Terms.RoomStage == terms.RoomStage
+                    && target.Terms.RequiresBarracks == terms.RequiresBarracks
+                    && target.Terms.RequiresConstructedBed == terms.RequiresConstructedBed
+                    && HousingRules.OriginalCauseCurrent(request, evaluation.HousingIssues);
+            }
             if (condition.UsesContinuousHold && condition.Observe(pawn, request.Terms).Satisfied) return false;
+            if (request.Terms.IsShared)
+            {
+                var r = request.Terms;
+                return SharedBedroomRules.Validity(r.ParticipantA, r.ParticipantB) == SharedPairValidity.Valid
+                    && HousingRules.Candidate(r.ParticipantA, r.ParticipantB, new RequestEvaluation()) != null
+                    && !condition.Observe(pawn, r).Satisfied;
+            }
             var candidate = Candidate(pawn, request.Terms.Kind);
             if (candidate == null) return false;
             return request.Terms.Kind != PromiseKind.Equipment
@@ -201,12 +225,17 @@ namespace ColonyPromises
             return new ColonistRequest
             {
                 Terms = terms, ReasonKey = candidate.ReasonKey, Expectation = candidate.Expectation,
+                HousingReasons = candidate.HousingReasons,
                 Magnitude = candidate.Magnitude, OfferedTick = now, ExpiryTick = terms.DeadlineTick,
                 DeadlineDays = RequestRules.Deadline((int)terms.Kind, candidate.Magnitude),
                 Announced = false, RecoveryEnabled = true
             };
         }
 
-        public static void ResetObservations(ColonistPromises state) => state.Deficits.Clear();
+        public static void ResetObservations(ColonistPromises state, bool clearHousing = false)
+        {
+            state.Deficits.Clear();
+            if (clearHousing) state.HousingWitnesses.Clear();
+        }
     }
 }

@@ -9,6 +9,15 @@ namespace ColonyPromises
 
     public sealed class PromiseRecord : IExposable
     {
+        public string SharedId;
+        public Pawn ParticipantA;
+        public Pawn ParticipantB;
+        public string HistoryPartnerLabel;
+        public bool RequiresBarracks;
+        public bool HousingBased;
+        public bool RequiresConstructedBed;
+        public bool IsShared => ParticipantA != null || ParticipantB != null || SharedId != null;
+        public Pawn PartnerOf(Pawn pawn) => pawn == ParticipantA ? ParticipantB : ParticipantA;
         public PromiseKind Kind;
         public int CreatedTick;
         public int DeadlineTick;
@@ -70,6 +79,13 @@ namespace ColonyPromises
 
         public void ExposeData()
         {
+            Scribe_Values.Look(ref SharedId, "sharedId");
+            Scribe_References.Look(ref ParticipantA, "participantA");
+            Scribe_References.Look(ref ParticipantB, "participantB");
+            Scribe_Values.Look(ref HistoryPartnerLabel, "historyPartnerLabel");
+            Scribe_Values.Look(ref RequiresBarracks, "requiresBarracks");
+            Scribe_Values.Look(ref HousingBased, "housingBased");
+            Scribe_Values.Look(ref RequiresConstructedBed, "requiresConstructedBed");
             Scribe_Values.Look(ref Kind, "kind");
             Scribe_Values.Look(ref CreatedTick, "createdTick");
             Scribe_Values.Look(ref DeadlineTick, "deadlineTick");
@@ -116,6 +132,8 @@ namespace ColonyPromises
     public sealed class ColonistPromises : IExposable
     {
         public Pawn Pawn;
+        public string SharedId;
+        public SharedBedroomCommitment Shared; // Runtime alias to the component's authoritative record.
         public int Trust = PromiseBalance.InitialTrust;
         public int CooldownUntilTick;
         public int LastGenerationCheck = -1;
@@ -124,6 +142,7 @@ namespace ColonyPromises
         public PromiseRecord Active;
         public ColonistRequest Request;
         public List<DeficitObservation> Deficits = new List<DeficitObservation>();
+        public List<HousingWitness> HousingWitnesses = new List<HousingWitness>();
         public List<PromiseRecord> History = new List<PromiseRecord>();
         // Separate reward ledger: trimming visible history must not restore full rewards.
         public List<SuccessStamp> RecentSuccesses = new List<SuccessStamp>();
@@ -131,14 +150,27 @@ namespace ColonyPromises
         public void ExposeData()
         {
             Scribe_References.Look(ref Pawn, "pawn");
+            Scribe_Values.Look(ref SharedId, "sharedId");
             Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
             Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
             Scribe_Values.Look(ref NextUnpromisedRecoveryTick, "nextUnpromisedRecoveryTick");
             Scribe_Collections.Look(ref RecentRecoveries, "recentRecoveries", LookMode.Deep);
-            Scribe_Deep.Look(ref Active, "active");
-            Scribe_Deep.Look(ref Request, "request");
+            if (Scribe.mode == LoadSaveMode.Saving && SharedId != null)
+            {
+                // Shared terms are serialized once by the component, not once per participant.
+                PromiseRecord emptyActive = null;
+                ColonistRequest emptyRequest = null;
+                Scribe_Deep.Look(ref emptyActive, "active");
+                Scribe_Deep.Look(ref emptyRequest, "request");
+            }
+            else
+            {
+                Scribe_Deep.Look(ref Active, "active");
+                Scribe_Deep.Look(ref Request, "request");
+            }
             Scribe_Collections.Look(ref Deficits, "deficits", LookMode.Deep);
+            Scribe_Collections.Look(ref HousingWitnesses, "housingWitnesses", LookMode.Deep);
             Scribe_Collections.Look(ref History, "history", LookMode.Deep);
             Scribe_Collections.Look(ref RecentSuccesses, "recentSuccesses", LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -147,6 +179,7 @@ namespace ColonyPromises
                 History = History ?? new List<PromiseRecord>();
                 RecentSuccesses = RecentSuccesses ?? new List<SuccessStamp>();
                 Deficits = Deficits ?? new List<DeficitObservation>();
+                HousingWitnesses = HousingWitnesses ?? new List<HousingWitness>();
                 RecentRecoveries = RecentRecoveries ?? new List<SuccessStamp>();
             }
         }
@@ -156,6 +189,7 @@ namespace ColonyPromises
     {
         public PromiseRecord Terms;
         public string ReasonKey;
+        public List<HousingWitness> HousingReasons;
         public ExpectationDef Expectation;
         public bool Announced = true; // Missing old fields must not resend an announcement.
         public bool ReminderSent;
@@ -171,6 +205,7 @@ namespace ColonyPromises
             Scribe_Values.Look(ref ReminderSent, "reminderSent");
             Scribe_Values.Look(ref RecoveryEnabled, "recoveryEnabled");
             Scribe_Values.Look(ref ReasonKey, "reasonKey");
+            Scribe_Collections.Look(ref HousingReasons, "housingReasons", LookMode.Deep);
             Scribe_Defs.Look(ref Expectation, "expectation");
             Scribe_Values.Look(ref OfferedTick, "offeredTick");
             Scribe_Values.Look(ref ExpiryTick, "expiryTick");

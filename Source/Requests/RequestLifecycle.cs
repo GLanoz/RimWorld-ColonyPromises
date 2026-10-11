@@ -13,7 +13,7 @@ namespace ColonyPromises
             r.ResetHold();
             state.Request = null;
             state.Active = r;
-            RequestGenerator.ResetObservations(state);
+            RequestGenerator.ResetObservations(state, true);
         }
 
         public static PromiseRecord Close(ColonistPromises state, PromiseOutcome outcome, int now, bool recoverTrust = false)
@@ -31,7 +31,7 @@ namespace ColonyPromises
             r.StableThing = null;
             r.ObservedRoom = null;
             state.CooldownUntilTick = now + RequestRules.UnacceptedCooldownDays * PromiseBalance.TicksPerDay;
-            RequestGenerator.ResetObservations(state);
+            RequestGenerator.ResetObservations(state, true);
             return r;
         }
     }

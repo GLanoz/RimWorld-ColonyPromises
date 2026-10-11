@@ -22,7 +22,7 @@ public static class FeatureChecks
     static T Empty<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
     static void Check(bool value, string name) { checks++; if (!value) throw new Exception(name); }
     static ColonistRequest Request(PromiseKind kind = PromiseKind.Bedroom) => RequestGenerator.Offer(new RequestCandidate {
-        Terms = new PromiseRecord { Kind = kind, RequiredTicks = 60000 }, Magnitude = 0 }, 100);
+        Terms = new PromiseRecord { Kind = kind, RequiredTicks = 60000, HousingBased = true }, Magnitude = 0 }, 100);
     static void Save(IExposable record, string path)
     {
         try { Scribe.saver.InitSaving(path, "save"); record.ExposeData(); Scribe.saver.FinalizeSaving(); }
@@ -230,6 +230,6 @@ public static class FeatureChecks
                     "Letter contents render with plain numeric placeholders in " + folder);
             }
         } finally { Current.Game = oldGame; LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
-        return checks + UIChecks.Run(root);
+        return checks + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path);
     }
 }

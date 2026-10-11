@@ -14,7 +14,7 @@ namespace ColonyPromises
                 StateFor(pawn);
             var ready = new List<KeyValuePair<ColonistPromises, RequestCandidate>>();
             lastObservation = now;
-            foreach (var state in colonists) ObserveRequest(state, now, ready);
+            foreach (var state in colonists.ToList()) ObserveRequest(state, now, ready);
             OfferReady(now, ready);
         }
 
@@ -23,17 +23,30 @@ namespace ColonyPromises
             if (!Prefs.DevMode || pawn == null) return;
             int now = Find.TickManager.TicksGame;
             var ready = new List<KeyValuePair<ColonistPromises, RequestCandidate>>();
-            ObserveRequest(StateFor(pawn), now, ready);
+            var selected = StateFor(pawn);
+            ObserveRequest(selected, now, ready);
+            var partners = SharedBedroomRules.Partners(pawn);
+            if (partners.Count == 1 && PromiseConditions.Eligible(partners[0])
+                && partners[0].thingIDNumber < pawn.thingIDNumber)
+            {
+                var owner = StateFor(partners[0]);
+                if (SharedBedroomRules.SlotFree(owner, now))
+                {
+                    var candidate = RequestGenerator.Observe(owner, PromiseKind.Bedroom, now);
+                    if (candidate?.Terms.IsShared == true) ready.Add(new KeyValuePair<ColonistPromises, RequestCandidate>(owner, candidate));
+                }
+            }
             OfferReady(now, ready);
         }
 
         private void ObserveRequest(ColonistPromises state, int now, List<KeyValuePair<ColonistPromises, RequestCandidate>> ready)
         {
             state.LastGenerationCheck = now;
+            if (state.Shared != null) { CheckShared(state.Shared, now); return; }
             if (state.Pawn == null || state.Pawn.Dead || state.Pawn.Destroyed || state.Pawn.Faction != Faction.OfPlayer)
             {
                 if (state.Request != null) CloseRequest(state, PromiseOutcome.Closed, now);
-                RequestGenerator.ResetObservations(state);
+                RequestGenerator.ResetObservations(state, true);
                 return;
             }
             if (state.Request != null)
@@ -43,7 +56,7 @@ namespace ColonyPromises
             }
             if (state.Active != null || now < state.CooldownUntilTick || !PromiseConditions.Eligible(state.Pawn))
             {
-                RequestGenerator.ResetObservations(state);
+                RequestGenerator.ResetObservations(state, true);
                 return;
             }
             foreach (PromiseKind kind in Enum.GetValues(typeof(PromiseKind)))
@@ -58,6 +71,12 @@ namespace ColonyPromises
             if (now < nextOffer || ready.Count == 0) return;
             // Preserve age priority after the accumulation cap; pawn and kind break true ties.
             var chosen = RequestGenerator.SelectReady(ready);
+            if (chosen.Value.Terms.IsShared)
+            {
+                if (!CreateShared(chosen.Value, now)) return;
+                nextOffer = now + RequestRules.OfferSpacing;
+                return;
+            }
             chosen.Key.Request = RequestGenerator.Offer(chosen.Value, now);
             RequestGenerator.ResetObservations(chosen.Key);
             nextOffer = now + RequestRules.OfferSpacing;
@@ -80,6 +99,8 @@ namespace ColonyPromises
             bool satisfied = observable && RequestMaintenance.Satisfied(pawn, request);
             bool recovery = TrustRecovery.Available(state, request, now);
             var terms = request.Terms;
+            if (terms.Kind == PromiseKind.Bedroom && (!terms.HousingBased || observable && !satisfied && !RequestGenerator.Relevant(pawn, request)))
+            { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             var condition = PromiseConditions.Get(terms.Kind);
             if (recovery && condition?.UsesContinuousHold == true)
             {
