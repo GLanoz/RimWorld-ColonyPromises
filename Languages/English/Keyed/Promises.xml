@@ -31,7 +31,10 @@
   <CP_Result>{0}: {1} — {2}.</CP_Result>
   <CP_RequestTitle>Request: {0}</CP_RequestTitle>
   <CP_ResponseTime>Respond within {0} days. If accepted, fulfill within {1} days.</CP_ResponseTime>
-  <CP_FixedConsequences>Success: {0} mood for {1} days; {2} trust. Broken: {3} mood for {4} days; {5} trust. Withdrawn: {6} mood for {7} days; {8} trust. Cooldown after resolution: {9} days. These values are fixed when accepted; repeated successes reduce rewards, never penalties.</CP_FixedConsequences>
+  <CP_FixedConsequences>Success: {0} mood for {1} days; {2} trust.
+Broken: {3} mood for {4} days; {5} trust.
+Withdrawn: {6} mood for {7} days; {8} trust.
+Cooldown after resolution: {9} days.</CP_FixedConsequences>
   <CP_Accept>Promise to fulfill…</CP_Accept>
   <CP_AcceptConfirm>Promise to {0}:
 
@@ -122,4 +125,21 @@ Response time remaining: {2} days. Open Promises to review the reason, exact con
   <CP_UnpromisedRecovery>Without accepting: meeting this open request can restore +{0} trust, with no mood reward. {1} Current verified progress: {2} hours. Complete before the response deadline. Recovery has separate cooldown and repeat limits.</CP_UnpromisedRecovery>
   <CP_RecoveryHold>Keep the requested bed/room or equipped item valid continuously for {0} verified hours.</CP_RecoveryHold>
   <CP_RecoveryLeisure>Accumulate {0} recognized recreation hours while this request is open and restore joy to at least 35%. Acceptance starts promise progress from zero.</CP_RecoveryLeisure>
+  <CP_TabRequests>Requests</CP_TabRequests>
+  <CP_TabColonists>Colonists</CP_TabColonists>
+  <CP_NoPendingRequests>No requests are awaiting a response.</CP_NoPendingRequests>
+  <CP_ListRequest>Has a request</CP_ListRequest>
+  <CP_ListPromise>Promise in progress</CP_ListPromise>
+  <CP_ListWaiting>Cooldown</CP_ListWaiting>
+  <CP_ListNone>No request</CP_ListNone>
+  <CP_RequestSummaryRow>{0} — {1}
+{2}
+Response time remaining: {3} days.</CP_RequestSummaryRow>
+  <CP_ShortBedroom>Private bedroom: at least “{0}”, held for one day.</CP_ShortBedroom>
+  <CP_ShortLeisure>{0} hours of actual recreation.</CP_ShortLeisure>
+  <CP_ShortEquipment>Equip {0}: at least {1} quality, held for one day.</CP_ShortEquipment>
+  <CP_ShortDurability>At least {0}% durability.</CP_ShortDurability>
+  <CP_More>More details</CP_More>
+  <CP_RepeatRules>Values are fixed at acceptance. Fulfilled promises of the same type in the last {0} days reduce later positive rewards. Penalties are never reduced.</CP_RepeatRules>
+  <CP_DeadlineCompact>Illness, caravans, and combat do not pause the deadline.</CP_DeadlineCompact>
 </LanguageData>

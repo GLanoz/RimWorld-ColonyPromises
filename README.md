@@ -92,13 +92,15 @@ Recovery happens once per request, at most once per colonist every **10 days**, 
 
 ## Interface, history, and settings
 
-The Promises button shows the number of current unanswered requests. The tab begins with a colony-wide list; select a row to view that colonist. It shows trust and its effect, request reasons and conditions, exact consequences, response time, active progress, remaining time, and a short history. Acceptance, refusal, and withdrawal use confirmation dialogs.
+The Promises button shows the number of current unanswered requests. Inside the window, **Requests** lists only unanswered requests, ordered by the nearest response deadline. Each row shows the colonist, request type, a short requirement, and time remaining. Click it to open that colonist's details in **Colonists**; request letters take you there too.
+
+**Colonists** has a permanent list on the left, with request, active-promise, cooldown, or no-request status. The selected colonist's trust, conditions, exact consequences, response time or active progress, actions, and personal history appear on the right. Lists and details scroll independently. Ordinary reopening retains the last internal tab and valid selection for the current session; a departed colonist is replaced by an available selection. Acceptance, refusal, and withdrawal use confirmation dialogs. General trust and repeat rules are available under **More details**.
 
 History shows the result, elapsed time, and mood and trust changes actually applied, including trust clamping. Later balance or trust changes do not recalculate history. Results without consequences say so; missing information in older records is marked unavailable.
 
 Each new request sends one letter naming the colonist and requirement. A single reminder arrives **half a day before the response deadline**. Turn reminders off in the Colony Promises mod settings; initial request letters remain enabled. Notification state is saved to prevent repeated reminders after loading. Closed, expired, and accepted requests leave the count and list.
 
-With standard **Development mode** enabled, the tab also shows why a colonist is or is not generating requests, observation time, target availability, cooldowns, and upcoming checks. **Check now** runs a normal check for the selected colonist without bypassing rules. Viewing the panel does not change progress or create requests.
+With standard **Development mode** enabled, expand the diagnostic block in a colonist's details to see generation reasons, observation time, target availability, cooldowns, and upcoming checks. **Check now** runs a normal check without bypassing rules. Diagnostics start collapsed; viewing them does not change progress or create requests.
 
 ## Absence, saves, and limitations
 

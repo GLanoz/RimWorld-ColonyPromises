@@ -10,9 +10,25 @@ namespace ColonyPromises
     public sealed class MainTabWindow_Promises : MainTabWindow
     {
         private Pawn pawn;
-        private Vector2 scroll;
-        private float contentHeight = 1000f;
-        public override Vector2 RequestedTabSize => new Vector2(760f, 640f);
+        private bool colonistsTab;
+        private bool moreExpanded;
+        private bool diagnosticsExpanded;
+        private Vector2 requestsScroll;
+        private Vector2 colonistsScroll;
+        private Vector2 detailsScroll;
+        private float colonistHeight;
+        private float detailHeight;
+        public override Vector2 RequestedTabSize => FitSize(UI.screenWidth, UI.screenHeight);
+
+        internal static Vector2 FitSize(float screenWidth, float screenHeight) => new Vector2(
+            Math.Max(1, Math.Min(1080, screenWidth - 32)), Math.Max(1, Math.Min(760, screenHeight - 90)));
+
+        internal static IEnumerable<ColonistPromises> ByExpiry(IEnumerable<ColonistPromises> requests) =>
+            requests.OrderBy(s => s.Request.ExpiryTick).ThenBy(s => s.Pawn.thingIDNumber);
+
+        internal static string StatusKey(ColonistPromises state, int now, bool visibleRequest) =>
+            state.Active != null ? "CP_ListPromise" : visibleRequest ? "CP_ListRequest"
+            : now < state.CooldownUntilTick ? "CP_ListWaiting" : "CP_ListNone";
 
         public static void OpenFor(Pawn target)
         {
@@ -23,17 +39,40 @@ namespace ColonyPromises
 
         public void SelectPawn(Pawn target)
         {
-            pawn = target ?? Candidates().FirstOrDefault();
-            scroll = Vector2.zero;
+            colonistsTab = true;
+            pawn = target;
+            detailsScroll = Vector2.zero;
+            detailHeight = 0;
+            moreExpanded = diagnosticsExpanded = false;
+        }
+
+        private bool CanKeepSelection(List<Pawn> candidates) => pawn != null
+            && !pawn.Dead && !pawn.Destroyed
+            && (candidates.Contains(pawn) || (Prefs.DevMode && pawn.Spawned));
+
+        private void ValidateSelection(List<Pawn> candidates)
+        {
+            if (!CanKeepSelection(candidates)) SelectPawnWithoutNavigation(candidates.FirstOrDefault());
+        }
+
+        private void SelectPawnWithoutNavigation(Pawn target)
+        {
+            bool previousTab = colonistsTab;
+            SelectPawn(target);
+            colonistsTab = previousTab;
         }
 
         public override void PostOpen()
         {
             base.PostOpen();
-            var selected = Find.Selector.SingleSelectedThing as Pawn;
             var candidates = Candidates().ToList();
-            if (PromiseConditions.Eligible(selected) || (Prefs.DevMode && selected != null)) pawn = selected;
-            else if (pawn == null || !candidates.Contains(pawn)) pawn = candidates.FirstOrDefault();
+            if (pawn == null)
+            {
+                var selected = Find.Selector.SingleSelectedThing as Pawn;
+                if (PromiseConditions.Eligible(selected) || (Prefs.DevMode && selected != null && !selected.Dead))
+                    SelectPawnWithoutNavigation(selected);
+            }
+            ValidateSelection(candidates);
         }
 
         private static IEnumerable<Pawn> Candidates() => PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists
@@ -45,42 +84,98 @@ namespace ColonyPromises
             if (component == null) return;
             Text.Font = GameFont.Small;
             var candidates = Candidates().ToList();
-            if (!Prefs.DevMode && pawn != null && !candidates.Contains(pawn)) pawn = candidates.FirstOrDefault();
-            if (Widgets.ButtonText(new Rect(0, 0, inRect.width, 32), pawn?.LabelShort ?? "CP_SelectColonist".Translate().ToString()))
+            ValidateSelection(candidates);
+            var bodyRect = new Rect(inRect.x, inRect.y + 34, inRect.width, Math.Max(1, inRect.height - 34));
+            TabDrawer.DrawTabs(bodyRect, new List<TabRecord> {
+                new TabRecord("CP_TabRequests".Translate(), () => colonistsTab = false, !colonistsTab),
+                new TabRecord("CP_TabColonists".Translate(), () => colonistsTab = true, colonistsTab)
+            });
+            int now = Find.TickManager.TicksGame;
+            if (!colonistsTab) DrawRequests(bodyRect, component, now);
+            else DrawColonists(bodyRect, candidates, component, now);
+        }
+
+        private void DrawRequests(Rect rect, GameComponent_Promises component, int now)
+        {
+            var requests = ByExpiry(component.OpenRequests(now)).ToList();
+            if (requests.Count == 0)
             {
-                var options = candidates.Select(p =>
-                {
-                    var s = component.PeekState(p);
-                    string status = s.Active != null ? "CP_StatusPromise".Translate().ToString()
-                        : s.Request != null ? "CP_StatusRequest".Translate().ToString() : "CP_StatusWaiting".Translate().ToString();
-                    return new FloatMenuOption("CP_ColonistChoice".Translate(p.LabelShort, status), () => { pawn = p; scroll = Vector2.zero; });
-                }).ToList();
-                if (options.Count > 0) Find.WindowStack.Add(new FloatMenu(options));
-            }
-            if (pawn == null)
-            {
-                Widgets.Label(new Rect(0, 45, inRect.width, 80), "CP_NoColonists".Translate());
+                Widgets.Label(rect, "CP_NoPendingRequests".Translate());
                 return;
             }
-            var state = component.PeekState(pawn);
-            Widgets.Label(new Rect(0, 40, inRect.width, 30), "CP_Trust".Translate(pawn.LabelShort, state.Trust, PromiseBalance.MaxTrust));
-            var outer = new Rect(0, 78, inRect.width, inRect.height - 78);
-            var view = new Rect(0, 0, outer.width - 20, contentHeight);
-            Widgets.BeginScrollView(outer, ref scroll, view);
+            float width = Math.Max(1, rect.width - 20);
+            float height = requests.Sum(s => RequestRowHeight(s, now, width));
+            Widgets.BeginScrollView(rect, ref requestsScroll, new Rect(0, 0, width, height));
             float y = 0;
-            float width = view.width;
-            int now = Find.TickManager.TicksGame;
-            var requests = component.OpenRequests(now);
-            Label(ref y, width, "CP_OpenRequests".Translate(requests.Count));
-            foreach (var entry in requests)
+            foreach (var state in requests)
             {
-                if (Button(ref y, width, "CP_RequestRow".Translate(entry.Pawn.LabelShort,
-                    ("CP_Type_" + entry.Request.Terms.Kind).Translate(),
-                    PromiseText.Number((entry.Request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay))))
-                    SelectPawn(entry.Pawn);
+                string text = RequestRow(state, now);
+                float rowHeight = RequestRowHeight(state, now, width);
+                var row = new Rect(0, y, width, rowHeight - 6);
+                Widgets.DrawHighlightIfMouseover(row);
+                Widgets.Label(new Rect(8, y + 6, Math.Max(1, width - 16), row.height - 12), text);
+                if (Widgets.ButtonInvisible(row)) SelectPawn(state.Pawn);
+                y += rowHeight;
             }
-            Label(ref y, width, "CP_TrustImpact".Translate(TrustRules.LowTrustThreshold,
-                PromiseText.Number(TrustRules.MoodFactor(state.Trust) * 100)));
+            Widgets.EndScrollView();
+        }
+
+        private static string RequestRow(ColonistPromises state, int now) =>
+            "CP_RequestSummaryRow".Translate(state.Pawn.LabelShort,
+                ("CP_Type_" + state.Request.Terms.Kind).Translate(), ShortRequirement(state.Request.Terms),
+                PromiseText.Number(Math.Max(0, state.Request.ExpiryTick - now) / (float)PromiseBalance.TicksPerDay));
+
+        private static float RequestRowHeight(ColonistPromises state, int now, float width) =>
+            Math.Max(80, Text.CalcHeight(RequestRow(state, now), Math.Max(1, width - 16)) + 24);
+
+        internal static string ShortRequirement(PromiseRecord record)
+        {
+            if (record.Kind == PromiseKind.Bedroom)
+                return "CP_ShortBedroom".Translate(BedroomCondition.RoomLabel(record.RoomStage));
+            if (record.Kind == PromiseKind.Leisure)
+                return "CP_ShortLeisure".Translate(PromiseText.Number(record.RequiredTicks / (float)PromiseBalance.TicksPerHour));
+            return "CP_ShortEquipment".Translate(record.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
+                record.MinimumQuality.GetLabel()).ToString()
+                + (record.MinimumHitPointsFraction > 0 ? " " + "CP_ShortDurability".Translate(
+                    PromiseText.Number(record.MinimumHitPointsFraction * 100)).ToString() : "");
+        }
+
+        private void DrawColonists(Rect rect, List<Pawn> candidates, GameComponent_Promises component, int now)
+        {
+            var shown = new List<Pawn>(candidates);
+            if (Prefs.DevMode && pawn != null && !shown.Contains(pawn)) shown.Add(pawn);
+            float listWidth = Math.Min(260, rect.width * 0.28f);
+            var listRect = new Rect(rect.x, rect.y, listWidth, rect.height);
+            float width = Math.Max(1, listWidth - 20);
+            var visible = new HashSet<Pawn>(component.OpenRequests(now).Select(s => s.Pawn));
+            var labels = shown.Select(p => new KeyValuePair<Pawn, string>(p,
+                p.LabelShort + "\n" + StatusKey(component.PeekState(p), now, visible.Contains(p)).Translate())).ToList();
+            colonistHeight = labels.Sum(entry => Math.Max(64, Text.CalcHeight(entry.Value, Math.Max(1, width - 16)) + 20));
+            Widgets.BeginScrollView(listRect, ref colonistsScroll, new Rect(0, 0, width, colonistHeight));
+            float y = 0;
+            foreach (var entry in labels)
+            {
+                float height = Math.Max(64, Text.CalcHeight(entry.Value, Math.Max(1, width - 16)) + 20);
+                var row = new Rect(0, y, width, height - 4);
+                if (entry.Key == pawn) Widgets.DrawHighlightSelected(row);
+                Widgets.DrawHighlightIfMouseover(row);
+                Widgets.Label(new Rect(8, y + 6, Math.Max(1, width - 16), row.height - 12), entry.Value);
+                if (Widgets.ButtonInvisible(row)) SelectPawn(entry.Key);
+                y += height;
+            }
+            Widgets.EndScrollView();
+            var detailRect = new Rect(rect.x + listWidth + 12, rect.y, Math.Max(1, rect.width - listWidth - 12), rect.height);
+            if (pawn == null) Widgets.Label(detailRect, "CP_NoColonists".Translate());
+            else DrawDetails(detailRect, component, now);
+        }
+
+        private void DrawDetails(Rect rect, GameComponent_Promises component, int now)
+        {
+            var state = component.PeekState(pawn);
+            float width = Math.Max(1, rect.width - 20);
+            Widgets.BeginScrollView(rect, ref detailsScroll, new Rect(0, 0, width, Math.Max(rect.height, detailHeight)));
+            float y = 0;
+            Label(ref y, width, "CP_Trust".Translate(pawn.LabelShort, state.Trust, PromiseBalance.MaxTrust));
             if (state.Active != null)
             {
                 var r = state.Active;
@@ -90,7 +185,7 @@ namespace ColonyPromises
                 Label(ref y, width, "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)));
                 if (r.FrozenConsequences) Label(ref y, width, PromiseText.Consequences(r));
                 else Label(ref y, width, "CP_LegacyPromise".Translate());
-                Label(ref y, width, "CP_DeadlineRule".Translate());
+                Label(ref y, width, "CP_DeadlineCompact".Translate());
                 if (Button(ref y, width, "CP_Withdraw".Translate()))
                 {
                     var target = pawn;
@@ -101,7 +196,7 @@ namespace ColonyPromises
                             r.FrozenConsequences ? r.CooldownDays : PromiseBalance.CooldownDays), () => component.Withdraw(target, r)));
                 }
             }
-            else if (state.Request != null)
+            else if (state.Request != null && RequestMaintenance.Visible(state, now))
             {
                 var request = state.Request;
                 var r = PromiseConsequences.Preview(state, request, now);
@@ -116,7 +211,7 @@ namespace ColonyPromises
                             : "CP_RecoveryHold".Translate(PromiseText.Number(PromiseBalance.HoldTicks / (float)PromiseBalance.TicksPerHour)).ToString(),
                         PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour)));
 
-                Label(ref y, width, "CP_DeadlineRule".Translate());
+                Label(ref y, width, "CP_DeadlineCompact".Translate());
                 string error = component.AcceptanceError(pawn, request);
                 if (error != null) Label(ref y, width, error);
                 if (error == null && Button(ref y, width, "CP_Accept".Translate()))
@@ -138,12 +233,20 @@ namespace ColonyPromises
             {
                 Label(ref y, width, "CP_NoRequest".Translate());
                 if (now < state.CooldownUntilTick) Label(ref y, width, "CP_Cooldown".Translate(PromiseText.Number((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay)));
+            }
+            if (Button(ref y, width, (moreExpanded ? "- " : "+ ") + "CP_More".Translate())) moreExpanded = !moreExpanded;
+            if (moreExpanded)
+            {
+                Label(ref y, width, "CP_TrustImpact".Translate(TrustRules.LowTrustThreshold,
+                    PromiseText.Number(TrustRules.MoodFactor(state.Trust) * 100)));
+                Label(ref y, width, "CP_RepeatRules".Translate(PromiseBalance.RepeatWindowDays));
                 Label(ref y, width, "CP_RequestRules".Translate());
             }
-            if (Prefs.DevMode)
+            if (Prefs.DevMode && Button(ref y, width, (diagnosticsExpanded ? "- " : "+ ") + "CP_DebugTitle".Translate()))
+                diagnosticsExpanded = !diagnosticsExpanded;
+            if (Prefs.DevMode && diagnosticsExpanded)
             {
                 y += 12;
-                Label(ref y, width, "CP_DebugTitle".Translate());
                 string exclusion = PromiseConditions.EligibilityReason(pawn);
                 Label(ref y, width, "CP_DebugEligible".Translate(
                     exclusion == null ? "CP_DebugYes".Translate().ToString() : exclusion.Translate().ToString()));
@@ -170,7 +273,7 @@ namespace ColonyPromises
                 Label(ref y, width, PromiseHistory.Format(r, now));
                 Label(ref y, width, PromiseConditions.Get(r.Kind)?.Describe(r) ?? "CP_MissingParameter".Translate().ToString());
             }
-            contentHeight = y + 8;
+            detailHeight = y + 8;
             Widgets.EndScrollView();
         }
 
@@ -186,8 +289,9 @@ namespace ColonyPromises
 
         private static bool Button(ref float y, float width, string text)
         {
-            bool clicked = Widgets.ButtonText(new Rect(0, y, width, 32), text);
-            y += 38;
+            float height = Math.Max(32, Text.CalcHeight(text, Math.Max(1, width - 16)) + 12);
+            bool clicked = Widgets.ButtonText(new Rect(0, y, width, height), text);
+            y += height + 6;
             return clicked;
         }
     }

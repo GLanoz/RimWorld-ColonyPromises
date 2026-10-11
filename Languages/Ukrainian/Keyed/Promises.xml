@@ -31,7 +31,10 @@
   <CP_Result>{0}: {1} — {2}.</CP_Result>
   <CP_RequestTitle>Прохання: {0}</CP_RequestTitle>
   <CP_ResponseTime>Час для відповіді: {0} дн. Після прийняття виконайте за {1} дн.</CP_ResponseTime>
-  <CP_FixedConsequences>Виконання: {0} настрою на {1} дн.; {2} довіри. Порушення: {3} настрою на {4} дн.; {5} довіри. Відкликання: {6} настрою на {7} дн.; {8} довіри. Очікування після завершення: {9} дн. Значення фіксуються при прийнятті; повторні виконання зменшують винагороду, але не штрафи.</CP_FixedConsequences>
+  <CP_FixedConsequences>Виконання: {0} настрою на {1} дн.; {2} довіри.
+Порушення: {3} настрою на {4} дн.; {5} довіри.
+Відкликання: {6} настрою на {7} дн.; {8} довіри.
+Очікування після завершення: {9} дн.</CP_FixedConsequences>
   <CP_Accept>Пообіцяти виконати…</CP_Accept>
   <CP_AcceptConfirm>Обіцяти колоністу {0}:
 
@@ -122,4 +125,21 @@
   <CP_UnpromisedRecovery>Без прийняття: задоволення цього відкритого прохання може відновити +{0} довіри без бонусу настрою. {1} Поточний підтверджений прогрес: {2} години. Завершіть до спливання строку відповіді. Для відновлення діють окремі очікування й обмеження повторів.</CP_UnpromisedRecovery>
   <CP_RecoveryHold>Утримуйте потрібне ліжко й кімнату або екіпірований предмет у відповідному стані безперервно протягом {0} підтверджених годин.</CP_RecoveryHold>
   <CP_RecoveryLeisure>Накопичте {0} годин визнаних грою розваг, поки це прохання відкрите, і відновіть потребу розваг принаймні до 35%. Прийняття починає прогрес обіцянки з нуля.</CP_RecoveryLeisure>
+  <CP_TabRequests>Прохання</CP_TabRequests>
+  <CP_TabColonists>Колоністи</CP_TabColonists>
+  <CP_NoPendingRequests>Наразі немає прохань, що очікують на відповідь.</CP_NoPendingRequests>
+  <CP_ListRequest>Є прохання</CP_ListRequest>
+  <CP_ListPromise>Виконується обіцянка</CP_ListPromise>
+  <CP_ListWaiting>Очікування</CP_ListWaiting>
+  <CP_ListNone>Немає прохання</CP_ListNone>
+  <CP_RequestSummaryRow>{0} — {1}
+{2}
+Час на відповідь: {3} дн.</CP_RequestSummaryRow>
+  <CP_ShortBedroom>Власна спальня: щонайменше «{0}», утримувати одну добу.</CP_ShortBedroom>
+  <CP_ShortLeisure>{0} год. фактичного відпочинку.</CP_ShortLeisure>
+  <CP_ShortEquipment>Екіпірувати {0}: якість щонайменше {1}, утримувати одну добу.</CP_ShortEquipment>
+  <CP_ShortDurability>Міцність щонайменше {0}%.</CP_ShortDurability>
+  <CP_More>Докладніше</CP_More>
+  <CP_RepeatRules>Значення фіксуються при прийнятті. Виконані обіцянки того самого типу за останні {0} дн. зменшують наступну позитивну винагороду. Штрафи не зменшуються.</CP_RepeatRules>
+  <CP_DeadlineCompact>Хвороба, караван і бій не призупиняють термін.</CP_DeadlineCompact>
 </LanguageData>

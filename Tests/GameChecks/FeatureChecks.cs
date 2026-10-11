@@ -230,6 +230,6 @@ public static class FeatureChecks
                     "Letter contents render with plain numeric placeholders in " + folder);
             }
         } finally { Current.Game = oldGame; LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
-        return checks;
+        return checks + UIChecks.Run(root);
     }
 }

@@ -87,7 +87,7 @@ Equipment must have a quality component and a player-acquirable loaded def. Cand
 
 `Evaluate`, `Project`, and `PrepareTerms` serve both generation and diagnostics. `PeekState` avoids enrollment just to display a pawn; consequence previews operate on a copy. Viewing diagnostics therefore does not reset clocks, modify terms, or create requests.
 
-Enable standard Development mode, select a pawn, and open Promises. The panel above history shows exclusions, slot/cooldown state, current and target conditions, saved/projected evidence, selected-pawn last check, colony last/next scan, and global gating. Reopen the tab after selecting an ineligible map pawn to inspect its exclusion.
+Enable standard Development mode and expand diagnostics in the Colonists detail panel, above history. It shows exclusions, slot/cooldown state, current/target conditions, saved/projected evidence, selected-pawn last check, colony last/next scan, and global gating. Initial selection can include an ineligible selected map pawn in Development mode; a valid remembered selection takes precedence on reopening.
 
 `Check now` uses ordinary observation and offer methods for the selected pawn. It respects eligibility, persistence, cooldown, occupancy, and frequency rules, but checks that pawn rather than the whole priority queue. It does not advance the scheduled scan. Same-tick repeats add no evidence; there is no forced reward-bearing request or per-scan logging.
 
@@ -162,7 +162,9 @@ Missing collections initialize empty, trust defaults to 50 and is clamped, and a
 
 Letters save `requestPawn`; requests save `announced`, `reminderSent`, and `recoveryEnabled`. Missing old announcement flags default true to avoid re-announcement; recovery defaults false. Settings save `remindersEnabled`, default true. Notice flags are consumed before sending. The reminder window starts 30,000 ticks before expiry; disabling leaves the pending flag intact, so re-enabling before expiry can send the one remaining reminder.
 
-`OpenRequests` is the read-only source for list and badge. Expired, terminal, accepted, and observable obsolete states are excluded immediately; absence alone does not prove obsolescence. Fulfilled requests remain visible only for eligible proof. `ChoiceLetter_Request` opens the existing tab through `SetCurrentTab` and selects its saved pawn. `MainButtonWorker_Promises` inherits toggle behavior and draws a badge without mutating Def labels.
+`OpenRequests` is the read-only source for list and badge. Expired, terminal, accepted, and observable obsolete states are excluded immediately; absence alone does not prove obsolescence. Fulfilled requests remain visible only for eligible proof. `ChoiceLetter_Request` opens the existing window through `SetCurrentTab`, then `SelectPawn` switches to Colonists and resets detail scrolling. `MainButtonWorker_Promises` inherits toggle behavior and draws a badge without mutating Def labels.
+
+The UI uses checked `TabDrawer.DrawTabs`/`TabRecord` APIs. Requests sorts a copy of current entries by response expiry, then pawn ID; it never displays a selected pawn's personal data. Colonists has separate list/detail scroll positions, highlighted selection, and read-only statuses from current visibility and cooldown. Ordinary reopening retains session-local navigation; selection validation handles removed pawns without changing the internal tab. This state is not added to game saves. `RequestedTabSize` is bounded by logical `UI.screenWidth/Height` with margin for game controls. Text and button heights use wrapped `Text.CalcHeight`, including long names. More details and Development-only diagnostics start collapsed; conditions, times, progress, and numeric effects remain visible.
 
 History stores `ResolvedTick`, `AppliedMood`, and actual post-clamp `AppliedTrust`; rendering never recalculates effects. Availability flags distinguish zeros from absent fields. Older entries without the metadata marker use only explicit XML values; omitted defaults are not guessed. Penalty-free outcomes have a no-change description; recovery displays its recorded change. History trimming does not trim repeat ledgers.
 
@@ -188,7 +190,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -Ri
 | Requests | Compiled acceptance/closure, penalty-free outcomes, snapshots, repeat retention, old/new Scribe fields |
 | Invalidation | Bedless `UnclaimBed` and Prefix; exact-item hold resets without clearing unrelated progress |
 | Generation | Shared projection, read-only diagnostics, capped queue fairness, schedules, migration defaults, Dev guard, bilingual text |
-| Features | Notice/settings flags, list/count transitions, low-trust/repeat rewards, frozen promises, recovery proof/gates/ledgers, pending invalidation |
+| Features | Notice/settings flags, list/count transitions, low-trust/repeat rewards, recovery proof/gates/ledgers, pending invalidation; UI navigation, expiry ordering, statuses, logical-screen size bounds, and bilingual summaries |
 | History | Real translator for every outcome in both languages, applied effects/clamping, missing metadata, serialization |
 | Content | Patch signatures/arguments, XML, source localization keys, bilingual placeholder parity |
 
@@ -236,7 +238,7 @@ Also test children, guests, prisoners, slaves, quest lodgers, trait/work restric
 | New/old saves | New game and pre-mod save initialize trust 50/fresh evidence without opening tab. Old manual promises, including one-hour recreation, preserve terms/progress/deadlines/clocks/trust/history and legacy effects. |
 | Save continuity | Save partial deficits, requests, accepted/pending holds, recreation, snapshots, cooldowns, outcomes. Same-tick reload adds nothing/duplicates none; gaps earn no retrospective credit. Real item/room reconstruction preserves qualifying holds. |
 | History/languages | Every outcome, fractional rewards, clamped zeros, recovery in both languages. Half-day age uses 0.5/0,5 with signed actual effects. Reload keeps effects. Explicit old values remain; missing fields say unavailable. |
-| Layout/performance | Long mod names, language switches on saved requests, small screens/UI scaling, full history, large colony: readable scrolling/buttons, no periodic result spam. |
+| Layout/performance | Requests contains no personal data, sorts nearest expiry first, and has an empty state. Rows/letters open the right Colonists details. Reopen retains tab/selection; removing the pawn or closing its request leaves no stale actions. Test independent scrolling, long names, both languages, small screens/UI scaling, full history, collapsed rules/Dev diagnostics, and no periodic result spam. Isolated layout bounds do not establish visual correctness. |
 
 For missing-history migration, use a copied older save with individual `appliedMood`, `appliedTrust`, or `resolvedTick` absent, then save/reload again. This field exercise does not establish full reference loading or safe removal.
 
