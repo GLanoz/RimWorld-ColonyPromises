@@ -31,11 +31,27 @@ An unaccepted request also closes without penalty when it becomes obsolete, such
 
 ### Bedroom
 
-A colonist may ask for a private bedroom or an improvement to an inadequate one. The target follows the game's expectations, which already account for colony wealth. Under the standard game categories, targets range from mediocre to somewhat impressive; an existing bedroom is asked to improve by at most two categories. The exact category appears in the request.
+A housing request starts with a **negative housing thought actually recognized by the game**: a poor-bedroom or barracks sleep memory, sleeping on the ground or outdoors, an unmet Greedy room requirement, or sleeping apart from a romantic partner. A missing private room, high expectations, or unrelated low mood is not enough. A colonist who is happy in a good barracks does not ask to move out.
 
-Greedy colonists expect one category more, within the same upper limit. Ascetics do not make bedroom requests. A bedroom already meeting the desired standard produces none.
+The problem must remain current for **two observed game days**. Sleep memories last only a day, so a confirmed memory can continue to support observation while the matching physical problem remains. Expiration alone does not reset this evidence; fixing the bed, room role, enclosure, or relevant mood-producing quality does. Old memories cannot produce requests about already repaired housing. Active situational thoughts are checked directly, including the game's restrictions and nullifiers.
 
-The colonist must be the sole assigned owner of a non-medical colonist bed in a proper enclosed bedroom. Other room owners, medical beds, barracks, hospitals, and outdoor spaces disqualify it. The **same bed and room must qualify continuously for one game day**. A brief reassignment is not enough.
+The target is the lowest game category that removes the confirmed penalty, including a Greedy requirement where applicable. Under Core rules, an awful bedroom can become neutral at dull, while a negative barracks experience can be solved by improving the barracks to its first nonnegative category. The exact category and whether a **bedroom or barracks** is required appear in the request. Expectations and wealth do not create a penalty or add an unnecessary quality floor.
+
+A private-bedroom promise requires the sole assigned owner of a usable non-medical colonist bed in a proper enclosed Bedroom, with no other room owners or medical beds. A barracks-improvement promise instead requires a qualifying Barracks and permits other room owners. A ground-sleep request also requires a bed with a material cost; a free sleeping spot does not solve it. The **same bed and room must qualify continuously for one game day**. A brief reassignment is not enough.
+
+Temperature complaints, disturbed sleep, jealousy of another bedroom, and an Ascetic's dislike of a room that is too impressive are not converted into arbitrary quality targets. The current promise cannot reliably guarantee those solutions; Development diagnostics explain the limitation.
+
+### Shared bedrooms
+
+A romantic pair can make **one shared bedroom request**, occupying both colonists' request slots. Both must be eligible and able to share a bed under the game's rules, including any active restrictions on shared sleeping. Neither may already have a request, promise, or cooldown. The pair needs two observed days of an unmet bedroom requirement and takes one place in the colony's offer queue.
+
+Confirmed dissatisfaction of **one partner is enough**. The reason names that person and their observed penalty, without claiming the other partner is dissatisfied. The target must address that problem and avoid a known conflicting requirement for either person. Having separate beds alone is insufficient: the game's sleeping-apart thought can be inactive when partners already share a room. Already resolved problems create no request. Pairs involving an Ascetic, ambiguous multiple partners, or no usable loaded double-bed type do not receive shared or conflicting new individual bedroom requests; Development diagnostics explain the blocker.
+
+Assign **exactly these two colonists to the same non-medical colonist bed with at least two sleeping slots**. Both must be able to use it. Follow the displayed room requirement: a private Bedroom excludes other room owners; an explicit shared-barracks improvement permits them. Both exclude medical beds. Keep the same qualifying bed and room for a continuous day. They do not need to sleep at the same time. Removing either owner, changing the bed, or losing qualifying conditions resets the common progress.
+
+Either participant can accept, decline, or withdraw the shared record. Both panels show the same deadline and progress, a link to the partner, and separate personal consequence figures. Rewards use the normal bedroom scale for each participant, adjusted by that person's trust and repeat history; being a pair does not increase the requirement's significance. Each person's effects, cooldown, and history apply once. Eligible unaccepted recovery remains personal and grants no mood reward.
+
+The Requests list, button count, offer letter, and reminder include the shared record once. A breakup, either partner's death or faction departure, or an actual change making shared sleeping forbidden closes it without penalty for both. Temporary absence or unavailable relationship data does not establish a breakup. Both must be observable on the same map to earn hold progress; deadlines continue during absence. Existing individual promises are not converted into shared ones.
 
 ### Recreation
 
@@ -61,8 +77,8 @@ These are base success rewards at trust 40 or above, before repeat reductions. M
 
 | Request | Deadline after acceptance | Success mood | Success trust |
 | --- | --- | --- | --- |
-| Bedroom: one-category improvement | 5 days | +5 | +5 |
-| Bedroom: missing room or two-category improvement | 7 days | +7 | +6 |
+| Housing: smaller improvement | 5 days | +5 | +5 |
+| Housing: missing room or improvement of two or more categories | 7 days | +7 | +6 |
 | Recreation: 4 hours | 3 days | +3 | +3 |
 | Recreation: 6–8 hours | 4 days | +4 | +4 |
 | Equipment: one deficiency | 4 days | +4 | +4 |
@@ -109,6 +125,8 @@ Illness, combat, caravans, and cryptosleep **do not pause deadlines**. Caravans 
 Bed reassignment, failed room conditions, switching rooms or physical equipment, and removing equipment reset the affected hold. Room shape and item quality changes reset it even when they improve conditions. These events do not reset accumulated recreation.
 
 Existing promises retain their saved requirements, progress, deadlines, trust, history, and previous consequence rules, including old one-hour recreation targets. New promises use the current rules described here.
+
+Accepted housing promises remain binding even if their original negative thought disappears. Older unanswered housing requests based only on expectations close as obsolete without penalties or rewards; fresh requests need new confirmed housing evidence and two observed days. Old expectation-only observation time is not treated as evidence of dissatisfaction.
 
 Equipment requests consider existing loose stock, not recipes, traders, inventory, or future purchases. Custom recreation may not count, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
 
