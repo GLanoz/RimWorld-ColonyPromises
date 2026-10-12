@@ -80,6 +80,11 @@ namespace ColonyPromises
         public const float SevereJoy = 0.15f;
         public const float WornFraction = 0.5f;
         public const float ReplacementFraction = 0.8f;
+        public const int WeaponSkillDifference = 4;
+        public const int WeaponUpgradeSkill = 10;
+        // Quality enum values: Normal = 2, Good = 3. Keep this rules file game-independent.
+        public const int WeaponUpgradeBaseQuality = 2;
+        public const int WeaponUpgradeSkilledQuality = 3;
         public const int MinHours = 4;
         public const int MaxHours = 8;
         public const int BedroomBaseStage = 2;

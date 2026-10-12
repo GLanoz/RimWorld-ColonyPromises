@@ -172,6 +172,7 @@ namespace ColonyPromises
                     && HousingRules.OriginalCauseCurrent(request, evaluation.HousingIssues);
             }
             if (request.Terms.Kind == PromiseKind.Equipment) return EquipmentNeeds.CauseCurrent(pawn, request.Terms)
+                && EquipmentNeeds.WeaponTargetCurrent(pawn, request.Terms)
                 && EquipmentNeeds.UsableDefinition(pawn, request.Terms)
                   && DlcCompatibility.ApparelDefinition(pawn, request.Terms.EquipmentDef)
                   && (!request.Terms.EquipmentDef.IsApparel || !DlcCompatibility.AvoidHumanLeather(pawn) || request.Terms.AvoidHumanLeather)

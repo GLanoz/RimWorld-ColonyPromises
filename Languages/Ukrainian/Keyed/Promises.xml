@@ -202,7 +202,7 @@
   <CP_ConstructedBed>Ліжко повинне мати вартість у матеріалах; безкоштовне спальне місце не підходить.</CP_ConstructedBed>
   <CP_NeedSleeping>Спостереження призупинене, поки колоніст спить або його стан неможливо перевірити.</CP_NeedSleeping>
   <CP_JoyEffect>Поточний вплив потреби розваг на настрій: {0}. Низька потреба розваг є достатнім доказом навіть без негативної думки.</CP_JoyEffect>
-  <CP_GearNoCause>Немає підтриманого актуального невдоволення спорядженням. Низька якість або відсутність предмета самі по собі не є потребою.</CP_GearNoCause>
+  <CP_GearNoCause>Немає підтриманої проблеми зі спорядженням або бажання покращити зброю. Сама відсутність спорядження не є потребою.</CP_GearNoCause>
   <CP_GearNoSolution>Актуальна потреба є, але не знайдено придатного рішення на доступному складі або перевіреного рецепта з верстатом, майстром і матеріалами.</CP_GearNoSolution>
   <CP_GearEvidence>{0}: настрій {1}; поточні умови підтверджують причину: {2}.</CP_GearEvidence>
   <CP_GearPiece>Проблемний предмет: {0}; стан {1}%.</CP_GearPiece>
@@ -291,4 +291,18 @@
   <CP_NoHumanLeather>Не використовуйте людську шкіру.</CP_NoHumanLeather>
   <CP_HousingCause_TitleBedroomRequirementsNotMet>Спальня не відповідає титулу</CP_HousingCause_TitleBedroomRequirementsNotMet>
   <CP_CardReason_TitleNoPersonalBedroom>Титул колоніста вимагає власної спальні.</CP_CardReason_TitleNoPersonalBedroom>
+  <CP_WeaponChoice>Вибір зброї: {0} — {1}.</CP_WeaponChoice>
+  <CP_WeaponRanged>стрілецька</CP_WeaponRanged>
+  <CP_WeaponMelee>ближнього бою</CP_WeaponMelee>
+  <CP_WeaponChoiceBlocked>не може користуватися придатною зброєю</CP_WeaponChoiceBlocked>
+  <CP_WeaponChoiceBrawler>уподобання забіяки</CP_WeaponChoiceBrawler>
+  <CP_WeaponChoiceRestriction>фактичні обмеження навичок</CP_WeaponChoiceRestriction>
+  <CP_WeaponChoiceLevelGap>суттєва перевага бойової навички</CP_WeaponChoiceLevelGap>
+  <CP_WeaponChoiceEquipped>збереження типу придатної екіпірованої зброї</CP_WeaponChoiceEquipped>
+  <CP_WeaponChoicePassion>сильніша пристрасть</CP_WeaponChoicePassion>
+  <CP_WeaponChoiceLevel>вища бойова навичка</CP_WeaponChoiceLevel>
+  <CP_WeaponChoiceTie>рівні навички; стабільний пріоритет стрілецької зброї</CP_WeaponChoiceTie>
+  <CP_WeaponUpgradeEvidence>Хоче кращу зброю: {0}; потрібна якість: {1}. Це особисте бажання, а не штраф настрою від гри.</CP_WeaponUpgradeEvidence>
+  <CP_GearReason_WeaponUpgrade>Хоче надійнішу зброю для бою.</CP_GearReason_WeaponUpgrade>
+  <CP_CardReason_WeaponUpgrade>Хоче надійнішу зброю для бою.</CP_CardReason_WeaponUpgrade>
 </LanguageData>

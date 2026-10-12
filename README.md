@@ -71,15 +71,20 @@ Recognized games, social relaxation, skygazing, and recreational walking count. 
 
 ### Equipment
 
-Equipment requests require a current negative effect caused by a supported equipment problem for two observed days. General unhappiness, low quality, combat skills, and missing equipment alone do not create them.
+Clothing requests and the Brawler weapon complaint require a current negative effect caused by a supported equipment problem for two observed days. A separate weapon-upgrade desire uses the rules below, without adding a negative mood thought. General unhappiness and missing equipment alone do not create requests.
 
 - **Damaged clothing:** replace a specific worn piece with the same type at **80% condition or better**. The game's complaint excludes locked clothing and items that do not care about damage. The request addresses that piece; other damaged clothing can still cause dissatisfaction.
 - **Unwanted nudity:** provide one compatible garment covering the missing basic body areas. A nude colonist who has no supported negative effect does not request clothing. Core's nudity complaint is disabled with Ideology; ideology-specific dress complaints are currently unsupported.
 
 With Royalty or Ideology, a replacement cannot remove the only garment satisfying an active title or role requirement. Relevant desired clothing and gender-specific nudity preferences also constrain new targets. If the colonist's beliefs reject human-leather clothing, the request explicitly excludes that material, including when checking available manufacturing supplies. These safeguards do not turn every ideological clothing complaint into a new request. Royalty's clothing-quality preference does not add a quality floor to a worn-clothing request.
+
 - **Brawler with a ranged weapon:** provide a usable melee primary weapon. A better ranged weapon does not solve this problem. Nonviolent colonists never request weapons.
 
-These new requests have **no minimum quality requirement**. Apparel condition must remain at least 80% throughout the hold; a higher-quality worn item does not qualify. Body structure, wearing restrictions, locked apparel, and equipment usability are checked.
+- **Better copy of a suitable weapon:** a colonist carrying an appropriate weapon of Awful or Poor quality can ask for the same model at Normal quality. At Normal quality, a Shooting or Melee level of at least 10 in its corresponding skill permits a request for Good. Good or better does not produce quality requests. This is a personal desire, observed for two days, rather than a penalty imposed by the game. A higher-quality different model does not fulfill it; the Brawler complaint takes priority.
+
+Weapon selection respects actual restrictions and Brawler first. A Shooting advantage of at least four levels favors ranged weapons; a Melee advantage of four favors melee. With closer skills, a usable equipped weapon keeps its type. Without one, stronger passion wins, then higher skill, with ranged first on a complete tie. Level zero is usable when the game allows it. Unavailable targets never cause a fallback to the wrong weapon type. Skill changes can invalidate an unanswered request but cannot change an accepted promise.
+
+Clothing replacements and the Brawler solution have **no minimum quality requirement**; weapon-upgrade requests state their required quality. Apparel condition must remain at least 80% throughout the hold; a higher-quality worn item does not qualify. Body structure, wearing restrictions, locked apparel, and equipment usability are checked.
 
 A solution may be reachable, permitted loose stock or an item the colony can manufacture with an unlocked recipe, usable workbench, suitable crafter, and available materials. Core and loaded-mod items can qualify. Unsupported production routes and speculative future trades are not assumed feasible. Lack of stock does not erase the underlying need; diagnostics distinguish a need from an available solution.
 

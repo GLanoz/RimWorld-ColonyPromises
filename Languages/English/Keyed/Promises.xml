@@ -202,7 +202,7 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
   <CP_ConstructedBed>The bed must have a material cost; a free sleeping spot does not qualify.</CP_ConstructedBed>
   <CP_NeedSleeping>Observation is paused while the pawn is asleep or cannot be observed.</CP_NeedSleeping>
   <CP_JoyEffect>Current recreation-related mood effect: {0}. Low recreation need is sufficient evidence without a negative thought.</CP_JoyEffect>
-  <CP_GearNoCause>No supported current equipment complaint. Low quality or missing equipment alone is not a need.</CP_GearNoCause>
+  <CP_GearNoCause>No supported equipment complaint or weapon-upgrade desire. Missing equipment alone is not a need.</CP_GearNoCause>
   <CP_GearNoSolution>A current need exists, but no usable solution with reachable stock or a verified recipe, workbench, crafter and materials could be found.</CP_GearNoSolution>
   <CP_GearEvidence>{0}: mood {1}; current conditions confirm it: {2}.</CP_GearEvidence>
   <CP_GearPiece>Problem item: {0}; condition {1}%.</CP_GearPiece>
@@ -291,4 +291,18 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_NoHumanLeather>Do not use human leather.</CP_NoHumanLeather>
   <CP_HousingCause_TitleBedroomRequirementsNotMet>Bedroom below title requirements</CP_HousingCause_TitleBedroomRequirementsNotMet>
   <CP_CardReason_TitleNoPersonalBedroom>This title calls for a personal bedroom.</CP_CardReason_TitleNoPersonalBedroom>
+  <CP_WeaponChoice>Weapon choice: {0} — {1}.</CP_WeaponChoice>
+  <CP_WeaponRanged>ranged</CP_WeaponRanged>
+  <CP_WeaponMelee>melee</CP_WeaponMelee>
+  <CP_WeaponChoiceBlocked>cannot use a suitable weapon</CP_WeaponChoiceBlocked>
+  <CP_WeaponChoiceBrawler>Brawler preference</CP_WeaponChoiceBrawler>
+  <CP_WeaponChoiceRestriction>actual skill restrictions</CP_WeaponChoiceRestriction>
+  <CP_WeaponChoiceLevelGap>clear combat skill advantage</CP_WeaponChoiceLevelGap>
+  <CP_WeaponChoiceEquipped>keep the usable equipped type</CP_WeaponChoiceEquipped>
+  <CP_WeaponChoicePassion>stronger passion</CP_WeaponChoicePassion>
+  <CP_WeaponChoiceLevel>higher combat skill</CP_WeaponChoiceLevel>
+  <CP_WeaponChoiceTie>equal skills; stable ranged-first choice</CP_WeaponChoiceTie>
+  <CP_WeaponUpgradeEvidence>Wants a better {0}; target quality: {1}. This is a personal desire, not a game mood penalty.</CP_WeaponUpgradeEvidence>
+  <CP_GearReason_WeaponUpgrade>Wants a more reliable weapon for combat.</CP_GearReason_WeaponUpgrade>
+  <CP_CardReason_WeaponUpgrade>Wants a more reliable weapon for combat.</CP_CardReason_WeaponUpgrade>
 </LanguageData>

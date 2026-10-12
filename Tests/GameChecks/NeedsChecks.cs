@@ -12,6 +12,89 @@ public static class NeedsChecks
     static void Check(bool condition, string name) { checks++; if (!condition) throw new Exception(name); }
     public static int Run(string root, string path)
     {
+        bool? Choice(int shooting, int melee, bool? equipped = null, Passion shootPassion = Passion.None,
+            Passion meleePassion = Passion.None, bool brawler = false, bool violent = true,
+            bool shootingDisabled = false, bool meleeDisabled = false) => EquipmentNeeds.ChooseRanged(violent,
+                brawler, shootingDisabled, meleeDisabled, shooting, melee, shootPassion, meleePassion, equipped, out _);
+        Check(Choice(15, 2) == true, "Shooting specialist selects ranged weapons");
+        Check(Choice(2, 15) == false, "Melee specialist selects melee weapons");
+        Check(Choice(8, 4, false) == true, "Exactly four overrides equipped melee");
+        Check(Choice(4, 8, true) == false, "Exactly four overrides equipped ranged");
+        Check(Choice(7, 4, false) == false, "Difference of three preserves melee");
+        Check(Choice(4, 7, true) == true, "Difference of three preserves ranged");
+        Check(Choice(5, 6, null, Passion.Major, Passion.Minor) == true, "Passion precedes close levels without equipment");
+        Check(Choice(6, 5, null, Passion.Minor, Passion.Major) == false, "Melee passion precedes close levels");
+        Check(Choice(6, 5) == true && Choice(5, 6) == false, "Equal passions use higher level");
+        Check(Choice(0, 0) == true && Choice(0, 0, false) == false, "Zero skills are usable and ties are stable");
+        Check(Choice(15, 2, null, brawler: true) == false, "Brawler overrides high Shooting");
+        Check(Choice(15, 2, null, violent: false) == null, "Nonviolent pawns select no weapon");
+        Check(Choice(15, 0, null, shootingDisabled: true) == false, "Real skill restriction precedes level difference");
+        Check(Choice(15, 2, null, brawler: true, meleeDisabled: true) == null, "Restricted Brawler has no contradictory fallback");
+        var meleeDef = (ThingDef)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ThingDef));
+        var rangedDef = (ThingDef)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ThingDef));
+        foreach (var def in new[] { meleeDef, rangedDef }) { def.category = ThingCategory.Item;
+            def.tools = new System.Collections.Generic.List<Tool> { new Tool() }; }
+        typeof(ThingDef).GetField("verbs", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .SetValue(rangedDef, new System.Collections.Generic.List<VerbProperties> { new VerbProperties { verbClass = typeof(Verse.Verb_Shoot) } });
+        Check(rangedDef.IsRangedWeapon && !rangedDef.IsMeleeWeapon, "Ranged weapon with melee tools remains ranged by game API");
+        Check(!new[] { meleeDef }.Any(d => EquipmentNeeds.WeaponTypeMatches(d, Choice(15, 2))), "Wrong-type-only stock cannot switch a specialist");
+        Check(!EquipmentNeeds.WeaponTypeMatches(rangedDef, null), "Blocked choice has no available target");
+        foreach (var quality in new[] { QualityCategory.Awful, QualityCategory.Poor })
+            Check(EquipmentNeeds.UpgradeQuality(quality, 0) == QualityCategory.Normal, "Below Normal targets Normal even at level zero");
+        Check(EquipmentNeeds.UpgradeQuality(QualityCategory.Normal, 9) == null, "Level nine does not request Good");
+        Check(EquipmentNeeds.UpgradeQuality(QualityCategory.Normal, 10) == QualityCategory.Good, "Level ten targets Good");
+        Check(EquipmentNeeds.UpgradeQuality(QualityCategory.Good, 20) == null
+            && EquipmentNeeds.UpgradeQuality(QualityCategory.Legendary, 20) == null, "Good and better create no upgrade desire");
+        var frozenWeapon = new PromiseRecord { Kind = PromiseKind.Equipment, EquipmentDef = rangedDef,
+            MinimumQuality = QualityCategory.Good, ProgressTicks = 4000, DeadlineTick = 50000, SuccessMood = 6 };
+        Choice(0, 20);
+        Check(frozenWeapon.EquipmentDef == rangedDef && frozenWeapon.MinimumQuality == QualityCategory.Good
+            && frozenWeapon.ProgressTicks == 4000 && frozenWeapon.DeadlineTick == 50000 && frozenWeapon.SuccessMood == 6,
+            "Selecting a new type does not rewrite accepted terms");
+        Check(EquipmentNeeds.AcceptsParameters(true, true, QualityCategory.Good, 1, true, frozenWeapon)
+            && !EquipmentNeeds.AcceptsParameters(false, true, QualityCategory.Legendary, 1, true, frozenWeapon),
+            "Upgrade fulfillment requires the same model, not a higher quality unrelated model");
+        var upgradeTerms = new PromiseRecord { Kind = PromiseKind.Equipment, NeedBasedEquipment = true,
+            EquipmentCause = "WeaponUpgrade", EquipmentDef = rangedDef, MinimumQuality = QualityCategory.Good,
+            RequiredTicks = PromiseBalance.HoldTicks };
+        var upgradeCandidate = new RequestCandidate { Terms = upgradeTerms, Signature = "weapon-upgrade-v1:fixture:3",
+            ReasonKey = "CP_GearReason_WeaponUpgrade", Magnitude = 0 };
+        var upgradeObservation = RequestGenerator.Project(null, upgradeCandidate, PromiseKind.Equipment, 0, false);
+        for (int tick = RequestRules.ObservationInterval; tick <= RequestRules.PersistentTicks; tick += RequestRules.ObservationInterval)
+        {
+            upgradeObservation = RequestGenerator.Project(upgradeObservation, upgradeCandidate, PromiseKind.Equipment, tick, false);
+            Check(RequestRules.Ready(upgradeObservation.Ticks, false, tick, 0) == (tick == RequestRules.PersistentTicks),
+                "Weapon desire cannot bypass the two-day observation threshold");
+        }
+        Check(!RequestRules.Ready(upgradeObservation.Ticks, false, 120000, 120001), "Weapon desire respects individual cooldown");
+        var upgradeState = new ColonistPromises();
+        var upgradeRequest = RequestGenerator.Offer(upgradeCandidate, 120000);
+        upgradeState.Request = upgradeRequest;
+        RequestLifecycle.Accept(upgradeState, upgradeRequest, 120100);
+        Check(upgradeState.Active == upgradeTerms && upgradeState.Request == null && upgradeTerms.FrozenConsequences
+            && upgradeTerms.EquipmentDef == rangedDef && upgradeTerms.MinimumQuality == QualityCategory.Good,
+            "Upgrade offer and acceptance retain target and freeze the standard effects");
+        int acceptedDeadline = upgradeTerms.DeadlineTick;
+        float acceptedMood = upgradeTerms.SuccessMood;
+        var upgradeItem = (Thing)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(Thing));
+        PromiseProgress.UpdateHold(upgradeTerms, new ConditionObservation { Satisfied = true, Thing = upgradeItem }, 120100);
+        PromiseProgress.UpdateHold(upgradeTerms, new ConditionObservation { Satisfied = true, Thing = upgradeItem }, 120350);
+        Choice(0, 20);
+        Check(upgradeTerms.ProgressTicks == 250 && upgradeTerms.DeadlineTick == acceptedDeadline && upgradeTerms.SuccessMood == acceptedMood,
+            "Changed preference leaves the accepted physical-item hold and consequences intact");
+        rangedDef.defName = "WeaponUpgradeFixture"; rangedDef.label = "fixture rifle";
+        DefDatabase<ThingDef>.Add(rangedDef);
+        // Serialize parameters and progress; the physical item itself is tested by the shared cross-reference fixtures.
+        upgradeTerms.StableThing = null;
+        try { Scribe.saver.InitSaving(path, "save"); upgradeTerms.ExposeData(); Scribe.saver.FinalizeSaving(); }
+        finally { Scribe.saver.ForceStop(); }
+        var savedUpgrade = new PromiseRecord();
+        try { Scribe.loader.InitLoading(path); Scribe.loader.curParent = savedUpgrade; savedUpgrade.ExposeData(); }
+        finally { Scribe.loader.ForceStop(); }
+        Check(savedUpgrade.EquipmentCause == "WeaponUpgrade" && savedUpgrade.EquipmentDef == rangedDef
+            && savedUpgrade.MinimumQuality == QualityCategory.Good && !savedUpgrade.QualityOptional
+            && savedUpgrade.ProgressTicks == 250 && savedUpgrade.DeadlineTick == acceptedDeadline
+            && savedUpgrade.SuccessMood == acceptedMood, "Accepted upgrade fields survive existing Scribe keys");
         Check(!EquipmentNeeds.Confirmed("Pain", -10, true), "Unrelated negative mood is not an equipment cause");
         Check(!EquipmentNeeds.Confirmed("ApparelDamaged", 0, true), "An uncomplaining pawn does not request apparel");
         Check(!EquipmentNeeds.Confirmed("Naked", 0, true), "Nullified nudity cannot request clothing");
@@ -113,6 +196,11 @@ public static class NeedsChecks
                 string reason = EquipmentNeeds.Reason(request), conditions = new EquipmentCondition().Describe(replacement);
                 Check(reason.Contains("−3") && reason.IndexOf("test apparel", StringComparison.OrdinalIgnoreCase) >= 0 && !reason.Contains("{") && !reason.Contains("CP_"), "Specific equipment reason formats in " + language);
                 Check(conditions.Contains("80") && !conditions.Contains("CP_") && !conditions.Contains("{"), "Durability and optional quality format in " + language);
+                string upgradeReason = PromiseCardText.Reason(upgradeRequest), upgradeConditions = PromiseCardText.Conditions(upgradeTerms);
+                Check(!upgradeReason.Contains("CP_") && !upgradeReason.Contains("{") && !upgradeReason.Contains("0"),
+                    "Personal upgrade reason invents no mood penalty in " + language);
+                Check(upgradeConditions.IndexOf("fixture rifle", StringComparison.OrdinalIgnoreCase) >= 0 && upgradeConditions.Contains(QualityCategory.Good.GetLabel())
+                    && !upgradeConditions.Contains("CP_"), "Upgrade card names its same model and fixed quality in " + language);
             }
         } finally { LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
         return checks;

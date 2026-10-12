@@ -9,6 +9,71 @@ namespace ColonyPromises
 {
     public static class EquipmentNeeds
     {
+        public static readonly IReadOnlyList<string> Causes = Array.AsReadOnly(new[] { "ApparelDamaged", "Naked", "BrawlerUnhappy", "WeaponUpgrade" });
+        public static bool? ChooseRanged(bool violent, bool brawler, bool shootingDisabled, bool meleeDisabled,
+            int shooting, int melee, Passion shootingPassion, Passion meleePassion, bool? equippedRanged, out string reason)
+        {
+            reason = "CP_WeaponChoiceBlocked";
+            if (!violent || shootingDisabled && meleeDisabled) return null;
+            if (brawler) { reason = "CP_WeaponChoiceBrawler"; return meleeDisabled ? (bool?)null : false; }
+            if (shootingDisabled || meleeDisabled) { reason = "CP_WeaponChoiceRestriction"; return !shootingDisabled; }
+            if (Math.Abs(shooting - melee) >= RequestRules.WeaponSkillDifference)
+            { reason = "CP_WeaponChoiceLevelGap"; return shooting > melee; }
+            if (equippedRanged.HasValue) { reason = "CP_WeaponChoiceEquipped"; return equippedRanged; }
+            if (shootingPassion != meleePassion) { reason = "CP_WeaponChoicePassion"; return shootingPassion > meleePassion; }
+            if (shooting != melee) { reason = "CP_WeaponChoiceLevel"; return shooting > melee; }
+            reason = "CP_WeaponChoiceTie";
+            return true;
+        }
+
+        public static bool? PreferredRanged(Pawn pawn, out string reason)
+        {
+            var shooting = pawn.skills?.GetSkill(SkillDefOf.Shooting);
+            var melee = pawn.skills?.GetSkill(SkillDefOf.Melee);
+            var primary = pawn.equipment?.Primary;
+            bool? equipped = primary != null && UsableDefinition(pawn, new PromiseRecord { EquipmentDef = primary.def })
+                && EquipmentUtility.CanEquip(primary, pawn) ? (bool?)primary.def.IsRangedWeapon : null;
+            return ChooseRanged(!pawn.WorkTagIsDisabled(WorkTags.Violent)
+                && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation),
+                pawn.story?.traits?.HasTrait(TraitDefOf.Brawler) == true,
+                shooting == null || shooting.TotallyDisabled, melee == null || melee.TotallyDisabled,
+                shooting?.Level ?? 0, melee?.Level ?? 0, shooting?.passion ?? Passion.None,
+                melee?.passion ?? Passion.None, equipped, out reason);
+        }
+
+        public static bool WeaponTargetCurrent(Pawn pawn, PromiseRecord terms)
+        {
+            if (!terms.EquipmentDef.IsWeapon) return true;
+            var ranged = PreferredRanged(pawn, out _);
+            return WeaponTypeMatches(terms.EquipmentDef, ranged);
+        }
+
+        public static bool WeaponTypeMatches(ThingDef def, bool? ranged) => ranged.HasValue
+            && (ranged.Value ? def.IsRangedWeapon : def.IsMeleeWeapon);
+
+        public static QualityCategory? UpgradeQuality(QualityCategory quality, int skill)
+        {
+            if ((int)quality < RequestRules.WeaponUpgradeBaseQuality) return (QualityCategory)RequestRules.WeaponUpgradeBaseQuality;
+            if ((int)quality == RequestRules.WeaponUpgradeBaseQuality && skill >= RequestRules.WeaponUpgradeSkill)
+                return (QualityCategory)RequestRules.WeaponUpgradeSkilledQuality;
+            return null;
+        }
+
+        public static bool UpgradeTarget(Pawn pawn, out Thing primary, out QualityCategory minimum)
+        {
+            primary = pawn.equipment?.Primary;
+            minimum = QualityCategory.Normal;
+            if (primary == null || !primary.def.IsWeapon || !primary.TryGetQuality(out var quality)
+                || !WeaponTargetCurrent(pawn, new PromiseRecord { EquipmentDef = primary.def })
+                || !UsableDefinition(pawn, new PromiseRecord { EquipmentDef = primary.def })
+                || !EquipmentUtility.CanEquip(primary, pawn)) return false;
+            var skill = pawn.skills.GetSkill(primary.def.IsRangedWeapon ? SkillDefOf.Shooting : SkillDefOf.Melee);
+            var target = UpgradeQuality(quality, skill.Level);
+            if (!target.HasValue) return false;
+            minimum = target.Value;
+            return true;
+        }
+
         // Read a fresh, unattached situational thought; viewing diagnostics does not dirty the pawn's cache.
         public static float NegativeMood(Pawn pawn, string name)
         {
@@ -32,7 +97,11 @@ namespace ColonyPromises
         {
             result.Reason = "CP_GearNoCause";
             var details = new List<string>();
-            foreach (string cause in new[] { "ApparelDamaged", "Naked", "BrawlerUnhappy" })
+            var ranged = PreferredRanged(pawn, out string weaponReason);
+            details.Add("CP_WeaponChoice".Translate((ranged.HasValue ? ranged.Value ? "CP_WeaponRanged" : "CP_WeaponMelee"
+                : "CP_DebugNo").Translate(), weaponReason.Translate()).ToString());
+            bool brawlerDeficit = false;
+            foreach (string cause in Causes.Where(c => c != "WeaponUpgrade"))
             {
                 float mood = NegativeMood(pawn, cause);
                 if (mood >= 0) continue;
@@ -49,11 +118,13 @@ namespace ColonyPromises
                 if (source != null) details.Add("CP_GearPiece".Translate(source.LabelCap,
                     source.def.useHitPoints ? PromiseText.Number(source.HitPoints * 100f / source.MaxHitPoints) : "100").ToString());
                 if (!Confirmed(cause, mood, current)) continue;
+                if (cause == "BrawlerUnhappy") brawlerDeficit = true;
                 result.HasDeficit = true;
                 string signature = "equipment-need-v2:" + cause + ":" + (source?.thingIDNumber ?? 0);
                 if (result.DeficitSignature == null) result.DeficitSignature = signature;
                 IEnumerable<ThingDef> targets = cause == "ApparelDamaged" ? new[] { source.def }
-                    : DefDatabase<ThingDef>.AllDefsListForReading.Where(d => cause == "Naked" ? d.IsApparel : d.IsMeleeWeapon)
+                    : DefDatabase<ThingDef>.AllDefsListForReading.Where(d => cause == "Naked" ? d.IsApparel
+                        : ranged == false && WeaponTypeMatches(d, ranged))
                         .OrderBy(d => d.defName, StringComparer.Ordinal);
                 foreach (var def in targets)
                 {
@@ -78,6 +149,25 @@ namespace ColonyPromises
                 }
                 result.Reason = ModsConfig.IdeologyActive || ModsConfig.RoyaltyActive ? "CP_DlcGearNoSolution" : "CP_GearNoSolution";
             }
+            if (!brawlerDeficit && UpgradeTarget(pawn, out var weapon, out var minimum))
+            {
+                // Model and threshold identify the desire; swapping copies does not supply extra observed time.
+                string signature = "weapon-upgrade-v1:" + weapon.def.defName + ":" + (int)minimum;
+                var terms = new PromiseRecord { Kind = PromiseKind.Equipment, EquipmentDef = weapon.def,
+                    NeedBasedEquipment = true, EquipmentCause = "WeaponUpgrade", MinimumQuality = minimum,
+                    RequiredTicks = PromiseBalance.HoldTicks };
+                result.HasDeficit = true;
+                result.DeficitSignature = signature;
+                details.Add("CP_WeaponUpgradeEvidence".Translate(weapon.LabelCap, minimum.GetLabel()).ToString());
+                if (UsableDefinition(pawn, terms) && CanObtain(pawn, terms, out var availability))
+                {
+                    result.Current = string.Join("\n", details) + "\n" + availability;
+                    result.Reason = null;
+                    return new RequestCandidate { Terms = terms, Signature = signature,
+                        ReasonKey = "CP_GearReason_WeaponUpgrade", Magnitude = 0 };
+                }
+                result.Reason = "CP_GearNoSolution";
+            }
             result.Current = string.Join("\n", details);
             if (ModsConfig.IdeologyActive) result.Current += "\n" + "CP_GearIdeology".Translate();
             return null;
@@ -90,6 +180,10 @@ namespace ColonyPromises
 
         public static bool CauseCurrent(Pawn pawn, PromiseRecord r)
         {
+            if (r.EquipmentCause == "WeaponUpgrade") return r.NeedBasedEquipment
+                && UpgradeTarget(pawn, out var weapon, out var minimum)
+                && weapon.def == r.EquipmentDef && minimum == r.MinimumQuality
+                && NegativeMood(pawn, "BrawlerUnhappy") >= 0;
             if (!r.NeedBasedEquipment || NegativeMood(pawn, r.EquipmentCause) >= 0) return false;
             if (r.EquipmentCause == "ApparelDamaged") return r.ProblemThing is Apparel a
                 && pawn.apparel.WornApparel.Contains(a) && Damaged(pawn, a);
