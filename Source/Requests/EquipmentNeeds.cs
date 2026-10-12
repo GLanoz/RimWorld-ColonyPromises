@@ -93,7 +93,7 @@ namespace ColonyPromises
         public static bool Confirmed(string cause, float mood, bool current) => mood < 0 && current
             && (cause == "ApparelDamaged" || cause == "Naked" || cause == "BrawlerUnhappy");
 
-        public static RequestCandidate Evaluate(Pawn pawn, RequestEvaluation result)
+        public static RequestCandidate Evaluate(Pawn pawn, RequestEvaluation result, string requestedCause = null)
         {
             result.Reason = "CP_GearNoCause";
             var details = new List<string>();
@@ -103,6 +103,7 @@ namespace ColonyPromises
             bool brawlerDeficit = false;
             foreach (string cause in Causes.Where(c => c != "WeaponUpgrade"))
             {
+                if (requestedCause != null && cause != requestedCause) continue;
                 float mood = NegativeMood(pawn, cause);
                 if (mood >= 0) continue;
                 Thing source = null;
@@ -149,7 +150,10 @@ namespace ColonyPromises
                 }
                 result.Reason = ModsConfig.IdeologyActive || ModsConfig.RoyaltyActive ? "CP_DlcGearNoSolution" : "CP_GearNoSolution";
             }
-            if (!brawlerDeficit && UpgradeTarget(pawn, out var weapon, out var minimum))
+            if ((requestedCause == null || requestedCause == "WeaponUpgrade") && !brawlerDeficit
+                && !(requestedCause == "WeaponUpgrade" && NegativeMood(pawn, "BrawlerUnhappy") < 0
+                    && pawn.equipment?.Primary?.def.IsRangedWeapon == true)
+                && UpgradeTarget(pawn, out var weapon, out var minimum))
             {
                 // Model and threshold identify the desire; swapping copies does not supply extra observed time.
                 string signature = "weapon-upgrade-v1:" + weapon.def.defName + ":" + (int)minimum;

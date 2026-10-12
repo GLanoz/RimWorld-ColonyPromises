@@ -305,4 +305,28 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_WeaponUpgradeEvidence>Wants a better {0}; target quality: {1}. This is a personal desire, not a game mood penalty.</CP_WeaponUpgradeEvidence>
   <CP_GearReason_WeaponUpgrade>Wants a more reliable weapon for combat.</CP_GearReason_WeaponUpgrade>
   <CP_CardReason_WeaponUpgrade>Wants a more reliable weapon for combat.</CP_CardReason_WeaponUpgrade>
+  <CP_DevCreate>Create test request…</CP_DevCreate>
+  <CP_DevCurrent>From current needs</CP_DevCurrent>
+  <CP_DevManual>Set terms manually</CP_DevManual>
+  <CP_DevTestLabel>Test request</CP_DevTestLabel>
+  <CP_DevDisabled>Enable Development mode to use this action.</CP_DevDisabled>
+  <CP_DevOccupied>This colonist or their partner already has a request or promise. Use Clear selected record with confirmation first.</CP_DevOccupied>
+  <CP_DevNoSubtype>The current evaluator has no candidate for this subtype. Check the need diagnostics or set terms manually.</CP_DevNoSubtype>
+  <CP_DevNoTargets>No usable target is available for this selection.</CP_DevNoTargets>
+  <CP_DevManualReason>A test request with manually chosen terms.</CP_DevManualReason>
+  <CP_DevClear>Clear selected record…</CP_DevClear>
+  <CP_DevClearConfirm>Clear the selected request or promise for {0}? A shared record is removed for both participants. No consequences or new cooldown will be applied. Trust, history and repeat tracking will stay unchanged.</CP_DevClearConfirm>
+  <CP_DevHours>{0} hours of recreation</CP_DevHours>
+  <CP_DevCondition>Minimum condition: {0}%</CP_DevCondition>
+  <CP_DevType_Private>Private bedroom</CP_DevType_Private>
+  <CP_DevType_Improve>Bedroom improvement</CP_DevType_Improve>
+  <CP_DevType_BuiltBed>A built bed in a bedroom</CP_DevType_BuiltBed>
+  <CP_DevType_Barracks>Barracks improvement</CP_DevType_Barracks>
+  <CP_DevType_Shared>Shared bedroom with a partner</CP_DevType_Shared>
+  <CP_DevType_SharedBarracks>Shared bed in improved barracks</CP_DevType_SharedBarracks>
+  <CP_DevType_Leisure>Recreation</CP_DevType_Leisure>
+  <CP_DevType_ApparelDamaged>Replace worn clothing</CP_DevType_ApparelDamaged>
+  <CP_DevType_Naked>Clothing for unwanted nudity</CP_DevType_Naked>
+  <CP_DevType_BrawlerUnhappy>Melee weapon for a Brawler</CP_DevType_BrawlerUnhappy>
+  <CP_DevType_WeaponUpgrade>Better copy of an equipped weapon</CP_DevType_WeaponUpgrade>
 </LanguageData>

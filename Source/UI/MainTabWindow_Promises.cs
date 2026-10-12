@@ -317,6 +317,10 @@ namespace ColonyPromises
                     Label(ref y, width, RequestDiagnostics.Describe(state, kind, now));
                 Label(ref y, width, "CP_DebugSampling".Translate());
                 if (Button(ref y, width, "CP_DebugCheckNow".Translate())) component.CheckRequestsNow(pawn);
+                if ((state.Active ?? state.Request?.Terms)?.DevTest == true) Label(ref y, width, "CP_DevTestLabel".Translate());
+                if (Button(ref y, width, "CP_DevCreate".Translate())) DevRequestMenu.Open(pawn);
+                var devRecord = state.Active ?? state.Request?.Terms;
+                if (devRecord != null && Button(ref y, width, "CP_DevClear".Translate())) DevRequestMenu.Clear(pawn, devRecord);
             }
             y += 16;
             Label(ref y, width, "CP_History".Translate());

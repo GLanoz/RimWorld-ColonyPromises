@@ -305,4 +305,28 @@
   <CP_WeaponUpgradeEvidence>Хоче кращу зброю: {0}; потрібна якість: {1}. Це особисте бажання, а не штраф настрою від гри.</CP_WeaponUpgradeEvidence>
   <CP_GearReason_WeaponUpgrade>Хоче надійнішу зброю для бою.</CP_GearReason_WeaponUpgrade>
   <CP_CardReason_WeaponUpgrade>Хоче надійнішу зброю для бою.</CP_CardReason_WeaponUpgrade>
+  <CP_DevCreate>Створити тестове прохання…</CP_DevCreate>
+  <CP_DevCurrent>За поточними потребами</CP_DevCurrent>
+  <CP_DevManual>Задати умови вручну</CP_DevManual>
+  <CP_DevTestLabel>Тестове прохання</CP_DevTestLabel>
+  <CP_DevDisabled>Для цієї дії ввімкніть режим розробника.</CP_DevDisabled>
+  <CP_DevOccupied>Колоніст або партнер уже має прохання чи обіцянку. Спочатку скористайтеся очищенням вибраного запису з підтвердженням.</CP_DevOccupied>
+  <CP_DevNoSubtype>Для цього підтипу зараз немає придатного прохання. Перегляньте діагностику потреб або задайте умови вручну.</CP_DevNoSubtype>
+  <CP_DevNoTargets>Для цього вибору немає придатної цілі.</CP_DevNoTargets>
+  <CP_DevManualReason>Тестове прохання з умовами, заданими вручну.</CP_DevManualReason>
+  <CP_DevClear>Очистити вибраний запис…</CP_DevClear>
+  <CP_DevClearConfirm>Прибрати вибране прохання або обіцянку для {0}? Спільний запис буде прибрано для обох учасників. Наслідків і нового очікування не буде. Довіра, історія та облік повторів збережуться.</CP_DevClearConfirm>
+  <CP_DevHours>{0} годин відпочинку</CP_DevHours>
+  <CP_DevCondition>Мінімальний стан: {0}%</CP_DevCondition>
+  <CP_DevType_Private>Окрема спальня</CP_DevType_Private>
+  <CP_DevType_Improve>Покращення спальні</CP_DevType_Improve>
+  <CP_DevType_BuiltBed>Повноцінне ліжко у спальні</CP_DevType_BuiltBed>
+  <CP_DevType_Barracks>Покращення барака</CP_DevType_Barracks>
+  <CP_DevType_Shared>Спільна спальня з партнером</CP_DevType_Shared>
+  <CP_DevType_SharedBarracks>Спільне ліжко в покращеному бараку</CP_DevType_SharedBarracks>
+  <CP_DevType_Leisure>Відпочинок</CP_DevType_Leisure>
+  <CP_DevType_ApparelDamaged>Заміна зношеного одягу</CP_DevType_ApparelDamaged>
+  <CP_DevType_Naked>Одяг проти небажаної оголеності</CP_DevType_Naked>
+  <CP_DevType_BrawlerUnhappy>Зброя ближнього бою для забіяки</CP_DevType_BrawlerUnhappy>
+  <CP_DevType_WeaponUpgrade>Краща копія екіпірованої зброї</CP_DevType_WeaponUpgrade>
 </LanguageData>

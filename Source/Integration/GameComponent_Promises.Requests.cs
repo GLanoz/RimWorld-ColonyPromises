@@ -96,6 +96,12 @@ namespace ColonyPromises
                 return;
             }
             bool observable = RequestMaintenance.Observable(pawn);
+            if (request.Terms.DevManual)
+            {
+                if (now >= request.ExpiryTick) CloseRequest(state, PromiseOutcome.Expired, now);
+                else if (RequestNotices.TakeReminder(request, now, ColonyPromisesMod.Settings.RemindersEnabled)) RequestNotices.Send(state, true);
+                return;
+            }
             if (observable && !DlcCompatibility.PendingCompatible(pawn, request.Terms))
             { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             bool satisfied = observable && RequestMaintenance.Satisfied(pawn, request);

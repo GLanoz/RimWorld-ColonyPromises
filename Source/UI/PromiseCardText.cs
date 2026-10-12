@@ -25,6 +25,7 @@ namespace ColonyPromises
         public static string Reason(ColonistRequest request)
         {
             var r = request.Terms;
+            if (r.DevManual) return "CP_DevManualReason".Translate();
             if (r.IsShared) return SharedPromiseText.RequestReason(request);
             if (r.Kind == PromiseKind.Leisure) return "CP_CardReasonLeisure".Translate();
             if (r.NeedBasedEquipment) return ("CP_CardReason_" + r.EquipmentCause).Translate(r.EquipmentDef.LabelCap);

@@ -32,7 +32,7 @@ namespace ColonyPromises
     {
         public static RequestCandidate Candidate(Pawn pawn, PromiseKind kind) => Evaluate(pawn, kind).Candidate;
 
-        public static RequestEvaluation Evaluate(Pawn pawn, PromiseKind kind)
+        public static RequestEvaluation Evaluate(Pawn pawn, PromiseKind kind, bool devBypassCooldown = false, string equipmentCause = null)
         {
             var result = new RequestEvaluation();
             result.Reason = PromiseConditions.EligibilityReason(pawn);
@@ -43,9 +43,10 @@ namespace ColonyPromises
             if (result.Reason != null) return result;
             switch (kind)
             {
-                case PromiseKind.Bedroom: result.Candidate = Bedroom(pawn, result); break;
+                case PromiseKind.Bedroom: result.Candidate = Bedroom(pawn, result, devBypassCooldown && Prefs.DevMode); break;
                 case PromiseKind.Leisure: result.Candidate = LeisureNeeds.Evaluate(pawn, result); break;
-                case PromiseKind.Equipment: result.Candidate = Equipment(pawn, result); break;
+                case PromiseKind.Equipment: result.Candidate = EquipmentNeeds.Evaluate(pawn, result,
+                    devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
             }
             if (kind == PromiseKind.Bedroom && result.HousingIssues == null)
             {
@@ -61,13 +62,11 @@ namespace ColonyPromises
 
         private static bool Trait(Pawn pawn, TraitDef def) => pawn.story?.traits?.HasTrait(def) == true;
 
-        private static RequestCandidate Bedroom(Pawn pawn, RequestEvaluation result)
+        private static RequestCandidate Bedroom(Pawn pawn, RequestEvaluation result, bool devBypassCooldown = false)
         {
-            if (SharedBedroomRules.TryEvaluate(pawn, result, out var shared)) return shared;
+            if (SharedBedroomRules.TryEvaluate(pawn, result, out var shared, devBypassCooldown)) return shared;
             return HousingRules.Candidate(pawn, null, result);
         }
-
-        private static RequestCandidate Equipment(Pawn pawn, RequestEvaluation result) => EquipmentNeeds.Evaluate(pawn, result);
 
         public static RequestCandidate ObservationCandidate(RequestEvaluation evaluation, PromiseKind kind) => evaluation.Candidate
             ?? (evaluation.DeficitSignature == null ? null : new RequestCandidate {
@@ -156,6 +155,7 @@ namespace ColonyPromises
         public static bool Relevant(Pawn pawn, ColonistRequest request)
         {
             if (request?.Terms == null) return false;
+            if (request.Terms.DevManual) return DevRequests.ValidTerms(pawn, request.Terms);
             var condition = PromiseConditions.Get(request.Terms.Kind);
             if (condition == null || !condition.ValidParameters(request.Terms)) return false;
             if (request.Terms.Kind == PromiseKind.Bedroom)

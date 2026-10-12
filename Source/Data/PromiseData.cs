@@ -15,6 +15,8 @@ namespace ColonyPromises
         public string HistoryPartnerLabel;
         public bool RequiresBarracks;
         public bool HousingBased;
+        public bool DevTest;
+        public bool DevManual;
         public bool RequiresConstructedBed;
         public bool IsShared => ParticipantA != null || ParticipantB != null || SharedId != null;
         public Pawn PartnerOf(Pawn pawn) => pawn == ParticipantA ? ParticipantB : ParticipantA;
@@ -94,6 +96,8 @@ namespace ColonyPromises
             Scribe_Values.Look(ref HistoryPartnerLabel, "historyPartnerLabel");
             Scribe_Values.Look(ref RequiresBarracks, "requiresBarracks");
             Scribe_Values.Look(ref HousingBased, "housingBased");
+            Scribe_Values.Look(ref DevTest, "devTest");
+            Scribe_Values.Look(ref DevManual, "devManual");
             Scribe_Values.Look(ref RequiresConstructedBed, "requiresConstructedBed");
             Scribe_Values.Look(ref Kind, "kind");
             Scribe_Values.Look(ref CreatedTick, "createdTick");

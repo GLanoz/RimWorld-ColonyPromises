@@ -13,16 +13,19 @@ namespace ColonyPromises
         public bool CreateShared(RequestCandidate candidate, int now)
         {
             var terms = candidate?.Terms;
+            if (terms?.DevTest == true && !Prefs.DevMode) return false;
             if (terms?.IsShared != true || !PromiseConditions.Eligible(terms.ParticipantA) || !PromiseConditions.Eligible(terms.ParticipantB)
                 || SharedBedroomRules.Validity(terms.ParticipantA, terms.ParticipantB) != SharedPairValidity.Valid)
                 return false;
             var a = StateFor(terms.ParticipantA);
             var b = StateFor(terms.ParticipantB);
-            if (!SharedBedroomRules.SlotFree(a, now) || !SharedBedroomRules.SlotFree(b, now)) return false;
+            if (terms.DevTest ? DevRequests.Occupied(a) || DevRequests.Occupied(b)
+                : !SharedBedroomRules.SlotFree(a, now) || !SharedBedroomRules.SlotFree(b, now)) return false;
             while (sharedBedrooms.Any(s => s.Id == "shared-bedroom-" + nextSharedId)) nextSharedId++;
             var shared = new SharedBedroomCommitment { Id = "shared-bedroom-" + nextSharedId++,
                 First = terms.ParticipantA, Second = terms.ParticipantB, Request = RequestGenerator.Offer(candidate, now) };
             terms.SharedId = shared.Id;
+            if (terms.DevManual) shared.Request.RecoveryEnabled = false;
             sharedBedrooms.Add(shared);
             AttachShared(shared, a, b);
             RequestGenerator.ResetObservations(a);
@@ -76,7 +79,7 @@ namespace ColonyPromises
             foreach (var pawn in new[] { shared.First, shared.Second })
             {
                 var state = PeekState(pawn);
-                if (state.Shared != shared || state.Active != null || state.Request != request || now < state.CooldownUntilTick)
+                if (state.Shared != shared || state.Active != null || state.Request != request || !request.Terms.DevTest && now < state.CooldownUntilTick)
                     return "CP_PairSlotBlocked".Translate();
             }
             return null;
@@ -116,6 +119,13 @@ namespace ColonyPromises
             }
             bool observable = validity == SharedPairValidity.Valid && RequestMaintenance.Observable(shared.First)
                 && RequestMaintenance.Observable(shared.Second) && shared.First.Map == shared.Second.Map;
+            if (terms.DevManual)
+            {
+                if (now >= shared.Request.ExpiryTick) ResolveShared(shared, PromiseOutcome.Expired, now);
+                else if (RequestNotices.TakeReminder(shared.Request, now, ColonyPromisesMod.Settings.RemindersEnabled))
+                    RequestNotices.Send(StateFor(shared.First), true);
+                return;
+            }
             if (observable && !DlcCompatibility.PendingCompatible(shared.First, terms))
             { ResolveShared(shared, PromiseOutcome.Obsolete, now); return; }
             bool satisfied = observable && SharedBedroomRules.Observe(terms).Satisfied;

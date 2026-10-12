@@ -19,6 +19,7 @@ namespace ColonyPromises
         public static bool Visible(ColonistPromises state, int now)
         {
             if (!IsOpen(state, now)) return false;
+            if (state.Request.Terms.DevManual) return true;
             if (state.Request.Terms.Kind == PromiseKind.Equipment && !state.Request.Terms.NeedBasedEquipment) return false;
             if (state.Request.Terms.Kind == PromiseKind.Bedroom && !state.Request.Terms.HousingBased) return false;
             if (state.Shared != null)

@@ -97,7 +97,7 @@ namespace ColonyPromises
             if (state.Active != null) return "CP_AlreadyActive".Translate();
             int now = Find.TickManager.TicksGame;
             if (request == null || state.Request != request || now >= request.ExpiryTick) return "CP_RequestUnavailable".Translate();
-            if (now < state.CooldownUntilTick) return "CP_Cooldown".Translate(PromiseText.Number((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay));
+            if (!request.Terms.DevTest && now < state.CooldownUntilTick) return "CP_Cooldown".Translate(PromiseText.Number((state.CooldownUntilTick - now) / (float)PromiseBalance.TicksPerDay));
             if (!RequestGenerator.Relevant(pawn, request)) return "CP_RequestOutdated".Translate();
             return null;
         }

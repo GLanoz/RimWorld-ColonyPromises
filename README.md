@@ -137,6 +137,10 @@ Each new request sends one letter naming the colonist and requirement. A single 
 
 With standard **Development mode** enabled, expand the diagnostic block in a colonist's details to see generation reasons, observation time, target availability, cooldowns, and upcoming checks. **Check now** runs a normal check without bypassing rules. Diagnostics start collapsed; viewing them does not change progress or create requests.
 
+**Create test request…** opens two testing modes. **From current needs** evaluates the selected subtype normally but skips observation time, cooldowns and the colony offer interval. **Set terms manually** lets you choose room level, an eligible romantic partner, recreation hours, or equipment with quality and condition requirements, even without a deficit or when conditions are already met. It creates an open request, not an accepted promise. Manual test requests stay open until accepted, declined or expired; they can be accepted after Development mode is turned off. Accept them with the ordinary button, then meet the real requirements: actual recreation or a full day retaining the room/item. Rewards, penalties and history are real, so use a copied testing save.
+
+An occupied slot is never replaced automatically. **Clear selected record…** requires confirmation and removes only that request/promise (both participants for a shared record), without rewards, penalties or a new cooldown. Existing trust, history, repeat tracking and cooldowns remain. All creation/cleanup controls disappear outside Development mode.
+
 ## Absence, saves, and limitations
 
 Illness, combat, caravans, and cryptosleep **do not pause deadlines**. Caravans do not generate requests or earn progress. Open requests can expire while away, and accepted promises remain active. Accumulated recreation is retained, but bedroom and equipment holds reset on departure and need a fresh continuous day on return. Death, destruction, or leaving the player faction closes the obligation without penalty; temporary absence alone does not cancel it.

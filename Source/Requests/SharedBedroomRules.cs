@@ -32,7 +32,7 @@ namespace ColonyPromises
         public static bool SlotFree(ColonistPromises state, int now) => state != null
             && state.Active == null && state.Request == null && state.SharedId == null && now >= state.CooldownUntilTick;
 
-        public static bool TryEvaluate(Pawn pawn, RequestEvaluation result, out RequestCandidate candidate)
+        public static bool TryEvaluate(Pawn pawn, RequestEvaluation result, out RequestCandidate candidate, bool devBypassCooldown = false)
         {
             candidate = null;
             var partners = Partners(pawn);
@@ -55,7 +55,8 @@ namespace ColonyPromises
             { result.Reason = "CP_PairNoBed"; return true; }
             var component = GameComponent_Promises.Current;
             int now = Find.TickManager.TicksGame;
-            if (component != null && (!SlotFree(component.PeekState(pawn), now) || !SlotFree(component.PeekState(partner), now)))
+            if (component != null && !(devBypassCooldown && Prefs.DevMode)
+                && (!SlotFree(component.PeekState(pawn), now) || !SlotFree(component.PeekState(partner), now)))
             { result.Reason = "CP_PairSlotBlocked"; return true; }
             var first = pawn.thingIDNumber < partner.thingIDNumber ? pawn : partner;
             var second = first == pawn ? partner : pawn;
