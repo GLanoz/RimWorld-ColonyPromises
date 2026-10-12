@@ -227,8 +227,9 @@ public static class SharedBedroomChecks
                 sa.CooldownUntilTick = sb.CooldownUntilTick = 0;
                 shared = Shared(a, b, 4); Attach(component, shared);
                 Call(component, "CompleteShared", shared, outcome, 2400, false);
+                if (outcome == PromiseOutcome.Declined) { trustA = PromiseBalance.ClampTrust(trustA - 1); trustB = PromiseBalance.ClampTrust(trustB - 1); }
                 Check(sa.Trust == trustA && sb.Trust == trustB && sa.Request == null && sb.Request == null,
-                    "Shared " + outcome + " has no personal penalty and releases both slots");
+                    "Shared " + outcome + " applies only its intended personal effects and releases both slots");
             }
             sa.Trust = sb.Trust = 0; sa.CooldownUntilTick = sb.CooldownUntilTick = 0;
             shared = Shared(a, b, 5); Attach(component, shared); shared.Terms.ProgressTicks = 60000; shared.Terms.PreviouslySatisfied = true;

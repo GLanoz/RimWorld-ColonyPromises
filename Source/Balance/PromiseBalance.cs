@@ -75,6 +75,9 @@ namespace ColonyPromises
         public const int OfferSpacing = PromiseBalance.TicksPerDay / 2;
         public const int ResponseDays = 2;
         public const int UnacceptedCooldownDays = 3;
+        public const int DeclineMood = -1;
+        public const int DeclineTrust = -1;
+        public const int DeclineMemoryDays = 1;
         public const int CompletedCooldownDays = 5;
         public const float LowJoy = 0.35f;
         public const float SevereJoy = 0.15f;

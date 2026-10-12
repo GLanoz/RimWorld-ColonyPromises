@@ -259,8 +259,11 @@ namespace ColonyPromises
                 {
                     var target = pawn;
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-                        state.Shared == null ? "CP_DeclineConfirm".Translate(RequestRules.UnacceptedCooldownDays).ToString()
-                            : "CP_SharedDeclineConfirm".Translate(SharedPromiseText.Names(state.Shared.First, state.Shared.Second), RequestRules.UnacceptedCooldownDays).ToString(),
+                        (state.Shared == null ? "CP_DeclineConfirm".Translate(RequestRules.UnacceptedCooldownDays).ToString()
+                            : "CP_SharedDeclineConfirm".Translate(SharedPromiseText.Names(state.Shared.First, state.Shared.Second), RequestRules.UnacceptedCooldownDays).ToString())
+                            + "\n" + (state.Shared == null ? PromiseConsequences.DeclineText(state)
+                                : string.Join("\n", new[] { state.Shared.First, state.Shared.Second }.Select(p =>
+                                    p.LabelShort + ": " + PromiseConsequences.DeclineText(component.PeekState(p))))),
                         () => component.Decline(target, request)));
                 }
             }

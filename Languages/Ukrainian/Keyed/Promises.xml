@@ -48,9 +48,9 @@
 
 {4}</CP_AcceptConfirm>
   <CP_Decline>Відмовити…</CP_Decline>
-  <CP_DeclineConfirm>Відмовити в проханні? Без штрафу до настрою чи довіри. Нові прохання можливі після {0} днів.</CP_DeclineConfirm>
+  <CP_DeclineConfirm>Відмовити в проханні? Нові прохання можна очікувати через {0} дн.</CP_DeclineConfirm>
   <CP_NoRequest>Немає відкритого прохання чи активної обіцянки.</CP_NoRequest>
-  <CP_RequestRules>Прохання виникають поступово після двох днів спостережуваного дефіциту. Довільно обирати вимоги не можна. Відмова або відсутність відповіді не дають штрафу. Довіра має межі 0–100 і не дає постійного бонусу настрою.</CP_RequestRules>
+  <CP_RequestRules>Прохання виникають поступово після двох днів спостережуваного дефіциту. Довільно обирати вимоги не можна. Відмова дає невеликий штраф; відсутність відповіді — без штрафу. Довіра має межі 0–100 і не дає постійного бонусу настрою.</CP_RequestRules>
   <CP_RequestUnavailable>Це прохання вже закрите або час для відповіді сплив.</CP_RequestUnavailable>
   <CP_RequestOutdated>Це прохання більше не можна прийняти: потреба або доступне рішення змінилися.</CP_RequestOutdated>
   <CP_NewRequest>{0} висловлює прохання: {1}. Перегляньте його у вкладці «Обіцянки».</CP_NewRequest>
@@ -169,7 +169,7 @@
 {1}
 {2}</CP_SharedWithdrawConfirm>
   <CP_PersonalWithdrawal>{0}: {1} настрою на {2} дн.; {3} довіри; очікування {4} дн.</CP_PersonalWithdrawal>
-  <CP_SharedDeclineConfirm>Відмовити парі {0}? Без штрафу до настрою чи довіри. Обоє чекатимуть {1} днів до нових прохань.</CP_SharedDeclineConfirm>
+  <CP_SharedDeclineConfirm>Відмовити в проханні пари {0}? Обоє чекатимуть {1} дн. до нових прохань.</CP_SharedDeclineConfirm>
   <CP_SharedResult>{0}: спільна спальня — {1}.</CP_SharedResult>
   <CP_SharedHistoryType>{0} з {1}</CP_SharedHistoryType>
   <CP_PairRecovery>{0}: можливе відновлення +{1} довіри без прийняття після {2} безперервних підтверджених годин до спливання строку відповіді. Без бонусу настрою. Спільний прогрес: {3} год.; діють особисті обмеження відновлення.</CP_PairRecovery>
@@ -329,4 +329,5 @@
   <CP_DevType_Naked>Одяг проти небажаної оголеності</CP_DevType_Naked>
   <CP_DevType_BrawlerUnhappy>Зброя ближнього бою для забіяки</CP_DevType_BrawlerUnhappy>
   <CP_DevType_WeaponUpgrade>Краща копія екіпірованої зброї</CP_DevType_WeaponUpgrade>
+  <CP_DeclineEffects>Відмова: {0} настрою на {1} дн.; {2} довіри.</CP_DeclineEffects>
 </LanguageData>

@@ -48,9 +48,9 @@ Fulfill within {2} days after accepting.
 
 {4}</CP_AcceptConfirm>
   <CP_Decline>Decline…</CP_Decline>
-  <CP_DeclineConfirm>Decline this request? No mood or trust penalty. New requests can appear after {0} days.</CP_DeclineConfirm>
+  <CP_DeclineConfirm>Decline this request? New requests can appear after {0} days.</CP_DeclineConfirm>
   <CP_NoRequest>No open request or active promise.</CP_NoRequest>
-  <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining or ignoring a request has no penalty. Trust stays between 0 and 100 and gives no permanent mood bonus.</CP_RequestRules>
+  <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining has a small penalty; leaving a request unanswered has none. Trust stays between 0 and 100 and gives no permanent mood bonus.</CP_RequestRules>
   <CP_RequestUnavailable>This request is no longer open or its response time has expired.</CP_RequestUnavailable>
   <CP_RequestOutdated>This request can no longer be accepted. Its need or available solution has changed.</CP_RequestOutdated>
   <CP_NewRequest>{0} requests: {1}. Review it in Promises.</CP_NewRequest>
@@ -169,7 +169,7 @@ Response time remaining: {3} days.</CP_RequestSummaryRow>
 {1}
 {2}</CP_SharedWithdrawConfirm>
   <CP_PersonalWithdrawal>{0}: {1} mood for {2} days; {3} trust; cooldown {4} days.</CP_PersonalWithdrawal>
-  <CP_SharedDeclineConfirm>Decline the request from {0}? No mood or trust penalty. Both wait {1} days before new requests.</CP_SharedDeclineConfirm>
+  <CP_SharedDeclineConfirm>Decline the request from {0}? Both wait {1} days before new requests.</CP_SharedDeclineConfirm>
   <CP_SharedResult>{0}: shared bedroom — {1}.</CP_SharedResult>
   <CP_SharedHistoryType>{0} with {1}</CP_SharedHistoryType>
   <CP_PairRecovery>{0}: may recover +{1} trust without accepting, after {2} continuous verified hours before the response deadline. No mood reward. Shared progress: {3} hours; personal recovery limits apply.</CP_PairRecovery>
@@ -329,4 +329,5 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_DevType_Naked>Clothing for unwanted nudity</CP_DevType_Naked>
   <CP_DevType_BrawlerUnhappy>Melee weapon for a Brawler</CP_DevType_BrawlerUnhappy>
   <CP_DevType_WeaponUpgrade>Better copy of an equipped weapon</CP_DevType_WeaponUpgrade>
+  <CP_DeclineEffects>Declining: {0} mood for {1} day(s); {2} trust.</CP_DeclineEffects>
 </LanguageData>

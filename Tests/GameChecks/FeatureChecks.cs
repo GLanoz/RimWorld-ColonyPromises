@@ -133,7 +133,7 @@ public static class FeatureChecks
         Check(TrustRecovery.Available(recovery, recovery.Request, 700000), "Another direction can recover after the global cooldown");
         var refusal = new ColonistPromises { Trust = 0, Request = Request() };
         var declined = RequestLifecycle.Close(refusal, PromiseOutcome.Declined, 1000, true);
-        Check(refusal.Trust == 0 && declined.AppliedTrust == 0, "Decline remains penalty-free and grants no recovery");
+        Check(refusal.Trust == 0 && declined.AppliedTrust == 0 && declined.AppliedMood == -1, "Decline mood applies at zero trust without recovery or negative trust");
         refusal.Request = Request();
         Check(RequestLifecycle.Close(refusal, PromiseOutcome.Expired, 120100, true).AppliedTrust == 0, "Expiry grants no recovery");
         recovery.Request = null;

@@ -28,6 +28,7 @@ namespace ColonyPromises
             r.RecordResolution(now);
             r.Outcome = outcome;
             r.RecordConsequences(0, recovery);
+            if (outcome == PromiseOutcome.Declined) PromiseConsequences.ApplyDecline(state, r);
             r.StableThing = null;
             r.ObservedRoom = null;
             state.CooldownUntilTick = now + RequestRules.UnacceptedCooldownDays * PromiseBalance.TicksPerDay;

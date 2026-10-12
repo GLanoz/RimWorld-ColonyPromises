@@ -25,7 +25,7 @@ New requests appear at least **half a day apart across the whole colony**, inclu
 Select a colonist and open **Promises** on the bottom bar, or use **Open Promises** in a request letter. Review the reason, exact requirement, response time, fulfillment deadline, and mood and trust changes before accepting. Acceptance checks that the request is still relevant. You cannot choose arbitrary targets or deadlines.
 
 - **Accept:** turn the request into a timed promise. Meet its conditions before the deadline to earn the displayed reward.
-- **Decline:** close it without a mood or trust penalty.
+- **Decline:** close it with −1 mood for one day and −1 trust (bounded at zero).
 - **Leave unanswered:** it expires without a penalty. Satisfying it before acceptance normally gives no reward; limited recovery at very low trust is described below.
 - **Withdraw an accepted promise:** confirm the displayed penalty. Withdrawal is less costly than breaking it.
 

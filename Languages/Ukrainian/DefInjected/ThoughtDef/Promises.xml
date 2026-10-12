@@ -3,4 +3,5 @@
 <CP_PromiseFulfilled.stages.0.label>обіцянку виконано</CP_PromiseFulfilled.stages.0.label><CP_PromiseFulfilled.stages.0.description>Керівництво колонії виконало свою обіцянку мені.</CP_PromiseFulfilled.stages.0.description>
 <CP_PromiseBroken.stages.0.label>обіцянку порушено</CP_PromiseBroken.stages.0.label><CP_PromiseBroken.stages.0.description>Керівництво колонії порушило свою обіцянку мені.</CP_PromiseBroken.stages.0.description>
 <CP_PromiseWithdrawn.stages.0.label>обіцянку відкликано</CP_PromiseWithdrawn.stages.0.label><CP_PromiseWithdrawn.stages.0.description>Керівництво колонії відкликало свою обіцянку мені.</CP_PromiseWithdrawn.stages.0.description>
+<CP_RequestDeclined.stages.0.label>у проханні відмовлено</CP_RequestDeclined.stages.0.label><CP_RequestDeclined.stages.0.description>Керівництво колонії відмовило в моєму проханні.</CP_RequestDeclined.stages.0.description>
 </LanguageData>

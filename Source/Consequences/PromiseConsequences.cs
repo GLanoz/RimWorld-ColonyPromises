@@ -6,6 +6,17 @@ namespace ColonyPromises
 {
     public static class PromiseConsequences
     {
+        public static int DeclineTrustChange(ColonistPromises state) => PromiseBalance.ClampTrust(state.Trust + RequestRules.DeclineTrust) - state.Trust;
+        public static string DeclineText(ColonistPromises state) => "CP_DeclineEffects".Translate(
+            PromiseText.Signed(RequestRules.DeclineMood), RequestRules.DeclineMemoryDays, PromiseText.Signed(DeclineTrustChange(state)));
+        public static void ApplyDecline(ColonistPromises state, PromiseRecord record)
+        {
+            int delta = DeclineTrustChange(state);
+            state.Trust += delta;
+            record.RecordConsequences(RequestRules.DeclineMood, delta);
+            AddMemory(state, "CP_RequestDeclined", RequestRules.DeclineMood, RequestRules.DeclineMemoryDays);
+        }
+
         public static PromiseRecord Preview(ColonistPromises state, ColonistRequest request, int tick)
         {
             var copy = request.Terms.CopyForPreview();
@@ -81,6 +92,12 @@ namespace ColonyPromises
             int oldTrust = state.Trust;
             state.Trust = PromiseBalance.ClampTrust(oldTrust + trust);
             record.RecordConsequences(mood, state.Trust - oldTrust);
+            AddMemory(state, defName, mood, days);
+            state.CooldownUntilTick = tick + (record.FrozenConsequences ? record.CooldownDays : PromiseBalance.CooldownDays) * PromiseBalance.TicksPerDay;
+        }
+
+        private static void AddMemory(ColonistPromises state, string defName, float mood, int days)
+        {
             var memories = state.Pawn?.needs?.mood?.thoughts?.memories;
             if (memories != null)
             {
@@ -92,7 +109,6 @@ namespace ColonyPromises
                 memory.durationTicksOverride = days * PromiseBalance.TicksPerDay;
                 memories.TryGainMemory(memory);
             }
-            state.CooldownUntilTick = tick + (record.FrozenConsequences ? record.CooldownDays : PromiseBalance.CooldownDays) * PromiseBalance.TicksPerDay;
         }
     }
 }

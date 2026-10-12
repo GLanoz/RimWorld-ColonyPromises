@@ -191,6 +191,7 @@ namespace ColonyPromises
                     state.RecentSuccesses.RemoveAll(s => now - s.Tick > PromiseBalance.RepeatWindowDays * PromiseBalance.TicksPerDay);
                     PromiseConsequences.Apply(state, personal, outcome, now);
                 }
+                else if (outcome == PromiseOutcome.Declined && attached) PromiseConsequences.ApplyDecline(state, personal);
                 else personal.RecordConsequences(0, recovery[i]);
                 if (attached)
                 {

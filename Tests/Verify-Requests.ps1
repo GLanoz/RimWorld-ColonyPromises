@@ -43,7 +43,7 @@ public static class RequestChecks
         state.Deficits.Add(new DeficitObservation { Kind = PromiseKind.Leisure, Ticks = 120000 });
         state.Request = Request(PromiseKind.Leisure, 0);
         var closed = RequestLifecycle.Close(state, PromiseOutcome.Declined, 500);
-        Check(state.Trust == 50 && closed.AppliedTrust == 0 && closed.AppliedMood == 0, "Declining applies no penalty");
+        Check(state.Trust == 49 && closed.AppliedTrust == -1 && closed.AppliedMood == -1, "Declining records its small personal penalty");
         Check(state.Active == null && state.Request == null, "Declining does not create a promise");
         Check(state.CooldownUntilTick == 180500, "Declining starts individual cooldown");
         Check(state.Deficits.Count == 0, "Declining discards old deficit");
@@ -51,7 +51,7 @@ public static class RequestChecks
         Check(RequestLifecycle.Close(state, PromiseOutcome.Declined, 600) == null, "Closure cannot apply twice");
         state.Request = Request(PromiseKind.Leisure, 0);
         closed = RequestLifecycle.Close(state, PromiseOutcome.Expired, 700);
-        Check(state.Trust == 50 && closed.AppliedMood == 0, "Expiry is not a broken promise");
+        Check(state.Trust == 49 && closed.AppliedMood == 0, "Expiry applies no additional penalty");
         state.Request = Request(PromiseKind.Leisure, 0);
         closed = RequestLifecycle.Close(state, PromiseOutcome.SatisfiedUnaccepted, 800);
         Check(closed.AppliedTrust == 0 && state.RecentSuccesses.Count == 1, "Unaccepted fulfillment earns nothing");
