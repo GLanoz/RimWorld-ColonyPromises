@@ -1,6 +1,6 @@
 # Colony Promises
 
-Version **0.2.1** for RimWorld **1.6**.
+Version **0.2.2** for RimWorld **1.6**.
 
 Colonists ask for a better bedroom, time for recreation, or improved equipment after a need has remained unmet. You can accept a request as a promise, decline it, or leave it unanswered. Keeping and breaking promises affects mood and trust in the colony's leadership, without changing personal relationships between colonists.
 

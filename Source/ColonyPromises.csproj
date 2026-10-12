@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
