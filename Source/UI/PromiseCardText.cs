@@ -46,7 +46,7 @@ namespace ColonyPromises
             string quality = r.QualityOptional ? "" : "CP_CardQuality".Translate(r.MinimumQuality.GetLabel()).ToString();
             string condition = r.MinimumHitPointsFraction <= 0 ? "" : "CP_CardCondition".Translate(
                 PromiseText.Number(r.MinimumHitPointsFraction * 100)).ToString();
-            return (r.EquipmentDef?.IsApparel == true ? "CP_CardWear" : r.RequireMelee ? "CP_CardPrimary" : "CP_CardEquip")
+            return (r.EquipmentDef?.IsApparel == true ? "CP_CardWear" : r.RequireMelee || EquipmentNeeds.AcquisitionCause(r.EquipmentCause) ? "CP_CardPrimary" : "CP_CardEquip")
                 .Translate(r.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(), quality, condition, hours).ToString()
                 + (r.RequireCoverage ? " " + "CP_CardCoverage".Translate() : "")
                 + (r.AvoidHumanLeather ? " " + "CP_NoHumanLeather".Translate() : "");

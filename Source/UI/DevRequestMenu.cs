@@ -58,6 +58,8 @@ namespace ColonyPromises
             }
             IEnumerable<ThingDef> targets = DefDatabase<ThingDef>.AllDefsListForReading;
             if (type.Cause == "WeaponUpgrade") targets = targets.Where(d => d == pawn.equipment?.Primary?.def);
+            else if (EquipmentNeeds.AcquisitionCause(type.Cause)) targets = targets.Where(d =>
+                EquipmentNeeds.WeaponTypeMatches(d, type.Cause == "WeaponRanged"));
             else targets = targets.Where(d => type.Cause == "BrawlerUnhappy" ? d.IsMeleeWeapon : d.IsApparel);
             Show(targets.OrderBy(d => d.label, StringComparer.CurrentCulture).ThenBy(d => d.defName, StringComparer.Ordinal)
                 .Where(d => { var probe = terms.CopyForPreview(); probe.EquipmentDef = d; return DevRequests.ValidTerms(pawn, probe); })

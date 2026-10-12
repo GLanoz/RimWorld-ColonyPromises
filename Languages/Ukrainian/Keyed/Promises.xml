@@ -329,5 +329,15 @@
   <CP_DevType_Naked>Одяг проти небажаної оголеності</CP_DevType_Naked>
   <CP_DevType_BrawlerUnhappy>Зброя ближнього бою для забіяки</CP_DevType_BrawlerUnhappy>
   <CP_DevType_WeaponUpgrade>Краща копія екіпірованої зброї</CP_DevType_WeaponUpgrade>
+  <CP_GearReason_WeaponRanged>Хоче стрілецьку зброю, щоб використовувати свої навички в бою.</CP_GearReason_WeaponRanged>
+  <CP_CardReason_WeaponRanged>Хоче стрілецьку зброю, щоб використовувати свої навички в бою.</CP_CardReason_WeaponRanged>
+  <CP_GearReason_WeaponMelee>Хоче зброю ближнього бою, що відповідає його навичкам.</CP_GearReason_WeaponMelee>
+  <CP_CardReason_WeaponMelee>Хоче зброю ближнього бою, що відповідає його навичкам.</CP_CardReason_WeaponMelee>
+  <CP_DevType_WeaponRanged>Отримати стрілецьку зброю</CP_DevType_WeaponRanged>
+  <CP_DevType_WeaponMelee>Отримати зброю ближнього бою</CP_DevType_WeaponMelee>
+  <CP_WeaponAcquireEvidence>Стрільба {0}; ближній бій {1}. Хоче зброю типу «{2}»; основної зброї цього типу немає.</CP_WeaponAcquireEvidence>
+  <CP_WeaponAcquireNoTarget>Потрібна зброя вибраного типу, але придатної моделі немає на складі й доступне виробництво не підтверджене.</CP_WeaponAcquireNoTarget>
+  <CP_WeaponAcquireNoNeed>Немає бажання отримати цей тип зброї: перевірте мінімальну навичку, різницю рівнів, допустимий тип та поточну основну зброю.</CP_WeaponAcquireNoNeed>
+  <CP_WeaponAcquireBrawler>Чинне невдоволення забіяки має пріоритет над бажанням зброї за навичками.</CP_WeaponAcquireBrawler>
   <CP_DeclineEffects>Відмова: {0} настрою на {1} дн.; {2} довіри.</CP_DeclineEffects>
 </LanguageData>

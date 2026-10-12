@@ -47,7 +47,7 @@ namespace ColonyPromises
             RequiresBarracks = type.Barracks, ParticipantA = type.Shared ? pawn : null, ParticipantB = partner,
             RequiresConstructedBed = type.BuiltBed,
             NeedBasedEquipment = type.Kind == PromiseKind.Equipment, EquipmentCause = type.Cause,
-            RequireCoverage = type.Cause == "Naked", RequireMelee = type.Cause == "BrawlerUnhappy",
+            RequireCoverage = type.Cause == "Naked", RequireMelee = type.Cause == "BrawlerUnhappy" || type.Cause == "WeaponMelee",
             QualityOptional = type.Cause != "WeaponUpgrade", MinimumQuality = QualityCategory.Normal,
             MinimumHitPointsFraction = type.Cause == "ApparelDamaged" ? RequestRules.ReplacementFraction : 0,
             RoomStage = RequestRules.BedroomBaseStage,
@@ -69,6 +69,9 @@ namespace ColonyPromises
                 && RestUtility.CanUseBedEver(r.ParticipantB, d))) return false;
             if (r.Kind == PromiseKind.Leisure) return pawn.needs?.joy != null;
             return r.Kind != PromiseKind.Equipment || EquipmentNeeds.UsableDefinition(pawn, r)
+                && (!EquipmentNeeds.AcquisitionCause(r.EquipmentCause)
+                    || EquipmentNeeds.WeaponTypeMatches(r.EquipmentDef, r.EquipmentCause == "WeaponRanged")
+                        && !(r.EquipmentDef.IsRangedWeapon && pawn.story?.traits?.HasTrait(TraitDefOf.Brawler) == true))
                 && DlcCompatibility.ApparelDefinition(pawn, r.EquipmentDef)
                 && (!r.RequireCoverage || EquipmentNeeds.CoversMissingBasics(pawn, r.EquipmentDef));
         }

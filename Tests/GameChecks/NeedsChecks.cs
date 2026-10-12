@@ -30,6 +30,21 @@ public static class NeedsChecks
         Check(Choice(15, 2, null, violent: false) == null, "Nonviolent pawns select no weapon");
         Check(Choice(15, 0, null, shootingDisabled: true) == false, "Real skill restriction precedes level difference");
         Check(Choice(15, 2, null, brawler: true, meleeDisabled: true) == null, "Restricted Brawler has no contradictory fallback");
+        bool? Acquire(int shooting, int melee, bool? equipped = null, bool brawler = false, bool violent = true) =>
+            EquipmentNeeds.AcquisitionType(shooting, melee, Choice(shooting, melee, equipped, brawler: brawler, violent: violent), equipped);
+        Check(Acquire(15, 2) == true && Acquire(15, 2, false) == true, "Unarmed or sword-armed shooting specialist wants ranged");
+        Check(Acquire(15, 2, true) == null, "Existing ranged primary removes the acquisition desire regardless of quality");
+        Check(Acquire(2, 15) == false && Acquire(2, 15, true) == false, "Unarmed or gun-armed melee specialist wants melee without Brawler");
+        Check(Acquire(2, 15, false) == null, "Existing melee primary removes the acquisition desire");
+        Check(Acquire(6, 2) == true && Acquire(2, 6) == false, "Minimum six and exact four-level difference qualify symmetrically");
+        Check(Acquire(5, 1) == null && Acquire(1, 5) == null, "Four-level difference alone cannot bypass level six");
+        Check(Acquire(6, 3) == null && Acquire(3, 6) == null && Acquire(0, 0) == null, "Close and zero skills create no acquisition desire");
+        Check(Acquire(15, 2, null, brawler: true) == null && Acquire(15, 2, false, brawler: true) == null,
+            "Brawler never requests a gun due to high Shooting");
+        Check(Acquire(2, 15, null, brawler: true) == false, "Skilled unarmed Brawler may request melee");
+        Check(Acquire(15, 2, null, violent: false) == null, "Nonviolent acquisition is blocked before levels");
+        Check(!EquipmentNeeds.Confirmed("WeaponRanged", -100, true) && !EquipmentNeeds.Confirmed("WeaponMelee", -100, true),
+            "Mod-owned acquisition causes are not attributed to game mood thoughts");
         var meleeDef = (ThingDef)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ThingDef));
         var rangedDef = (ThingDef)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ThingDef));
         foreach (var def in new[] { meleeDef, rangedDef }) { def.category = ThingCategory.Item;
@@ -39,6 +54,8 @@ public static class NeedsChecks
         Check(rangedDef.IsRangedWeapon && !rangedDef.IsMeleeWeapon, "Ranged weapon with melee tools remains ranged by game API");
         Check(!new[] { meleeDef }.Any(d => EquipmentNeeds.WeaponTypeMatches(d, Choice(15, 2))), "Wrong-type-only stock cannot switch a specialist");
         Check(!EquipmentNeeds.WeaponTypeMatches(rangedDef, null), "Blocked choice has no available target");
+        Check(!new[] { meleeDef }.Any(d => EquipmentNeeds.WeaponTypeMatches(d, Acquire(15, 2))), "Wrong-type-only availability cannot produce a gun desire target");
+        Check(!new[] { rangedDef }.Any(d => EquipmentNeeds.WeaponTypeMatches(d, Acquire(2, 15))), "Wrong-type-only availability cannot produce a melee desire target");
         foreach (var quality in new[] { QualityCategory.Awful, QualityCategory.Poor })
             Check(EquipmentNeeds.UpgradeQuality(quality, 0) == QualityCategory.Normal, "Below Normal targets Normal even at level zero");
         Check(EquipmentNeeds.UpgradeQuality(QualityCategory.Normal, 9) == null, "Level nine does not request Good");
@@ -95,6 +112,39 @@ public static class NeedsChecks
             && savedUpgrade.MinimumQuality == QualityCategory.Good && !savedUpgrade.QualityOptional
             && savedUpgrade.ProgressTicks == 250 && savedUpgrade.DeadlineTick == acceptedDeadline
             && savedUpgrade.SuccessMood == acceptedMood, "Accepted upgrade fields survive existing Scribe keys");
+        meleeDef.defName = "WeaponAcquisitionMeleeFixture"; meleeDef.label = "fixture sword";
+        DefDatabase<ThingDef>.Add(meleeDef);
+        foreach (string cause in new[] { "WeaponRanged", "WeaponMelee" })
+        {
+            var acquisitionTerms = DevRequests.Manual(DevRequests.Types.First(t => t.Cause == cause), null);
+            acquisitionTerms.DevTest = acquisitionTerms.DevManual = false;
+            var target = cause == "WeaponRanged" ? rangedDef : meleeDef;
+            acquisitionTerms.EquipmentDef = target;
+            var acquisitionCandidate = new RequestCandidate { Terms = acquisitionTerms, Signature = "weapon-acquire-v1:" + cause,
+                ReasonKey = "CP_GearReason_" + cause };
+            var observed = RequestGenerator.Project(null, acquisitionCandidate, PromiseKind.Equipment, 0, false);
+            for (int tick = 2500; tick <= 120000; tick += 2500)
+                observed = RequestGenerator.Project(observed, acquisitionCandidate, PromiseKind.Equipment, tick, false);
+            Check(observed.Ticks == RequestRules.PersistentTicks && RequestRules.Ready(observed.Ticks, false, 120000, 0),
+                "Acquisition uses the existing two-day natural observation: " + cause);
+            var acquisitionState = new ColonistPromises();
+            var offer = RequestGenerator.Offer(acquisitionCandidate, 120000);
+            acquisitionState.Request = offer;
+            RequestLifecycle.Accept(acquisitionState, offer, 120100);
+            int deadline = acquisitionTerms.DeadlineTick;
+            Choice(2, 20);
+            Check(acquisitionState.Active == acquisitionTerms && acquisitionTerms.FrozenConsequences
+                && acquisitionTerms.EquipmentDef == target && acquisitionTerms.DeadlineTick == deadline,
+                "Acquisition acceptance freezes the item and real deadline independent of later skill preference: " + cause);
+            try { Scribe.saver.InitSaving(path, "save"); acquisitionTerms.ExposeData(); Scribe.saver.FinalizeSaving(); }
+            finally { Scribe.saver.ForceStop(); }
+            var loadedAcquisition = new PromiseRecord();
+            try { Scribe.loader.InitLoading(path); Scribe.loader.curParent = loadedAcquisition; loadedAcquisition.ExposeData(); }
+            finally { Scribe.loader.ForceStop(); }
+            Check(loadedAcquisition.EquipmentCause == cause && loadedAcquisition.EquipmentDef == target
+                && loadedAcquisition.QualityOptional && loadedAcquisition.DeadlineTick == deadline,
+                "Acquisition uses existing string/Def/quality Scribe fields: " + cause);
+        }
         Check(!EquipmentNeeds.Confirmed("Pain", -10, true), "Unrelated negative mood is not an equipment cause");
         Check(!EquipmentNeeds.Confirmed("ApparelDamaged", 0, true), "An uncomplaining pawn does not request apparel");
         Check(!EquipmentNeeds.Confirmed("Naked", 0, true), "Nullified nudity cannot request clothing");

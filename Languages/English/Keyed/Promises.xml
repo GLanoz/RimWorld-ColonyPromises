@@ -329,5 +329,15 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_DevType_Naked>Clothing for unwanted nudity</CP_DevType_Naked>
   <CP_DevType_BrawlerUnhappy>Melee weapon for a Brawler</CP_DevType_BrawlerUnhappy>
   <CP_DevType_WeaponUpgrade>Better copy of an equipped weapon</CP_DevType_WeaponUpgrade>
+  <CP_GearReason_WeaponRanged>Wants a ranged weapon to use their combat skills.</CP_GearReason_WeaponRanged>
+  <CP_CardReason_WeaponRanged>Wants a ranged weapon to use their combat skills.</CP_CardReason_WeaponRanged>
+  <CP_GearReason_WeaponMelee>Wants a melee weapon that suits their combat skills.</CP_GearReason_WeaponMelee>
+  <CP_CardReason_WeaponMelee>Wants a melee weapon that suits their combat skills.</CP_CardReason_WeaponMelee>
+  <CP_DevType_WeaponRanged>Obtain a ranged weapon</CP_DevType_WeaponRanged>
+  <CP_DevType_WeaponMelee>Obtain a melee weapon</CP_DevType_WeaponMelee>
+  <CP_WeaponAcquireEvidence>Shooting {0}; Melee {1}. Wants an equipped {2} weapon; no primary of that type is held.</CP_WeaponAcquireEvidence>
+  <CP_WeaponAcquireNoTarget>A weapon of the selected type is needed, but no usable model is obtainable through current stock or verified production.</CP_WeaponAcquireNoTarget>
+  <CP_WeaponAcquireNoNeed>No acquisition desire for this type: check the minimum skill, skill gap, permitted weapon type and current primary weapon.</CP_WeaponAcquireNoNeed>
+  <CP_WeaponAcquireBrawler>The existing Brawler complaint takes priority over a skill-based weapon desire.</CP_WeaponAcquireBrawler>
   <CP_DeclineEffects>Declining: {0} mood for {1} day(s); {2} trust.</CP_DeclineEffects>
 </LanguageData>

@@ -71,7 +71,11 @@ Recognized games, social relaxation, skygazing, and recreational walking count. 
 
 ### Equipment
 
-Clothing requests and the Brawler weapon complaint require a current negative effect caused by a supported equipment problem for two observed days. A separate weapon-upgrade desire uses the rules below, without adding a negative mood thought. General unhappiness and missing equipment alone do not create requests.
+Colonists can ask for a weapon suited to their combat skills. Shooting of at least 6, ahead of Melee by at least 4 levels, supports a ranged request; the reverse supports a melee request. This applies only when unarmed or using the opposite weapon type. Traits and actual usage restrictions take priority: a Brawler does not request a gun because of high Shooting. This is a personal desire added by the mod, without a new negative game thought.
+
+The request names an obtainable model and uses the usual two-day observation and equipment rewards. Without suitable stock or a verified manufacturing route, no request is offered instead of choosing the wrong type. An appropriate primary weapon removes this need; its quality can still support the separate same-model upgrade request. Acceptance fixes the model even if skills later change. The requested weapon must remain the primary weapon for one continuous day.
+
+Clothing requests and the Brawler weapon complaint require a current negative effect caused by a supported equipment problem for two observed days. A separate weapon-upgrade desire uses the rules below, without adding a negative mood thought. General unhappiness alone does not create requests. Missing equipment supports only the specific causes described here.
 
 - **Damaged clothing:** replace a specific worn piece with the same type at **80% condition or better**. The game's complaint excludes locked clothing and items that do not care about damage. The request addresses that piece; other damaged clothing can still cause dissatisfaction.
 - **Unwanted nudity:** provide one compatible garment covering the missing basic body areas. A nude colonist who has no supported negative effect does not request clothing. Core's nudity complaint is disabled with Ideology; ideology-specific dress complaints are currently unsupported.
