@@ -340,4 +340,38 @@
   <CP_WeaponAcquireNoNeed>Немає бажання отримати цей тип зброї: перевірте мінімальну навичку, різницю рівнів, допустимий тип та поточну основну зброю.</CP_WeaponAcquireNoNeed>
   <CP_WeaponAcquireBrawler>Чинне невдоволення забіяки має пріоритет над бажанням зброї за навичками.</CP_WeaponAcquireBrawler>
   <CP_DeclineEffects>Відмова: {0} настрою на {1} дн.; {2} довіри.</CP_DeclineEffects>
+  <CP_Type_Substance>Речовина</CP_Type_Substance>
+  <CP_SubstanceTryTitle>Спробувати нову речовину</CP_SubstanceTryTitle>
+  <CP_SubstanceAddictionTitle>Доза для залежності</CP_SubstanceAddictionTitle>
+  <CP_SubstanceTryReason>Хоче спробувати {0}.</CP_SubstanceTryReason>
+  <CP_SubstanceAddictionReason>Потребує {0} через залежність.</CP_SubstanceAddictionReason>
+  <CP_SubstanceTryAction>Після прийняття обіцянки вжийте {0}, щоб з’явився звичайний ефект речовини.</CP_SubstanceTryAction>
+  <CP_SubstanceAddictionAction>Після прийняття обіцянки вжийте одну придатну дозу {0}. Підійде будь-який підтриманий продукт для цієї залежності.</CP_SubstanceAddictionAction>
+  <CP_SubstanceDetails>Мод не призначає вживання й не змінює політики. Достатньо одного підтвердженого вживання; утримувати ефект певний час не потрібно. Після закриття прохання про речовину діє додаткове очікування {0} днів. Давнє вживання може бути невідомим: незнайомою вважається речовина без достовірного запису про вживання.</CP_SubstanceDetails>
+  <CP_SubstancePending>Очікується вживання обіцяної речовини.</CP_SubstancePending>
+  <CP_SubstanceProgress>Підтверджені дози: {0} / 1.</CP_SubstanceProgress>
+  <CP_SubstanceEvidence>Ступінь DrugDesire: {0}; активних залежностей: {1}; очікування речовин: {2} днів; записів знайомства: {3}.</CP_SubstanceEvidence>
+  <CP_SubstanceMissing>Підтверджена залежність: {0}; немає доступної придатної дози.</CP_SubstanceMissing>
+  <CP_SubstanceStockEvidence>Наявних стосів із дозами, включно з недоступними: {0}.</CP_SubstanceStockEvidence>
+  <CP_SubstanceCooldownBlocked>Триває окреме очікування перед проханнями про речовини.</CP_SubstanceCooldownBlocked>
+  <CP_SubstanceAsleep>Час сну не підтверджує потребу в проханні про речовину.</CP_SubstanceAsleep>
+  <CP_SubstancePolicyBlocked>Жодна підтримана доза не дозволена чинною політикою, рисами, переконаннями або фізичними правилами. Зміна політики не є вимогою.</CP_SubstancePolicyBlocked>
+  <CP_SubstanceAccessBlocked>Дози є, але вони недоступні або непридатні. Потрібно вирішити проблему доступу чи придатності; додаткове виробництво не запитується.</CP_SubstanceAccessBlocked>
+  <CP_SubstanceNoSupply>Для залежності бракує дози, але підтвердженого способу виробництва немає.</CP_SubstanceNoSupply>
+  <CP_SubstanceNoShortage>Немає підтриманої залежності, для якої бракує доступної дозволеної дози.</CP_SubstanceNoShortage>
+  <CP_SubstanceLimit>Три або більше активних залежностей блокують експериментування, але не забезпечення наявної залежності.</CP_SubstanceLimit>
+  <CP_SubstanceNoTrait>Для експериментування потрібна активна риса хімічного інтересу або захоплення. Самої залежності недостатньо.</CP_SubstanceNoTrait>
+  <CP_SubstanceUnsupported>Пропущено визначень із непідтриманою категорією, компонентами або неоднозначним чи нетимчасовим ефектом: {0}.</CP_SubstanceUnsupported>
+  <CP_SubstanceNoNewTarget>Немає незнайомої підтриманої речовини, яку дозволено вживати та можливо отримати.</CP_SubstanceNoNewTarget>
+  <CP_DevType_SubstanceTry>Спробувати нову речовину</CP_DevType_SubstanceTry>
+  <CP_DevType_SubstanceAddiction>Доза для наявної залежності</CP_DevType_SubstanceAddiction>
+  <CP_SubstanceStructure>Непідтримана будова речовини</CP_SubstanceStructure>
+  <CP_SubstanceCategory>Не рекреаційна речовина</CP_SubstanceCategory>
+  <CP_SubstanceOutcome>Непідтримана дія вживання</CP_SubstanceOutcome>
+  <CP_SubstanceEffect>Немає однозначного тимчасового ефекту</CP_SubstanceEffect>
+  <CP_SubstanceExtraEffect>Додатковий непідтриманий ефект</CP_SubstanceExtraEffect>
+  <CP_SubstanceKnown>Уже знайома речовина</CP_SubstanceKnown>
+  <CP_SubstanceNoAddiction>Немає відповідної залежності</CP_SubstanceNoAddiction>
+  <CP_SubstanceReady>Придатна ціль</CP_SubstanceReady>
+  <CP_SubstancePawnBlocked>Колоніст не може вживати цю речовину за чинними правилами</CP_SubstancePawnBlocked>
 </LanguageData>

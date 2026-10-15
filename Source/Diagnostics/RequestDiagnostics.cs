@@ -22,6 +22,7 @@ namespace ColonyPromises
                 RequestGenerator.Number(ticks / (float)PromiseBalance.TicksPerDay),
                 RequestGenerator.Number(RequestRules.PersistentTicks / (float)PromiseBalance.TicksPerDay)).ToString();
             if (saved != null) text += " " + "CP_DebugStored".Translate(RequestGenerator.Number(saved.Ticks / (float)PromiseBalance.TicksPerDay));
+            if (kind == PromiseKind.Substance) text += "\n" + SubstanceNeeds.TargetDiagnostics(state.Pawn);
             if (!string.IsNullOrEmpty(evaluation.Current)) text += "\n" + evaluation.Current;
             text += "\n" + "CP_DebugTarget".Translate((evaluation.Candidate == null ? "CP_DebugNo" : "CP_DebugYes").Translate());
             if (evaluation.Candidate == null) return text + "\n" + (evaluation.Reason ?? "CP_DebugNoGear").Translate();

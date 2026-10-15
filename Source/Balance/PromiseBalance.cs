@@ -85,6 +85,12 @@ namespace ColonyPromises
         public const float ReplacementFraction = 0.8f;
         public const int WeaponSkillDifference = 4;
         public const int WeaponAcquisitionSkill = 6;
+        public const int SubstanceCooldownDays = 15;
+        public const int ExperimentAddictionLimit = 3;
+        public const int ExperimentMood = 6;
+        public const int ExperimentTrust = 7;
+        public const int ExperimentMemoryDays = 3;
+        public const int SubstanceDeadlineDays = 4;
         public const int WeaponUpgradeSkill = 10;
         // Quality enum values: Normal = 2, Good = 3. Keep this rules file game-independent.
         public const int WeaponUpgradeBaseQuality = 2;

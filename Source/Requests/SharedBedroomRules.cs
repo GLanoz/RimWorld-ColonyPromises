@@ -37,8 +37,8 @@ namespace ColonyPromises
             candidate = null;
             var partners = Partners(pawn);
             if (partners.Count == 0) return false;
-            if (partners.Count != 1 || Partners(partners[0]).Count != 1
-                || Partners(partners[0])[0] != pawn) { result.Reason = "CP_PairAmbiguous"; return true; }
+            var reciprocal = partners.Count == 1 ? Partners(partners[0]) : null;
+            if (partners.Count != 1 || reciprocal.Count != 1 || reciprocal[0] != pawn) { result.Reason = "CP_PairAmbiguous"; return true; }
             var partner = partners[0];
             result.Current = "CP_PairSelected".Translate(partner.LabelShort);
             if (!PromiseConditions.Eligible(partner)) { result.Reason = "CP_PairIneligible"; return true; }
@@ -48,10 +48,7 @@ namespace ColonyPromises
             { result.Reason = "CP_PairConflictingNeeds"; return true; }
             if (!RequestMaintenance.Observable(partner) || pawn.Map != partner.Map)
             { result.Reason = "CP_PairUnobservable"; return true; }
-            if (!DefDatabase<ThingDef>.AllDefsListForReading.Any(def => def.building != null && def.PlayerAcquirable
-                && def.thingClass != null && typeof(Building_Bed).IsAssignableFrom(def.thingClass)
-                && BedUtility.GetSleepingSlotsCount(def.size) >= 2
-                && RestUtility.CanUseBedEver(pawn, def) && RestUtility.CanUseBedEver(partner, def)))
+            if (!HasUsableBedDefinition(pawn, partner))
             { result.Reason = "CP_PairNoBed"; return true; }
             var component = GameComponent_Promises.Current;
             int now = Find.TickManager.TicksGame;
@@ -64,6 +61,12 @@ namespace ColonyPromises
             result.Candidate = candidate;
             return true;
         }
+
+        public static bool HasUsableBedDefinition(Pawn a, Pawn b) =>
+            DefDatabase<ThingDef>.AllDefsListForReading.Any(def => def.building != null && def.PlayerAcquirable
+                && def.thingClass != null && typeof(Building_Bed).IsAssignableFrom(def.thingClass)
+                && BedUtility.GetSleepingSlotsCount(def.size) >= 2
+                && RestUtility.CanUseBedEver(a, def) && RestUtility.CanUseBedEver(b, def));
 
         public static bool BedOwnersMatch(Building_Bed bed, Pawn a, Pawn b) => bed != null && bed.SleepingSlotsCount >= 2
             && !bed.Medical && bed.ForColonists && bed.OwnersForReading.Count == 2

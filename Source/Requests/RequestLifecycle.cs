@@ -11,6 +11,7 @@ namespace ColonyPromises
             r.DeadlineTick = now + request.DeadlineDays * PromiseBalance.TicksPerDay;
             r.LastCheckTick = r.LastLeisureCreditTick = now;
             r.ResetHold();
+            r.SubstanceConsumedTick = -1;
             state.Request = null;
             state.Active = r;
             RequestGenerator.ResetObservations(state, true);
@@ -28,6 +29,7 @@ namespace ColonyPromises
             r.RecordResolution(now);
             r.Outcome = outcome;
             r.RecordConsequences(0, recovery);
+            SubstanceNeeds.StartCooldown(state, r, now);
             if (outcome == PromiseOutcome.Declined) PromiseConsequences.ApplyDecline(state, r);
             r.StableThing = null;
             r.ObservedRoom = null;

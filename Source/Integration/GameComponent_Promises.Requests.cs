@@ -49,6 +49,7 @@ namespace ColonyPromises
                 RequestGenerator.ResetObservations(state, true);
                 return;
             }
+            SubstanceNeeds.SeedKnowledge(state);
             if (state.Request != null)
             {
                 CheckOpenRequest(state, now);

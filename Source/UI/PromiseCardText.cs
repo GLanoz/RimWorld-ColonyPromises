@@ -9,6 +9,7 @@ namespace ColonyPromises
     {
         public static string Title(PromiseRecord r, Pawn selected)
         {
+            if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryTitle" : "CP_SubstanceAddictionTitle").Translate();
             if (r.IsShared) return (r.RequiresBarracks ? "CP_CardSharedBarracks" : "CP_CardSharedBedroom")
                 .Translate(r.PartnerOf(selected)?.LabelShort ?? "CP_MissingColonist".Translate().ToString());
             return r.Kind == PromiseKind.Equipment && r.NeedBasedEquipment
@@ -28,6 +29,8 @@ namespace ColonyPromises
             if (r.DevManual) return "CP_DevManualReason".Translate();
             if (r.IsShared) return SharedPromiseText.RequestReason(request);
             if (r.Kind == PromiseKind.Leisure) return "CP_CardReasonLeisure".Translate();
+            if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryReason" : "CP_SubstanceAddictionReason")
+                .Translate(r.SubstanceExperiment ? r.SubstanceDef?.LabelCap.ToString() : r.SubstanceChemical?.LabelCap.ToString());
             if (r.NeedBasedEquipment) return ("CP_CardReason_" + r.EquipmentCause).Translate(r.EquipmentDef.LabelCap);
             var reasons = request.HousingReasons?.Where(i => i.Mood < 0 && HousingRules.SupportedCause(i.Cause)).ToList();
             return reasons?.Count > 0 ? string.Join(" ", reasons.Select(i => i.Cause).Distinct().Take(2)
@@ -38,6 +41,8 @@ namespace ColonyPromises
         {
             string hours = PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour);
             if (r.Kind == PromiseKind.Leisure) return "CP_CardLeisure".Translate(hours);
+            if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryAction" : "CP_SubstanceAddictionAction")
+                .Translate(r.SubstanceExperiment ? r.SubstanceDef?.LabelCap.ToString() : r.SubstanceChemical?.LabelCap.ToString());
             if (r.Kind == PromiseKind.Bedroom)
                 return (r.RequiresBarracks ? (r.IsShared ? "CP_CardSharedBarracksAction" : "CP_CardBarracksAction")
                     : r.IsShared ? "CP_CardSharedBedroomAction" : "CP_CardBedroomAction")
@@ -65,6 +70,7 @@ namespace ColonyPromises
             if (r.IsShared && (!PromiseConditions.Observable(r.ParticipantA) || !PromiseConditions.Observable(r.ParticipantB)
                 || r.ParticipantA.Map != r.ParticipantB.Map)) return "CP_CardPartnerAway".Translate();
             if (r.Kind == PromiseKind.Leisure) return LeisureCondition.CanCredit(pawn) ? null : "CP_CardNotResting".Translate().ToString();
+            if (r.Kind == PromiseKind.Substance) return r.SubstanceConsumedTick >= 0 ? null : "CP_SubstancePending".Translate().ToString();
             var condition = PromiseConditions.Get(r.Kind);
             if (condition == null || !condition.ValidParameters(r)) return "CP_InvalidParameters".Translate();
             return condition.Observe(pawn, r).Satisfied ? null

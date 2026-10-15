@@ -47,6 +47,14 @@ namespace ColonyPromises
                 case PromiseKind.Leisure: result.Candidate = LeisureNeeds.Evaluate(pawn, result); break;
                 case PromiseKind.Equipment: result.Candidate = EquipmentNeeds.Evaluate(pawn, result,
                     devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
+                case PromiseKind.Substance: result.Candidate = SubstanceNeeds.Evaluate(pawn, result,
+                    devBypassCooldown && Prefs.DevMode, devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
+            }
+            if (kind == PromiseKind.Substance && pawn.jobs?.curDriver?.asleep == true)
+            {
+                result.Candidate = null;
+                result.ObservationPaused = true;
+                result.Reason = "CP_SubstanceAsleep";
             }
             if (kind == PromiseKind.Bedroom && result.HousingIssues == null)
             {
@@ -59,8 +67,6 @@ namespace ColonyPromises
         }
 
         public static string Number(float value) => PromiseText.Number(value);
-
-        private static bool Trait(Pawn pawn, TraitDef def) => pawn.story?.traits?.HasTrait(def) == true;
 
         private static RequestCandidate Bedroom(Pawn pawn, RequestEvaluation result, bool devBypassCooldown = false)
         {
@@ -77,7 +83,7 @@ namespace ColonyPromises
         {
             var candidate = ObservationCandidate(evaluation, kind);
             var result = Project(saved, candidate, kind, now, severe);
-            if (kind != PromiseKind.Leisure || candidate == null) return result;
+            if ((kind != PromiseKind.Leisure && kind != PromiseKind.Substance) || candidate == null) return result;
             bool continuous = saved != null && saved.Signature == candidate.Signature && saved.LastTick >= 0
                 && now >= saved.LastTick && now - saved.LastTick <= RequestRules.ObservationInterval;
             if (evaluation.ObservationPaused || saved?.ObservationPaused == true)
@@ -178,20 +184,8 @@ namespace ColonyPromises
                   && (!request.Terms.EquipmentDef.IsApparel || !DlcCompatibility.AvoidHumanLeather(pawn) || request.Terms.AvoidHumanLeather)
                 && EquipmentNeeds.CanObtain(pawn, request.Terms, out _);
             if (request.Terms.Kind == PromiseKind.Leisure) return LeisureNeeds.HasDeficit(pawn);
-            if (condition.UsesContinuousHold && condition.Observe(pawn, request.Terms).Satisfied) return false;
-            if (request.Terms.IsShared)
-            {
-                var r = request.Terms;
-                return SharedBedroomRules.Validity(r.ParticipantA, r.ParticipantB) == SharedPairValidity.Valid
-                    && HousingRules.Candidate(r.ParticipantA, r.ParticipantB, new RequestEvaluation()) != null
-                    && !condition.Observe(pawn, r).Satisfied;
-            }
-            var candidate = Candidate(pawn, request.Terms.Kind);
-            if (candidate == null) return false;
-            return request.Terms.Kind != PromiseKind.Equipment
-                || (candidate.Terms.EquipmentDef == request.Terms.EquipmentDef
-                    && candidate.Terms.MinimumQuality == request.Terms.MinimumQuality
-                    && candidate.Terms.MinimumHitPointsFraction == request.Terms.MinimumHitPointsFraction);
+            if (request.Terms.Kind == PromiseKind.Substance) return SubstanceNeeds.Relevant(pawn, request.Terms);
+            return false;
         }
 
         public static ColonistRequest Offer(RequestCandidate candidate, int now)
@@ -204,8 +198,9 @@ namespace ColonyPromises
                 Terms = terms, ReasonKey = candidate.ReasonKey, Expectation = candidate.Expectation,
                 HousingReasons = candidate.HousingReasons,
                 Magnitude = candidate.Magnitude, OfferedTick = now, ExpiryTick = terms.DeadlineTick,
-                DeadlineDays = RequestRules.Deadline((int)terms.Kind, candidate.Magnitude),
-                Announced = false, RecoveryEnabled = true
+                DeadlineDays = terms.Kind == PromiseKind.Substance ? RequestRules.SubstanceDeadlineDays
+                    : RequestRules.Deadline((int)terms.Kind, candidate.Magnitude),
+                Announced = false, RecoveryEnabled = terms.Kind != PromiseKind.Substance
             };
         }
 

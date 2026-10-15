@@ -340,4 +340,38 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_WeaponAcquireNoNeed>No acquisition desire for this type: check the minimum skill, skill gap, permitted weapon type and current primary weapon.</CP_WeaponAcquireNoNeed>
   <CP_WeaponAcquireBrawler>The existing Brawler complaint takes priority over a skill-based weapon desire.</CP_WeaponAcquireBrawler>
   <CP_DeclineEffects>Declining: {0} mood for {1} day(s); {2} trust.</CP_DeclineEffects>
+  <CP_Type_Substance>Substance</CP_Type_Substance>
+  <CP_SubstanceTryTitle>Try a new substance</CP_SubstanceTryTitle>
+  <CP_SubstanceAddictionTitle>A dose for an addiction</CP_SubstanceAddictionTitle>
+  <CP_SubstanceTryReason>Wants to try {0}.</CP_SubstanceTryReason>
+  <CP_SubstanceAddictionReason>Needs {0} because of an addiction.</CP_SubstanceAddictionReason>
+  <CP_SubstanceTryAction>Consume {0} after accepting the promise, with its usual effect taking hold.</CP_SubstanceTryAction>
+  <CP_SubstanceAddictionAction>Consume one suitable dose of {0} after accepting the promise. Any supported product that satisfies this addiction counts.</CP_SubstanceAddictionAction>
+  <CP_SubstanceDetails>No automatic consumption or policy changes. One verified ingestion is enough; no effect duration is required. Substance requests have an additional {0}-day cooldown after closure. Older use may be unknown: unfamiliar means no reliable use was recorded.</CP_SubstanceDetails>
+  <CP_SubstancePending>Waiting for the promised substance to be consumed.</CP_SubstancePending>
+  <CP_SubstanceProgress>Verified doses: {0} / 1.</CP_SubstanceProgress>
+  <CP_SubstanceEvidence>DrugDesire degree: {0}; active addictions: {1}; substance cooldown: {2} days; familiarity entries: {3}.</CP_SubstanceEvidence>
+  <CP_SubstanceMissing>Confirmed addiction: {0}; no accessible suitable dose.</CP_SubstanceMissing>
+  <CP_SubstanceStockEvidence>Existing dose stacks, including inaccessible ones: {0}.</CP_SubstanceStockEvidence>
+  <CP_SubstanceCooldownBlocked>The separate substance-request cooldown is active.</CP_SubstanceCooldownBlocked>
+  <CP_SubstanceAsleep>Sleeping time cannot establish a substance request.</CP_SubstanceAsleep>
+  <CP_SubstancePolicyBlocked>No supported dose is permitted by the current policy, traits, beliefs or physical rules. No policy change is requested.</CP_SubstancePolicyBlocked>
+  <CP_SubstanceAccessBlocked>Doses exist but are inaccessible or unsuitable. Resolve access or suitability; additional production is not requested.</CP_SubstanceAccessBlocked>
+  <CP_SubstanceNoSupply>An addiction lacks a dose, but no supported production route can supply one.</CP_SubstanceNoSupply>
+  <CP_SubstanceNoShortage>No supported addiction currently lacks an accessible permitted dose.</CP_SubstanceNoShortage>
+  <CP_SubstanceLimit>Three or more active addictions block experimentation, not addiction supply.</CP_SubstanceLimit>
+  <CP_SubstanceNoTrait>Experimentation requires active chemical interest or chemical fascination. Addiction alone is insufficient.</CP_SubstanceNoTrait>
+  <CP_SubstanceUnsupported>Skipped drug definitions with unsupported categories, components or ambiguous/non-temporary effects: {0}.</CP_SubstanceUnsupported>
+  <CP_SubstanceNoNewTarget>No unfamiliar supported substance is both permitted and obtainable.</CP_SubstanceNoNewTarget>
+  <CP_DevType_SubstanceTry>Try a new substance</CP_DevType_SubstanceTry>
+  <CP_DevType_SubstanceAddiction>Dose for an existing addiction</CP_DevType_SubstanceAddiction>
+  <CP_SubstanceStructure>Unsupported drug structure</CP_SubstanceStructure>
+  <CP_SubstanceCategory>Not a recreational drug</CP_SubstanceCategory>
+  <CP_SubstanceOutcome>Unsupported ingestion action</CP_SubstanceOutcome>
+  <CP_SubstanceEffect>No single guaranteed temporary effect</CP_SubstanceEffect>
+  <CP_SubstanceExtraEffect>Additional unsupported effect</CP_SubstanceExtraEffect>
+  <CP_SubstanceKnown>Already familiar</CP_SubstanceKnown>
+  <CP_SubstanceNoAddiction>No matching addiction</CP_SubstanceNoAddiction>
+  <CP_SubstanceReady>Eligible target</CP_SubstanceReady>
+  <CP_SubstancePawnBlocked>Cannot use this substance under current pawn rules</CP_SubstancePawnBlocked>
 </LanguageData>

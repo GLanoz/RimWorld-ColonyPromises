@@ -182,7 +182,7 @@ namespace ColonyPromises
             evaluation.Reason = null;
             string prefix = "housing-v2:" + (second == null ? first.thingIDNumber.ToString() : SharedBedroomRules.PairKey(first, second))
                 + ":" + terms.RequiresBarracks + ":" + target + ":" + terms.RequiresConstructedBed
-                + (requirements.Count == 0 ? "" : ":royal:" + string.Join("/", requirements.Select(r => r.Kind + ":" + r.Value + ":" + string.Join(",", r.Names)))) + "|";
+                + (requirements.Count == 0 ? "" : ":royal:" + DlcCompatibility.RequirementSignature(requirements)) + "|";
             string saved = GameComponent_Promises.Current?.PeekState(first).Deficits.FirstOrDefault(d => d.Kind == PromiseKind.Bedroom)?.Signature;
             var anchor = current.FirstOrDefault(i => saved == prefix + i.Pawn.thingIDNumber + "=" + i.Cause)
                 ?? current.OrderBy(i => i.Pawn.thingIDNumber).ThenBy(i => i.Cause).First();

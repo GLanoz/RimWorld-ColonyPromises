@@ -31,15 +31,18 @@ namespace ColonyPromises
             int kind = (int)r.Kind;
             int magnitude = request.Magnitude;
             float factor = RewardFactor(state, r.Kind, tick);
-            r.SuccessMood = TrustRules.RewardMood(RequestRules.MoodReward(kind, magnitude), factor, state.Trust);
+            bool experiment = r.Kind == PromiseKind.Substance && r.SubstanceExperiment;
+            int baseMood = experiment ? RequestRules.ExperimentMood : RequestRules.MoodReward(kind, magnitude);
+            int baseTrust = experiment ? RequestRules.ExperimentTrust : RequestRules.TrustReward(kind, magnitude);
+            r.SuccessMood = TrustRules.RewardMood(baseMood, factor, state.Trust);
             r.SuccessTrust = PromiseBalance.ClampTrust(state.Trust + System.Math.Max(1,
-                (int)System.Math.Round(RequestRules.TrustReward(kind, magnitude) * factor))) - state.Trust;
-            r.BrokenMood = RequestRules.BrokenBase(kind, magnitude)
+                (int)System.Math.Round(baseTrust * factor))) - state.Trust;
+            r.BrokenMood = -(baseMood + 2)
                 + PromiseBalance.FailureMood(state.Trust) - PromiseBalance.BrokenMood;
             r.BrokenTrust = PromiseBalance.ClampTrust(state.Trust + RequestRules.BrokenTrust(magnitude)) - state.Trust;
             r.WithdrawnMood = RequestRules.WithdrawMood(magnitude);
             r.WithdrawnTrust = PromiseBalance.ClampTrust(state.Trust + RequestRules.WithdrawTrust(magnitude)) - state.Trust;
-            r.SuccessDays = PromiseBalance.SuccessMemoryDays;
+            r.SuccessDays = experiment ? RequestRules.ExperimentMemoryDays : PromiseBalance.SuccessMemoryDays;
             r.BrokenDays = PromiseBalance.BrokenMemoryDays;
             r.WithdrawnDays = PromiseBalance.WithdrawnMemoryDays;
             r.CooldownDays = RequestRules.CompletedCooldownDays;
@@ -50,6 +53,7 @@ namespace ColonyPromises
 
         public static void Apply(ColonistPromises state, PromiseRecord record, PromiseOutcome outcome, int tick)
         {
+            SubstanceNeeds.StartCooldown(state, record, tick);
             if (outcome != PromiseOutcome.Fulfilled && outcome != PromiseOutcome.Broken && outcome != PromiseOutcome.Withdrawn)
             {
                 record.RecordConsequences(0, 0);

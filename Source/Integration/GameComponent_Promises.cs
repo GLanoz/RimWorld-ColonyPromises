@@ -92,7 +92,7 @@ namespace ColonyPromises
         public string AcceptanceError(Pawn pawn, ColonistRequest request)
         {
             if (!PromiseConditions.Eligible(pawn)) return "CP_Ineligible".Translate();
-            var state = StateFor(pawn);
+            var state = PeekState(pawn);
             if (state.Shared != null) return SharedAcceptanceError(state.Shared, request, Find.TickManager.TicksGame);
             if (state.Active != null) return "CP_AlreadyActive".Translate();
             int now = Find.TickManager.TicksGame;

@@ -101,6 +101,11 @@ public static class SharedBedroomChecks
             RoomStatDefOf.Impressiveness = new RoomStatDef { scoreStages = new List<RoomStatScoreStage> {
                 new RoomStatScoreStage { label = "Fixture room" } } };
             var a = Pawn(101, faction); var b = Pawn(102, faction); var other = Pawn(103, faction);
+            var previewComponent = new GameComponent_Promises(game);
+            var stored = (List<ColonistPromises>)typeof(GameComponent_Promises).GetField("colonists", fields).GetValue(previewComponent);
+            Check(PromiseConditions.Eligible(a), "Acceptance-preview fixture must reach the eligible-pawn path: " + PromiseConditions.EligibilityReason(a));
+            Check(previewComponent.AcceptanceError(a, null) != null && stored.Count == 0,
+                "Checking acceptance without an enrolled state cannot add saved colonist data");
             a.relations.DirectRelations.Add(new DirectPawnRelation(PawnRelationDefOf.Lover, b, 0));
             b.relations.DirectRelations.Add(new DirectPawnRelation(PawnRelationDefOf.Lover, a, 0));
             Check(SharedBedroomRules.PairKey(a, b) == SharedBedroomRules.PairKey(b, a), "Pair identity ignores order");

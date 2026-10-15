@@ -42,7 +42,16 @@ try {
     $processor.Replace($iconCall, [Mono.Cecil.Cil.Instruction]::Create([Mono.Cecil.Cil.OpCodes]::Ldnull))
     $assembly.Write($testAssembly)
     $assembly.Dispose()
-    dotnet (Join-Path $PSScriptRoot 'GameChecks\bin\Release\net10.0\ColonyPromises.GameChecks.dll') --features-only $modRoot
+    $previousGameData = $env:COLONY_PROMISES_GAME_DATA
+    $previousGameRoot = $env:COLONY_PROMISES_GAME_ROOT
+    $env:COLONY_PROMISES_GAME_DATA = Join-Path $RimWorldDir 'Data\Core\Defs\Drugs'
+    $env:COLONY_PROMISES_GAME_ROOT = $RimWorldDir
+    try {
+        dotnet (Join-Path $PSScriptRoot 'GameChecks\bin\Release\net10.0\ColonyPromises.GameChecks.dll') --features-only $modRoot
+    } finally {
+        $env:COLONY_PROMISES_GAME_DATA = $previousGameData
+        $env:COLONY_PROMISES_GAME_ROOT = $previousGameRoot
+    }
     if ($LASTEXITCODE -ne 0) { throw "Feature checks failed with exit code $LASTEXITCODE" }
 } finally {
     [IO.File]::WriteAllBytes($testAssembly, $originalBytes)

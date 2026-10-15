@@ -230,6 +230,6 @@ public static class FeatureChecks
                     "Letter contents render with plain numeric placeholders in " + folder);
             }
         } finally { Current.Game = oldGame; LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
-        return checks + CardChecks.Run(root) + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path) + NeedsChecks.Run(root, path) + DlcChecks.Run(root, path) + DevRequestChecks.Run(root, path);
+        return checks + CardChecks.Run(root) + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path) + NeedsChecks.Run(root, path) + DlcChecks.Run(root, path) + DevRequestChecks.Run(root, path) + SubstanceChecks.Run(root, path);
     }
 }

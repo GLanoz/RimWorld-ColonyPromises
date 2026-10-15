@@ -107,6 +107,7 @@ public static class DlcChecks
                 && loaded.DeadlineTick == 210000, "Absent new fields preserve legacy promises");
 
             string gameRoot = Environment.GetEnvironmentVariable("COLONY_PROMISES_GAME_ROOT") ?? @"C:\Games\Steam\steamapps\common\RimWorld";
+            CheckActualSpecialStates(gameRoot, flags);
             foreach (string dlc in new[] { "Royalty", "Ideology", "Biotech", "Anomaly", "Odyssey" })
                 Check(Directory.Exists(Path.Combine(gameRoot, "Data", dlc, "Defs")), "Local DLC Defs available for inspection: " + dlc);
             var royal = XDocument.Load(Path.Combine(gameRoot, "Data", "Royalty", "Defs", "RoyalTitles", "RoyalTitles_Empire.xml"));
@@ -214,4 +215,41 @@ public static class DlcChecks
         pawn.ideo = null;
     }
     static Pawn NamedPawn(string name) { var pawn = Empty<Pawn>(); pawn.Name = new NameSingle(name); return pawn; }
+
+    static void CheckActualSpecialStates(string gameRoot, FieldInfo[] flags)
+    {
+        var source = XDocument.Load(Path.Combine(gameRoot, "Data", "Anomaly", "Defs", "Misc", "Mutants.xml"));
+        var ghoul = source.Root.Elements("MutantDef").Single(n => (string)n.Element("defName") == "Ghoul");
+        var parent = source.Root.Elements("MutantDef").Single(n => (string)n.Attribute("Name") == (string)ghoul.Attribute("ParentName"));
+        string Value(string field) => (string)(ghoul.Element(field) ?? parent.Element(field));
+        var mutant = new MutantDef { defName = "Ghoul", canUseDrugs = bool.Parse(Value("canUseDrugs")),
+            disablePolicies = bool.Parse(Value("disablePolicies")), disableNeeds = bool.Parse(Value("disableNeeds")),
+            disableApparel = bool.Parse(Value("disableApparel")), drugWhitelist = new List<ThingDef>() };
+        foreach (var name in ghoul.Element("drugWhitelist").Elements())
+        { var def = Empty<ThingDef>(); def.defName = name.Value; mutant.drugWhitelist.Add(def); }
+        var excluded = Empty<ThingDef>(); excluded.defName = "NotOnActualGhoulWhitelist";
+        var pawn = Empty<Pawn>(); pawn.mutant = Empty<Pawn_MutantTracker>();
+        Set(pawn.mutant, "pawn", pawn); Set(pawn.mutant, "def", mutant); Set(pawn.mutant, "hasTurned", true);
+        var tracker = pawn.mutant;
+        for (int mask = 0; mask < 32; mask++)
+        {
+            for (int i = 0; i < flags.Length; i++) flags[i].SetValue(null, (mask & (1 << i)) != 0);
+            // Inactive configurations have no loaded mutant state; the game API reads that state directly.
+            pawn.mutant = (mask & 8) == 0 ? null : tracker;
+            Check(FoodUtility.DrugIsSuitable(pawn, mutant.drugWhitelist[0]), "Actual ghoul whitelist accepts its serum under switches: " + mask);
+            Check(FoodUtility.DrugIsSuitable(pawn, excluded) == ((mask & 8) == 0),
+                "Active Anomaly enforces actual ghoul whitelist without leaking into Core: " + mask);
+            Check(mutant.disablePolicies && mutant.disableApparel && mutant.disableNeeds
+                && !ghoul.Element("needWhitelist").Elements().Any(n => n.Value == "Mood" || n.Value == "Joy"),
+                "Actual ghoul has no ordinary mood/joy request needs and disables policies/apparel: " + mask);
+        }
+        var genes = XDocument.Load(Path.Combine(gameRoot, "Data", "Biotech", "Defs", "GeneDefs", "GeneTemplateDefs.xml"));
+        var dependency = genes.Root.Elements("GeneTemplateDef").Single(n => (string)n.Element("defName") == "ChemicalDependency");
+        Check((string)dependency.Element("geneClass") == "Gene_ChemicalDependency"
+            && (string)dependency.Element("addictionChanceFactor") == "0",
+            "Actual genetic dependency is distinct from an ordinary addiction request cause");
+        var swimming = XDocument.Load(Path.Combine(gameRoot, "Data", "Odyssey", "Defs", "JobDefs", "Jobs_Joy.xml"));
+        Check(swimming.Root.Elements("JobDef").Any(n => (string)n.Element("driverClass") == "JobDriver_GoSwimming"
+            && n.Element("joyKind") != null), "Actual swimming exposes a joy activity without a new promise type");
+    }
 }

@@ -60,6 +60,31 @@ foreach ($source in Get-ChildItem -LiteralPath (Join-Path $modRoot 'Source') -Fi
         if ($match.Groups[1].Value -notin $englishKeys) { throw "Missing localization: $($match.Groups[1].Value)" }
     }
 }
+# These common game APIs carry optional expansion rules; verify the relied-on call paths,
+# not just the presence of a method with the right name. This is not a gameplay test.
+$callPaths = @(
+    @('RimWorld.RestUtility', 'CanUseBedEver', 'CanDeathrest'),
+    @('RimWorld.RestUtility', 'CanUseBedNow', 'get_HarmedByVacuum'),
+    @('RimWorld.EquipmentUtility', 'CanEquip', 'RolePreventsFromUsing'),
+    @('RimWorld.FoodUtility', 'DrugIsSuitable', 'CanUseDrug'),
+    @('RimWorld.PawnUtility', 'CanTakeDrug', 'CanTakeDrugForDependency'),
+    @('RimWorld.BedUtility', 'WillingToShareBed', 'DoerWillingToDo'),
+    @('RimWorld.Pawn_NeedsTracker', 'ShouldHaveNeed', 'DisablesNeed'),
+    @('Verse.Map', 'get_IsPlayerHome', 'PlayerHasGravEngine')
+)
+foreach ($path in $callPaths) {
+    $type = $gameAssembly.MainModule.Types | Where-Object FullName -eq $path[0]
+    $calls = @($type.Methods | Where-Object Name -eq $path[1] | ForEach-Object {
+        $_.Body.Instructions | Where-Object { $_.OpCode.Name -in @('call','callvirt') } | ForEach-Object { $_.Operand.Name }
+    })
+    if ($path[2] -notin $calls) { throw "Optional DLC API call path changed: $($path -join ' / ')" }
+}
+$swimming = $gameAssembly.MainModule.Types | Where-Object FullName -eq 'RimWorld.JobDriver_GoSwimming'
+$swimmingTypes = @($swimming) + @($swimming.NestedTypes)
+$joyCalls = @($swimmingTypes | ForEach-Object { $_.Methods } | ForEach-Object {
+    if ($_.HasBody) { $_.Body.Instructions | Where-Object { $_.OpCode.Name -in @('call','callvirt') } | ForEach-Object { $_.Operand.Name } }
+})
+if ('JoyTickCheckEnd' -notin $joyCalls) { throw 'Swimming no longer exposes the supported recreation tick callback.' }
 $gameAssembly.Dispose()
 $modAssembly.Dispose()
 Write-Output "Verified $patches Harmony targets, $xmlCount XML files, $($englishKeys.Count) keyed translations and placeholder parity."

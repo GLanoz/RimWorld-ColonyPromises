@@ -25,7 +25,7 @@ namespace ColonyPromises
     {
         private static readonly Dictionary<PromiseKind, IPromiseCondition> Conditions = new[]
         {
-            (IPromiseCondition)new BedroomCondition(), new LeisureCondition(), new EquipmentCondition()
+            (IPromiseCondition)new BedroomCondition(), new LeisureCondition(), new EquipmentCondition(), new SubstanceCondition()
         }.ToDictionary(c => c.Kind);
         public static IPromiseCondition Get(PromiseKind kind) => Conditions.TryGetValue(kind, out var value) ? value : null;
         public static IEnumerable<IPromiseCondition> All => Conditions.Values;

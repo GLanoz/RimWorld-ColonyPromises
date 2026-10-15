@@ -303,11 +303,12 @@ namespace ColonyPromises
                 item.def.useHitPoints, r);
         }
 
-        public static bool CanObtain(Pawn pawn, PromiseRecord terms, out string reason)
+        public static bool CanObtain(Pawn pawn, PromiseRecord terms, out string reason, System.Func<Thing, bool> stockPredicate = null)
         {
             var stock = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver);
-            if (stock.Any(t => MatchesParameters(t, terms) && !t.IsForbidden(pawn)
-                && EquipmentUtility.CanEquip(t, pawn) && pawn.CanReach(t, PathEndMode.Touch, Danger.Some)))
+            if (stock.Any(t => (stockPredicate != null ? stockPredicate(t) : MatchesParameters(t, terms)
+                && EquipmentUtility.CanEquip(t, pawn)) && !t.IsForbidden(pawn)
+                && pawn.CanReach(t, PathEndMode.Touch, Danger.Some)))
             { reason = "CP_GearStock".Translate(); return true; }
             var target = terms.EquipmentDef;
             if ((target.thingClass != typeof(Apparel) && target.thingClass != typeof(ThingWithComps))

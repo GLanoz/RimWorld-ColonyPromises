@@ -4,7 +4,7 @@ using Verse;
 
 namespace ColonyPromises
 {
-    public enum PromiseKind { Bedroom, Leisure, Equipment }
+    public enum PromiseKind { Bedroom, Leisure, Equipment, Substance }
     public enum PromiseOutcome { Fulfilled, Broken, Withdrawn, Closed, Declined, Expired, SatisfiedUnaccepted, Obsolete }
 
     public sealed class PromiseRecord : IExposable
@@ -37,6 +37,11 @@ namespace ColonyPromises
         public bool RequireMelee;
         public List<BedroomRequirement> BedroomRequirements;
         public bool AvoidHumanLeather;
+        public bool SubstanceExperiment;
+        public ThingDef SubstanceDef;
+        public ChemicalDef SubstanceChemical;
+        public HediffDef SubstanceEffect;
+        public int SubstanceConsumedTick = -1;
         public int LastCheckTick = -1;
         public int LastLeisureCreditTick;
         public bool PreviouslySatisfied;
@@ -116,6 +121,11 @@ namespace ColonyPromises
             Scribe_Values.Look(ref RequireMelee, "requireMelee");
             Scribe_Collections.Look(ref BedroomRequirements, "bedroomRequirements", LookMode.Deep);
             Scribe_Values.Look(ref AvoidHumanLeather, "avoidHumanLeather");
+            Scribe_Values.Look(ref SubstanceExperiment, "substanceExperiment");
+            Scribe_Defs.Look(ref SubstanceDef, "substanceDef");
+            Scribe_Defs.Look(ref SubstanceChemical, "substanceChemical");
+            Scribe_Defs.Look(ref SubstanceEffect, "substanceEffect");
+            Scribe_Values.Look(ref SubstanceConsumedTick, "substanceConsumedTick", -1);
             Scribe_Values.Look(ref LastCheckTick, "lastCheckTick", -1);
             Scribe_Values.Look(ref LastLeisureCreditTick, "lastLeisureCreditTick");
             Scribe_Values.Look(ref PreviouslySatisfied, "previouslySatisfied");
@@ -160,6 +170,9 @@ namespace ColonyPromises
         public int CooldownUntilTick;
         public int LastGenerationCheck = -1;
         public int NextUnpromisedRecoveryTick;
+        public int SubstanceCooldownUntilTick;
+        public List<string> KnownSubstances = new List<string>();
+        public bool SubstanceHistoryInitialized;
         public List<SuccessStamp> RecentRecoveries = new List<SuccessStamp>();
         public PromiseRecord Active;
         public ColonistRequest Request;
@@ -177,6 +190,9 @@ namespace ColonyPromises
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
             Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
             Scribe_Values.Look(ref NextUnpromisedRecoveryTick, "nextUnpromisedRecoveryTick");
+            Scribe_Values.Look(ref SubstanceCooldownUntilTick, "substanceCooldownUntilTick");
+            Scribe_Collections.Look(ref KnownSubstances, "knownSubstances", LookMode.Value);
+            Scribe_Values.Look(ref SubstanceHistoryInitialized, "substanceHistoryInitialized");
             Scribe_Collections.Look(ref RecentRecoveries, "recentRecoveries", LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.Saving && SharedId != null)
             {
@@ -203,6 +219,7 @@ namespace ColonyPromises
                 Deficits = Deficits ?? new List<DeficitObservation>();
                 HousingWitnesses = HousingWitnesses ?? new List<HousingWitness>();
                 RecentRecoveries = RecentRecoveries ?? new List<SuccessStamp>();
+                KnownSubstances = KnownSubstances ?? new List<string>();
             }
         }
     }

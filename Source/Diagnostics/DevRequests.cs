@@ -30,13 +30,16 @@ namespace ColonyPromises
             new DevRequestType { Key = "Barracks", Kind = PromiseKind.Bedroom, Barracks = true },
             new DevRequestType { Key = "Shared", Kind = PromiseKind.Bedroom, Shared = true },
             new DevRequestType { Key = "SharedBarracks", Kind = PromiseKind.Bedroom, Shared = true, Barracks = true },
-            new DevRequestType { Key = "Leisure", Kind = PromiseKind.Leisure }
+            new DevRequestType { Key = "Leisure", Kind = PromiseKind.Leisure },
+            new DevRequestType { Key = "SubstanceTry", Cause = "SubstanceTry", Kind = PromiseKind.Substance },
+            new DevRequestType { Key = "SubstanceAddiction", Cause = "SubstanceAddiction", Kind = PromiseKind.Substance }
         };
         public static bool Occupied(ColonistPromises state) => state?.Active != null || state?.Request != null || state?.SharedId != null;
 
         public static bool Matches(DevRequestType type, RequestCandidate candidate, Pawn pawn) => candidate != null
             && candidate.Terms.Kind == type.Kind && (type.Kind == PromiseKind.Leisure
             || type.Kind == PromiseKind.Equipment && candidate.Terms.EquipmentCause == type.Cause
+            || type.Kind == PromiseKind.Substance && candidate.Terms.SubstanceExperiment == (type.Cause == "SubstanceTry")
             || type.Kind == PromiseKind.Bedroom && candidate.Terms.IsShared == type.Shared
                 && candidate.Terms.RequiresBarracks == type.Barracks
                 && (type.BuiltBed ? candidate.Terms.RequiresConstructedBed
@@ -51,7 +54,8 @@ namespace ColonyPromises
             QualityOptional = type.Cause != "WeaponUpgrade", MinimumQuality = QualityCategory.Normal,
             MinimumHitPointsFraction = type.Cause == "ApparelDamaged" ? RequestRules.ReplacementFraction : 0,
             RoomStage = RequestRules.BedroomBaseStage,
-            RequiredTicks = type.Kind == PromiseKind.Leisure ? RequestRules.MinHours * PromiseBalance.TicksPerHour : PromiseBalance.HoldTicks,
+            SubstanceExperiment = type.Cause == "SubstanceTry",
+            RequiredTicks = type.Kind == PromiseKind.Substance ? 1 : type.Kind == PromiseKind.Leisure ? RequestRules.MinHours * PromiseBalance.TicksPerHour : PromiseBalance.HoldTicks,
             DevTest = true, DevManual = true
         };
 
@@ -63,11 +67,10 @@ namespace ColonyPromises
             if (r.IsShared && (!PromiseConditions.Eligible(r.ParticipantB)
                 || SharedBedroomRules.Validity(r.ParticipantA, r.ParticipantB) != SharedPairValidity.Valid
                 || !RequestMaintenance.Observable(r.ParticipantB) || r.ParticipantA.Map != r.ParticipantB.Map)) return false;
-            if (r.IsShared && !DefDatabase<ThingDef>.AllDefsListForReading.Any(d => d.building != null && d.PlayerAcquirable
-                && d.thingClass != null && typeof(Building_Bed).IsAssignableFrom(d.thingClass)
-                && BedUtility.GetSleepingSlotsCount(d.size) >= 2 && RestUtility.CanUseBedEver(r.ParticipantA, d)
-                && RestUtility.CanUseBedEver(r.ParticipantB, d))) return false;
+            if (r.IsShared && !SharedBedroomRules.HasUsableBedDefinition(r.ParticipantA, r.ParticipantB)) return false;
             if (r.Kind == PromiseKind.Leisure) return pawn.needs?.joy != null;
+            if (r.Kind == PromiseKind.Substance) return SubstanceNeeds.Allowed(pawn, r.SubstanceDef, r.SubstanceExperiment)
+                && (r.SubstanceExperiment || SubstanceNeeds.Addictions(pawn).Any(a => a.Chemical == r.SubstanceChemical));
             return r.Kind != PromiseKind.Equipment || EquipmentNeeds.UsableDefinition(pawn, r)
                 && (!EquipmentNeeds.AcquisitionCause(r.EquipmentCause)
                     || EquipmentNeeds.WeaponTypeMatches(r.EquipmentDef, r.EquipmentCause == "WeaponRanged")

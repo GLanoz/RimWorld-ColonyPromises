@@ -153,6 +153,7 @@ namespace ColonyPromises
                 return (record.RequiresBarracks ? "CP_ShortBarracks" : record.IsShared ? "CP_ShortSharedBedroom" : "CP_ShortBedroom").Translate(BedroomCondition.RoomLabel(record.RoomStage));
             if (record.Kind == PromiseKind.Leisure)
                 return "CP_ShortLeisure".Translate(PromiseText.Number(record.RequiredTicks / (float)PromiseBalance.TicksPerHour));
+            if (record.Kind == PromiseKind.Substance) return PromiseCardText.Conditions(record);
             return (record.QualityOptional ? "CP_GearShort" : "CP_ShortEquipment").Translate(record.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
                 record.QualityOptional ? "CP_QualityNotRequired".Translate().ToString() : record.MinimumQuality.GetLabel()).ToString()
                 + (record.MinimumHitPointsFraction > 0 ? " " + "CP_ShortDurability".Translate(
@@ -173,8 +174,9 @@ namespace ColonyPromises
                 }));
             var listRect = new Rect(rect.x, rect.y + sortHeight + 6, listWidth, Math.Max(1, rect.height - sortHeight - 6));
             float width = Math.Max(1, listWidth - 20);
-            var visible = new HashSet<Pawn>(component.OpenRequests(now).Select(s => s.Pawn));
-            foreach (var entry in component.OpenRequests(now).Where(s => s.Shared != null)) visible.Add(entry.Shared.Second);
+            var requests = component.OpenRequests(now);
+            var visible = new HashSet<Pawn>(requests.Select(s => s.Pawn));
+            foreach (var entry in requests.Where(s => s.Shared != null)) visible.Add(entry.Shared.Second);
             var groups = GroupColonists(shown, component.PeekState, sortByName);
             Func<Pawn, string> label = p => p.LabelShort + "\n" + StatusKey(component.PeekState(p), now, visible.Contains(p)).Translate();
             Func<string, float> rowHeight = text => Math.Max(64, Text.CalcHeight(text, Math.Max(1, width - 16)) + 20);
@@ -224,7 +226,8 @@ namespace ColonyPromises
                 var r = displayed = state.Active;
                 Label(ref y, width, "CP_Active".Translate(PromiseCardText.Title(r, pawn)));
                 Label(ref y, width, PromiseCardText.Conditions(r));
-                Label(ref y, width, "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)));
+                Label(ref y, width, r.Kind == PromiseKind.Substance ? "CP_SubstanceProgress".Translate(r.ProgressTicks > 0 ? 1 : 0).ToString()
+                    : "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString());
                 Label(ref y, width, "CP_Remaining".Translate(PromiseText.Number(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay)));
                 string blocked = PromiseCardText.ProgressBlock(pawn, r);
                 if (blocked != null) Label(ref y, width, blocked);
@@ -266,6 +269,7 @@ namespace ColonyPromises
                                     p.LabelShort + ": " + PromiseConsequences.DeclineText(component.PeekState(p))))),
                         () => component.Decline(target, request)));
                 }
+                Label(ref y, width, PromiseConsequences.DeclineText(state));
             }
             else
             {

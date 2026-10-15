@@ -30,7 +30,7 @@ namespace ColonyPromises
             new FloatMenuOption(("CP_DevType_" + type.Key).Translate(), () => {
                 if (!Prefs.DevMode) return;
                 var component = GameComponent_Promises.Current;
-                if (DevRequests.Occupied(component.StateFor(pawn))) { Report("CP_DevOccupied".Translate()); return; }
+                if (DevRequests.Occupied(component.PeekState(pawn))) { Report("CP_DevOccupied".Translate()); return; }
                 if (!manual) { Report(component.CreateDevRequest(pawn, type)); return; }
                 if (type.Shared)
                     Show(SharedBedroomRules.Partners(pawn).Where(p => PromiseConditions.Eligible(p)
@@ -54,6 +54,20 @@ namespace ColonyPromises
                     new FloatMenuOption("CP_DevHours".Translate(hours), () => {
                         terms.RequiredTicks = hours * PromiseBalance.TicksPerHour; Create(pawn, type, terms);
                     })));
+                return;
+            }
+            if (type.Kind == PromiseKind.Substance)
+            {
+                Show(DefDatabase<ThingDef>.AllDefsListForReading.OrderBy(d => d.defName, StringComparer.Ordinal)
+                    .Where(d => SubstanceNeeds.SupportReason(d, type.Cause == "SubstanceTry") == null)
+                    .Select(def => {
+                        string reason = SubstanceNeeds.TargetReason(pawn, def, type.Cause == "SubstanceTry", true);
+                        return new FloatMenuOption(def.LabelCap.ToString() + (reason == null ? "" : " - " + reason.Translate().ToString()),
+                            reason == null ? (Action)(() => {
+                                var record = SubstanceNeeds.Terms(def, type.Cause == "SubstanceTry");
+                                record.DevTest = record.DevManual = true; Create(pawn, type, record);
+                            }) : null);
+                    }));
                 return;
             }
             IEnumerable<ThingDef> targets = DefDatabase<ThingDef>.AllDefsListForReading;
