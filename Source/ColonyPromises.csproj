@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <Version>0.2.2</Version>
+    <Version>0.2.3</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
-    <HarmonyPath Condition="'$(HarmonyPath)' == ''">C:\Games\Steam\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HarmonyPath>
+    <HarmonyPath Condition="'$(HarmonyPath)' == ''">C:\Games\Steam\steamapps\workshop\content\294100\2009463077\1.6\Assemblies\0Harmony.dll</HarmonyPath>
     <OutputPath>../1.6/Assemblies/</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>

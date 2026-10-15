@@ -4,6 +4,8 @@
 
 Colony Promises targets **RimWorld 1.6**, with API signatures and relevant call paths checked against **1.6.4871 rev591** (`Assembly-CSharp.dll`, assembly version **1.6.9676.17735**). Harmony is the only required mod dependency; DLC is optional. Assembly inspection establishes API availability, not behavior in a running game. The [README](../README.md) is the player guide and contains the current reward and deadline table. This file is the single technical reference, including build instructions and test scenarios.
 
+Mod version **0.2.3** is separate from the supported game version. The local `Version.txt` reports **1.6.4871 rev590**, while the referenced DLL's `VersionControl` derives **1.6.4871 rev591** from assembly version **1.6.9676.17735**. API checks target that DLL; `About.xml`, `LoadFolders.xml` and the versioned output folder continue to declare RimWorld **1.6** only.
+
 ## Project structure
 
 | Location | Responsibility |
@@ -23,9 +25,13 @@ Colony Promises targets **RimWorld 1.6**, with API signatures and relevant call 
 
 `Source/ColonyPromises.csproj` uses recursive SDK source inclusion. The core-check project links `Source/Balance/PromiseBalance.cs` and excludes game fixture sources. Moving files does not require changing the `ColonyPromises` namespace. Preserve saved type identities, enum values, Scribe keys, existing DefNames, and `lanoz.colonypromises` when reorganizing or extending the project.
 
+`SubstanceSupport` handles definition-only recognition; `SubstanceNeeds` handles pawn/policy/supply evaluation and ingestion credit; `SubstanceCondition` lives beside the other promise conditions. `SubstanceKnowledge` is a readonly snapshot for one evaluation, grouping loaded drug definitions and effects once. It is never retained across ticks, ingestion, Def changes or save loading, so familiarity and ambiguous-effect detection cannot become stale. Public recognition entry points and the condition's namespace/type identity are preserved.
+
+Natural and Dev shared-room checks use `SharedBedroomRules.HasUsableBedDefinition`; housing signatures reuse `RequirementSignature`. Manual tests retain their explicit persisted bypass and ordinary execution. Acceptance previews and Dev menu occupancy checks use `PeekState`, not enrollment. The colonist list evaluates open requests once per draw. No timer, balance, enum, Scribe key or frozen consequence changes accompany these reorganizations.
+
 ## Build and runtime files
 
-Use a .NET SDK and .NET Framework 4.7.2 reference assemblies to build the `net472` mod. Automated .NET hosts additionally require the **.NET 10 SDK**. The project references the Windows installation layout, `RimWorldWin64_Data/Managed`, and a separately installed Harmony `0Harmony.dll`.
+Use a .NET SDK and .NET Framework 4.7.2 reference assemblies to build the `net472` mod. Automated .NET hosts additionally require the **.NET 10 SDK**. The project references the Windows installation layout, `RimWorldWin64_Data/Managed`, and a separately installed Harmony `0Harmony.dll` for RimWorld 1.6. In a versioned Harmony package, use `1.6/Assemblies/0Harmony.dll`; override `HarmonyPath` when your installation differs.
 
 Run from the repository root, replacing the example paths with your installations:
 
@@ -52,6 +58,7 @@ After a successful build, run `powershell -NoProfile -ExecutionPolicy Bypass -Fi
 | Shared bedroom | `LovePartnerRelationUtility.IsLovePartnerRelation` / `LovePartnerRelationExists`, `Pawn.relations.DirectRelations`, `BedUtility.WillingToShareBed`, `GetSleepingSlotsCount`, `Building_Bed.SleepingSlotsCount`, `RestUtility.CanUseBedEver` / `CanUseBedNow` |
 | Manufacturing feasibility | `RecipeDef.AvailableNow` / `AvailableOnNow`, `ThingDef.AllRecipes`, `Building_WorkTable.CurrentlyUsableForBills`, work/skill and manipulation capacity checks, ingredient filters and `CountRequiredOfFor`, `GenStuff.AllowedStuffsFor` |
 | Equipped items | `AllEquipmentListForReading`, `WornApparel`, `CompQuality`, `TryGetQuality`, `QualityCategory` |
+| Substances | `CompProperties_Drug`, `ChemicalDef`, `Hediff_Addiction.Chemical`, `IngestionOutcomeDoer_GiveHediff`, `Thing.Ingested`, `PawnUtility.CanTakeDrug`, `FoodUtility.DrugIsSuitable`, `HasEverTaken` |
 | Recreation | `JoyUtility.JoyTickCheckEnd`, `curDriver.asleep`, `CurrentBed`, `RoomRoleDefOf.Hospital` |
 | Effects | `ThoughtMaker.MakeThought`, `Thought_Memory`, `RemoveMemoriesOfDef`, `TryGainMemory`, `Messages.Message` |
 | UI and notices | `MainTabWindow`, `Widgets`, `FloatMenu`, `Dialog_MessageBox.CreateConfirmation`; `ChoiceLetter`, `DiaOption`, `LetterMaker.MakeLetter`, `LetterStack.ReceiveLetter` |
@@ -281,21 +288,38 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -Ri
 
 `Tests/GameChecks` runs the real translator under .NET 10 because its .NET Standard 2.1 dependencies are absent from Windows PowerShell's CLR. Fixtures provide isolated language data and saved-type lookup, excluding engine back-compatibility converters from field round-trips. Shared fixtures register external pawn references with the actual Scribe cross-reference resolver and check canonical alias restoration. Cached room/bed fixtures exercise standard ownership/role predicates; they do not simulate a full map, live room calculation, ideologies, Unity windows, or complete migration. Signature/IL checks do not confirm live Harmony execution.
 
+Run the GameChecks-based scripts sequentially: Features, Generation and History share the output directory, and Features temporarily patches its disposable game DLL copy. Concurrent builds/runs can overwrite that copy. The script passes the selected installation to Core/DLC XML fixtures and restores the environment afterwards.
+
 `Verify-Features.ps1` also uses Mono.Cecil (pass `-CecilPath` if it is not available in the local NuGet cache). In the disposable test copy of `Assembly-CSharp.dll`, it skips `ModsConfig`'s initializer and substitutes null for the royal tracker's command-icon load, preserving its collections and all tested rule methods. This avoids Unity startup and any access to the player's mod configuration. It restores that copy afterwards; the installed game and packaged mod DLL are unchanged. DLC fixtures set the actual cached active switches, covering Core, each individual switch and all combinations. These are branch tests with supplied data, not full DLC Def loading. Fixtures cover absent trackers/joy, highest-title selection, room thresholds, captured values, unknown requirements, clothing-role preservation, gender-specific nudity, material matching, localization and Scribe defaults. Local Royalty XML is checked for supported requirement types.
 
-| Configuration | Automated coverage | In-game status |
+| Configuration | Automated coverage | Documented in-game coverage |
 | --- | --- | --- |
-| Core without DLC | Existing suites and all-disabled compatibility branches | Not launched for this update |
-| Royalty only | Guarded room branches, captured thresholds, clothing requirements; local API/Defs inspection | Not launched |
-| Ideology only | Guarded apparel/role and gender branches; local precept, thought and sleep-rule inspection | Not launched |
-| Biotech, Anomaly or Odyssey individually | Absent-data/need fallback branches; existing eligibility APIs and local Def inspection | Not launched |
-| Combined DLC | All switch combinations in isolated fixtures; combined saved constraints | Full loaded configurations remain unverified |
+| Core without DLC | All-disabled branches, Core drug/housing XML, existing lifecycle/UI/save-field suites | Configuration not recorded |
+| Royalty only | Captured title/room/clothing fixtures; shipped title requirement classes and API call paths | Configuration not recorded |
+| Ideology only | Clothing-role, gender preference and absence fallbacks; local precepts and shared-sleep/drug rule inspection | Configuration not recorded |
+| Biotech only | Missing-need branches; actual chemical-dependency template; bed/dependency API paths | Configuration not recorded |
+| Anomaly only | Actual ghoul whitelist/need restrictions projected into game suitability checks | Configuration not recorded |
+| Odyssey only | Actual swimming job and recreation callback; psilocap rejection from actual XML; gravship home API path | Configuration not recorded |
+| Combined DLC | All cached switch combinations; Royalty + Ideology furniture/clothing interaction; Anomaly suitability with other switches | Complete loaded configurations not tested |
 
-Local assemblies and Defs for all five expansions are available. A standalone .NET host cannot provide Unity maps or a complete expansion loader; no live configuration is established by these checks.
+The game assembly and Defs for all five expansions are locally available. Switch fixtures supply selected data and do not emulate the expansion loader. Metadata requires only Harmony; runtime XML contains no unconditional expansion-specific references. Common game APIs handle enabled content without exposing DLC assets when absent.
+
+| Existing function | Expansion integration and boundary |
+| --- | --- |
+| Eligibility, generation, observation and queue | Actual humanlike adult/free-colonist/mood eligibility and existing home-map rules; missing needs do not invent a deficit. No expansion-specific queue, timing or slot limit. |
+| Individual/shared rooms | Royalty title snapshots retain area/floor/furniture requirements; Ideology nullifiers and `WillingToShareBed` remain authoritative. `CanUseBedEver/Now` cover Biotech deathrest and Odyssey vacuum restrictions. Shared records remain canonical and do not convert to individual promises. |
+| Recreation | Actual joy need and `JoyTickCheckEnd` activity callback; Odyssey swimming uses that callback. Deathrest, travel and unrelated jobs are not recreation. No joy need means no recreation request. |
+| Clothing and weapons | Body/developmental-stage/locked-apparel checks plus `CanEquip` for biocoding, Royalty bonds and Ideology role limits; stored title/role/material constraints remain fixed. Skills and Brawler keep their existing priority. Custom item/manufacturing implementations remain conservative. |
+| Substances | Beliefs, physical suitability, real policy entries and Anomaly drug whitelist precede stock/production. Biotech's genetic dependency exception does not silently bypass beliefs. Only `Hediff_Addiction` creates ordinary addiction supply; gene dependency is a documented unsupported cause. Odyssey psilocap's special outcome remains excluded from experimentation. |
+| Movement and special states | `Map.IsPlayerHome` includes the game's gravship rules. Absence, sleep, downing and suspension do not add unverified time; deadlines keep running. Actual ingestion away from maps retains its existing one-dose credit path. |
+| Acceptance, outcomes, recovery and saves | Expansion-neutral terminal guards, personal consequence snapshots, repeat ledgers and independent substance gate. Decline remains penalized; unanswered expiry remains penalty-free. Saved enum values, keys, type identities, targets and effects are unchanged. |
+| Notices, history, UI and Dev tools | One authoritative shared record, saved notice flags, actual applied history figures and readonly diagnostics. Manual Dev bypass does not bypass structural/usage restrictions. Substance rows now name the substance/chemical rather than a missing equipment target. |
+
+`Verify-Content.ps1` checks the relied-on game call paths for bed sharing/usability, equipment roles, drug suitability/dependency, gene/ideology/hediff need rules, gravship home recognition and swimming's joy callback. These checks establish available API paths, not live outcomes.
 
 Housing fixtures read effect stages from the referenced installation's Core XML, exercise the compiled evidence predicates, minimum-category selector, candidate builder with supplied verified issues, anchoring, acceptance, bilingual attribution, and Scribe defaults/references. The .NET host cannot initialize the game's Unity-dependent mod configuration to run complete thought workers and nullifiers. Those runtime paths are inspected against the game assembly and remain in-game checks. If the installation differs from the project default, set `COLONY_PROMISES_GAME_ROOT` for the housing fixture's XML input.
 
-Release compilation and these checks pass. History display has been verified in-game by the player. Generation, diagnostics, notices/navigation, badge layout, settings across full reloads, realistic recreation balance, full migration, room reconstruction, and mod combinations remain gameplay checks. No safe-removal guarantee is established.
+The player has confirmed that the current mod works in RimWorld. Specific DLC configurations and individual test scenarios have not been recorded, so that confirmation is not a claim of exhaustive DLC compatibility. Automated regressions separately cover readonly acceptance, substance summaries, fresh/ambiguous familiarity snapshots, existing timing and frozen outcomes. Full configuration coverage, realistic map transitions and complete save reconstruction require targeted gameplay tests. Safe removal remains unverified.
 
 ## Manual test scenarios
 
@@ -367,8 +391,9 @@ For missing-history migration, use a copied older save with individual `appliedM
 
 - Deficits are sampled hourly, not verified every intervening tick. Unobservable/cooldown time is excluded; busy queues have no fixed maximum wait.
 - Caravans generate no requests or simulated progress. Deadlines continue through absence, illness, combat, and suspension.
+  Actual substance ingestion is event-based and can count during travel; there is no simulated dose credit.
 - Custom usability/recreation may fall outside standard APIs. Callback intervals are not independently reconstructed.
-- Shared bedrooms require an unambiguous reciprocal pair and exclude Ascetics conservatively. Loaded usable bed types are checked, but research/material availability is not forecast. Simultaneous multi-partner housing is unsupported. Full-map shared generation, live ideology restrictions, room reconstruction, and visual pair navigation still need gameplay testing.
+- Shared bedrooms require an unambiguous reciprocal pair and exclude Ascetics conservatively. Loaded usable bed types are checked, but research/material availability is not forecast. Simultaneous multi-partner housing is unsupported. Automated fixtures do not establish full-map shared generation, live ideology restrictions, room reconstruction or visual pair navigation for every configuration.
 - Changes bypassing ownership, equipment, quality, or room notifications can evade immediate invalidation. Periodic durability checks can miss unusual damage/repair cycles.
 - Shape and quality changes deliberately reset holds even when favorable. Engine reconstruction, full migration, live patches, and safe removal need game-level validation.
 
@@ -385,3 +410,64 @@ In a copied test save, use Shooting 15 / Melee 2, first unarmed, then with a swo
 Use **Create test request…** with **Obtain a ranged weapon** or **Obtain a melee weapon** in both current-needs and manual modes. Natural/current-needs evaluation shares the cause and availability rules; natural generation still needs two observed days. Accept, reverse skill levels, equip the fixed primary for a day, save/reload, and compare stored terms and progress. Decline individual and shared requests at trust zero and above zero: one actual penalty, no repeat after reload. Let separate requests expire: zero effects.
 
 Isolated checks cover thresholds, type exclusion, observation arithmetic, acceptance snapshots, existing-field Scribe round-trips, Dev variants and decline transitions. They do not establish live map generation, recipe feasibility, UI layout or full save loading.
+
+## Traits and substance requests
+
+Core TraitDefs and the available Royalty, Ideology, Biotech, Anomaly and Odyssey data are reviewed against the existing thought/need adapters. Trait lookups through `TraitSet.GetTrait`/`HasTrait` exclude suppressed traits. No blanket trait bonus or second mood interpretation is added.
+
+| Trait or group | Relevant behavior |
+| --- | --- |
+| Greedy | Actual negative Greedy thought can establish a housing cause; its neutral stage constrains the target. |
+| Ascetic | Housing evaluation avoids a conflicting quality target; shared generation remains conservatively blocked. |
+| Jealous | Its actual housing complaint is diagnosed but is not converted into an unsupported comparison with another colonist's room. |
+| Nudist | Game thought eligibility/nullifiers prevent unwanted-nudity requests when nudity is acceptable. A separate wish to remove clothing is not implemented. |
+| Brawler | Actual ranged-weapon complaint precedes other weapon causes; melee preference overrides skills. |
+| Chemical interest/fascination | Active `DrugDesire` degrees 1/2 establish the mod-owned experimentation desire. These are not inferred from addiction. |
+| Teetotaler | The negative `DrugDesire` degree cannot start experimentation; `PawnUtility.CanTakeDrug` governs actual permitted items, with additional explicit belief/policy checks. |
+| Biotech Recluse; Anomaly BodyMastery | Their game thought/need eligibility is retained. Missing needs create no invented deficit; neither trait gains a separate request. |
+| Mood, nerves, work speed, memory, combat modifiers, social/sexual preferences and other Core/DLC traits | No independent cause or reward modifier. They can influence the game's actual needs/thoughts or learned skills, which existing evaluators use. NightOwl and Undergrounder discomfort, food/body-mod desires, and Anomaly-specific wishes are not substituted for housing, recreation or equipment causes. |
+
+Royalty adds no independent pawn TraitDefs here; Ideology patches existing traits and supplies precept rules. Biotech Delicate and Anomaly PerfectMemory, Occultist, Joyous, Disturbing and VoidFascination receive no fabricated request effects. Odyssey weapon traits are item mechanics, not colonist TraitDefs. This review does not claim live testing of every trait or DLC combination.
+
+### Substance API and eligibility
+
+`SubstanceNeeds` evaluates the new appended `PromiseKind.Substance` (3); existing enum values and Scribe keys remain unchanged. It uses `ThingDef.IsDrug`/`IsIngestible`, `CompProperties_Drug.chemical` and `needLevelOffset`, `Hediff_Addiction.Chemical`, `Pawn_DrugPolicyTracker.HasEverTaken`, and standard `IngestionOutcomeDoer_GiveHediff` outcomes. A chemical maps through `ChemicalDef.addictionHediff`, rather than translated labels or a hardcoded drug list.
+
+Experiments require active chemical interest/fascination and fewer than three actual `Hediff_Addiction` instances. `Standard()` recognizes an acquirable drug with a `ThingWithComps`-compatible item class, a `CompDrug`-compatible component and ingestion outcomes. It does not require every auxiliary component to come from the game assembly. `SupportReason()` separately requires Social/Hard category and exactly one guaranteed positive `Hediff_High` or `Hediff_Alcohol` outcome with disappearance or negative severity decay. Auxiliary high components do not need to match a small whitelist; permanent-wound healing remains excluded. Other GiveHediff outcomes may only supply the mapped chemical tolerance.
+
+Standard `OffsetNeed` and `OffsetPsyfocus` ingestion actions are allowed alongside the high. Core GoJuice includes both: the former all-GiveHediff filter rejected it before policy, familiarity or supply checks. These actions adjust existing need/psyfocus values; the experimental completion target remains `GoJuiceHigh`. Unknown outcome implementations, ambiguous/missing temporary highs, medical targets and additional unsupported hediff outcomes remain excluded. Odyssey psilocap's custom outcome is not supported. Genetic chemical dependency without `Hediff_Addiction` is not a supply cause.
+
+Technical support, pawn suitability/policy, familiarity and availability are separate checks. `TargetReason()` reuses them for natural experimentation and readonly per-product diagnostics. Diagnostics name an unsupported outcome class and distinguish pawn restrictions, policy refusal, a known chemical and unavailable supply. Manual Dev selection lists technically supported products regardless of familiarity or deficit; blocked pawn/policy/addiction requirements appear as disabled options with a reason. It does not bypass those requirements. Auxiliary mod components do not alone make a drug technically unsupported, but the ordinary manufacturing solver remains conservative about custom production implementations.
+
+Both subtypes check consciousness, race ingestion capability, `FoodUtility.DrugIsSuitable` (including mutant rules), `PawnUtility.CanTakeDrug`, and existing policy entries. Experiments require joy or scheduled permission; addiction supply requires addiction permission. Active Ideology separately checks willingness for drug, recreational-drug and hard-drug history events, so the game's dependency exception cannot silently authorize a conflicting request. Mutants with disabled policies are excluded. The inspected `CurrentPolicy` getter assigns a default when uninitialized; evaluation instead reads the verified private `curPolicy` field and existing `DrugPolicyDatabase.AllPolicies` default without assigning or creating a policy. This keeps diagnostics read-only. No policies or jobs are changed.
+
+For an addiction, loose map stock and the pawn's inventory are checked across the chemical's supported dose products. An accessible permitted dose removes the need. Existing blocked/unsuitable stacks prevent asking for extra manufacturing; the evaluator reports the access problem. Otherwise stable ordinal DefName selection reuses `EquipmentNeeds.CanObtain` with an ingestible stock predicate and its existing ordinary-recipe/ingredient solver. This optional predicate leaves equipment checks unchanged. Speculative trade, planting/harvest forecasts, carried items on other pawns, special recipe workers and unusual drug implementations are not proof of availability.
+
+Both subtypes share the normal two-day observation, global offer interval, occupancy rules, snapshots, history and repeat ledger. Addiction shortage precedes experimentation. Experiment signatures identify the continuing unfamiliar-substance desire, not a physical stack; addiction signatures identify the chemical. Known sleep pauses observation without adding time. Unknown gaps restart it. A separately saved fifteen-day substance gate blocks only this direction and starts after every normal closure, including decline, expiry, obsolescence and penalty-free closure. Fresh evidence must follow it. Dev cleanup retains its existing no-consequence behavior.
+
+### Ingestion, persistence and outcomes
+
+The Harmony Prefix/Postfix on `Thing.Ingested(Pawn, float)` captures the pawn's already-active record, original Def, stack count and pre-ingestion effect severity. The original's outcome calls precede its return; a reduced stack or destruction confirms consumption, since its nutrition return is not a dose count. The Postfix journals real use even without an obligation, and credits only the same captured active record. Experiments additionally require the saved effect's severity to appear/increase. Addiction promises accept supported products matching their saved chemical and a positive chemical-need offset. These checks do not reinterpret an accepted promise through later traits, skill changes or policy changes.
+
+`substanceConsumedTick` defaults to −1 and guards duplicate credit; accepted records alone can credit, within their fixed issue/deadline bounds. Progress represents one dose, not ticks of effect duration. Completion uses the existing terminal transition and personal consequences exactly once. Requests fulfilled before acceptance close without an accepted reward; substance requests do not enable unaccepted trust recovery.
+
+New saved fields are `substanceExperiment`, `substanceDef`, `substanceChemical`, `substanceEffect`, `substanceConsumedTick`, `substanceCooldownUntilTick`, `knownSubstances` and `substanceHistoryInitialized`. The familiarity ledger keeps product and chemical keys independently of visible history. Game `HasEverTaken` records, mapped addictions and unambiguous current standard effects seed reliable knowledge; inference does not claim every product in a category was actually consumed. Unknown older use remains unknown. Missing fields preserve empty knowledge, no gate, no dose credit and all old accepted terms.
+
+Experiments snapshot baseline +6 mood for three days/+7 trust; addiction supply uses ordinary equipment's +4 mood for five days/+4 trust. Both use a four-day fulfillment deadline, normal low-trust/repeat scaling and existing failure/withdrawal calculations. Refusal remains −1 mood for one day and clamped −1 trust; response expiry remains zero. No other request balance changes.
+
+### Checks and game scenarios
+
+`SubstanceChecks` runs through `Verify-Features.ps1`. Isolated fixtures cover traits/addiction limits, suppressed traits, supported versus medical/permanent/custom effects, category identity, journal deduplication, two-day observation and sleep pause, acceptance snapshots, different chemical/actor/pre-acceptance/late events, effect confirmation, replay protection, independent cooldowns, refusal versus expiry, Scribe fields/defaults and bilingual cards. Existing suites continue checking the other directions. The same suite reads recognition-relevant fields and inherited item classes from the installed Core drug XML, including Beer and GoJuice, and checks GoJuice's additional need/psyfocus actions. Extra-action, unknown auxiliary component and unsupported-effect fixtures supplement those definitions. This projection is not full game Def loading. Map availability, real ingestion/Harmony callbacks and complete save reconstruction still require RimWorld.
+
+In a copied save:
+
+- Give an eligible adult chemical interest, fewer than three addictions, policy permission and obtainable unfamiliar beer/smokeleaf/psychite. Keep the desire observable for two waking days; expect one queued offer. Accept and consume the named item: one result, no sustained-effect timer. Test teetotaler, suppressed interest, prohibiting beliefs and exactly three addictions: no experiment.
+- Create a genuine psychite addiction, remove all doses, and provide unlocked ordinary production, a usable bench, a capable crafter and ingredients. After two observed days expect supply terms for the chemical. Manufacture a permitted product, accept, and consume it; another supported psychite product must also satisfy the chemical. Existing forbidden/unreachable or policy-disallowed stacks must explain access rather than trigger extra production.
+- Consume without any request, save/reload, and offer a different form of that chemical: it is familiar. On an older save, verify the game log/addiction/specific effect seeds only reliable familiarity; no claim of never-used history appears.
+- Use both substance variants in **Create test request…**, in both modes. Manual tests bypass the initial desire but still require a permitted supported target; addiction terms still require the actual addiction. Repeat consumption before acceptance, by another pawn, after expiry and after reload: no accepted reward. Check both languages and the one-dose progress display.
+- Decline: unchanged −1 mood/−1 trust, normal personal gate plus fifteen-day substance gate. Expire another request: zero effects and the same gates. Other directions may resume after their usual personal gate. Complete/withdraw/break/close a substance obligation: its separate gate must persist through reload, with no duplicate history or effects.
+- Run the cases in Core and with the available DLC separately, especially Ideology drug prohibitions, Biotech genes/suppressed traits and Anomaly mutant ingestion restrictions. Local XML/API inspection and fixture tests are not live DLC compatibility certification.
+
+- GoJuice regression: in Development mode select **Create test request... > Set terms manually > Try a new substance**. GoJuice should be listed even if familiar or absent from stock. A disallowing policy leaves it visible with a reason; enable permission yourself and create/accept the request. An existing high without ingestion must not complete it. Consume a dose after acceptance and confirm its high appears/increases, one result is recorded and reload cannot replay it. Compare Beer. For natural generation use chemical interest/fascination, fewer than three addictions, an unfamiliar chemical and reachable permitted stock; diagnostics should show each product's actual blocker. The usual observation, cooldown and queue still apply.
+
+For a refactor smoke test, open a copied existing save, verify an individual and shared active promise retain their exact targets/progress/effects, then test both substance rows in Requests in English and Ukrainian. Open/close diagnostics without advancing time: saved observation/cooldown/journal data must not change. Consume an unfamiliar permitted substance and reload: familiarity must update once. Repeat with your normal expansion set, checking shared-bed beliefs, royal constraints, role clothing, gene/suppressed traits, mutant exclusions, swimming and gravship transitions. Also verify decline still applies its displayed penalty while response expiry applies none.

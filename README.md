@@ -1,8 +1,8 @@
 # Colony Promises
 
-Version **0.2.2** for RimWorld **1.6**.
+Version **0.2.3** for RimWorld **1.6**.
 
-Colonists ask for a better bedroom, time for recreation, or improved equipment after a need has remained unmet. You can accept a request as a promise, decline it, or leave it unanswered. Keeping and breaking promises affects mood and trust in the colony's leadership, without changing personal relationships between colonists.
+Colonists ask for better housing, time for recreation, suitable equipment, or a substance after a need or supported personal desire has persisted. You can accept a request as a promise, decline it, or leave it unanswered. Keeping and breaking promises affects mood and trust in the colony's leadership, without changing personal relationships between colonists.
 
 ## Requirements and installation
 
@@ -10,7 +10,7 @@ Colonists ask for a better bedroom, time for recreation, or improved equipment a
 - **Harmony**, enabled and loaded before Colony Promises.
 - No DLC required. English and Ukrainian interfaces are included.
 
-Optional Royalty and Ideology rules are handled when those expansions are active. They have been checked against local game APIs and isolated fixtures, not tested in a running game. Biotech, Anomaly and Odyssey use the existing checks for actual needs, thought eligibility and usable equipment; no extra request types are added.
+All five RimWorld 1.6 expansions are optional: Royalty, Ideology, Biotech, Anomaly and Odyssey. The mod uses the game's active needs, thoughts and usability rules rather than granting expansion features. Royal bedroom requirements, beliefs about shared beds/clothing/drugs, genetic and mutant restrictions, and gravship home-map rules are considered where they affect existing requests. Genetic chemical dependency is not an ordinary addiction request, and psilocap's special effects are not supported experimental targets. See the testing limits below.
 
 Copy the ready-to-use Colony Promises folder into RimWorld's `Mods` folder. It should contain `About/`, `Defs/`, `Languages/`, `LoadFolders.xml`, and `1.6/Assemblies/ColonyPromises.dll`. Enable Harmony and Colony Promises, keep Harmony before Colony Promises in the load order, then restart. Harmony is a separate dependency; its DLL and the game's DLLs are not included.
 
@@ -94,9 +94,25 @@ A solution may be reachable, permitted loose stock or an item the colony can man
 
 The **same physical item must remain equipped for one game day**. Storage and inventory do not count. Clothing for nudity must provide the required coverage, and a melee weapon must be the primary weapon. Accepted terms remain binding after the original negative effect disappears.
 
+### Substances
+
+**Try something unfamiliar:** colonists with active chemical interest or chemical fascination can ask to try an unfamiliar substance. Addiction alone does not create this desire, and three or more active addictions block experimentation. Current drug policy, beliefs, physical suitability and verified supply must permit the target. The mod treats this as a personal desire, without adding a permanent mood penalty.
+
+**A dose for an existing addiction:** a confirmed addiction can support a request when no accessible, permitted dose remains. Any supported product for that chemical category can fulfill it. The three-addiction limit does not apply. An inaccessible or unsuitable existing supply blocks a production request: resolve that problem instead. Without ready supply or a verified ordinary manufacturing route, no impossible target is offered. The mod does not request policy changes.
+
+Both require two observed days and share the normal queue and personal slot. Fulfillment requires **one actual ingestion after acceptance**. Experimentation also requires the specified temporary effect to appear or increase after that dose. No repeated doses or arbitrary effect duration are required. Consumption before acceptance never earns a promise reward, and the mod does not administer drugs, assign jobs, or change policies.
+
+Recorded use persists independently of requests. Chemical categories prevent different forms of the same substance from counting as new experiments. Older use can be unknown; existing game records, confirmed addictions and unambiguous specific effects provide evidence of familiarity, not a claim that every other substance has never been used.
+
+Experiments support standard social/hard drugs with a single recognizable temporary high, such as beer, go-juice, wake-up, smokeleaf, ambrosia and psychite products. Medicines, irreversible medical treatments such as luciferium, and custom ingestion outcomes are excluded from experiments. An existing luciferium addiction may still support a supply request if an obtainable dose can be verified. Ordinary mod drugs using supported components can qualify; unusual drug behavior and genetic chemical dependency without an actual addiction are not covered.
+
+Development mode lists technically supported substances in manual test creation even when the colonist already knows them. Products blocked by current usage rules remain visible with a reason. The diagnostic panel also distinguishes unsupported effects, policy restrictions, familiarity and unavailable supply; natural requests still require all normal conditions.
+
+After **any** substance-request closure, including refusal or expiry, a separate **15-day substance cooldown** starts. It does not block housing, recreation or equipment requests, though their normal personal cooldown still applies. Once it ends, fresh observation is required.
+
 ## Deadlines and consequences
 
-These are base success rewards at trust 40 or above, before repeat reductions. Mood rewards last **five days**. The review window shows exact current values and durations. Acceptance fixes the requirement, deadline, effects, and cooldown; later changes to wealth, expectations, or trust do not rewrite those terms. A longer deadline does not itself increase the reward.
+These are base success rewards at trust 40 or above, before repeat reductions. Mood rewards last **five days**, except the **three-day** reward for trying a new substance. The review window shows exact current values and durations. Acceptance fixes the requirement, deadline, effects, and cooldown; later changes to wealth, expectations, or trust do not rewrite those terms. A longer deadline does not itself increase the reward.
 
 | Request | Deadline after acceptance | Success mood | Success trust |
 | --- | --- | --- | --- |
@@ -106,6 +122,8 @@ These are base success rewards at trust 40 or above, before repeat reductions. M
 | Recreation: 6–8 hours | 4 days | +4 | +4 |
 | Equipment: one deficiency | 4 days | +4 | +4 |
 | Equipment: worn and below-normal quality | 5 days | +5 | +5 |
+| Try a new substance | 4 days | +6 (3 days) | +7 |
+| A dose for an existing addiction | 4 days | +4 | +4 |
 
 Breaking a promise causes a **five-day** negative mood memory and costs **8 trust** for smaller requests or **10 trust** for larger ones. Its mood penalty is two points stronger than the base success reward, with up to three additional points of disappointment at high trust. The exact penalty is shown before acceptance.
 
@@ -143,11 +161,13 @@ With standard **Development mode** enabled, expand the diagnostic block in a col
 
 **Create test request…** opens two testing modes. **From current needs** evaluates the selected subtype normally but skips observation time, cooldowns and the colony offer interval. **Set terms manually** lets you choose room level, an eligible romantic partner, recreation hours, or equipment with quality and condition requirements, even without a deficit or when conditions are already met. It creates an open request, not an accepted promise. Manual test requests stay open until accepted, declined or expired; they can be accepted after Development mode is turned off. Accept them with the ordinary button, then meet the real requirements: actual recreation or a full day retaining the room/item. Rewards, penalties and history are real, so use a copied testing save.
 
+The menu also includes **Try a new substance** and **Dose for an existing addiction**. Choose a supported, permitted substance; the addiction variant still needs that actual addiction. Accept with the normal button and organize one real ingestion. Test tools never administer a dose.
+
 An occupied slot is never replaced automatically. **Clear selected record…** requires confirmation and removes only that request/promise (both participants for a shared record), without rewards, penalties or a new cooldown. Existing trust, history, repeat tracking and cooldowns remain. All creation/cleanup controls disappear outside Development mode.
 
 ## Absence, saves, and limitations
 
-Illness, combat, caravans, and cryptosleep **do not pause deadlines**. Caravans do not generate requests or earn progress. Open requests can expire while away, and accepted promises remain active. Accumulated recreation is retained, but bedroom and equipment holds reset on departure and need a fresh continuous day on return. Death, destruction, or leaving the player faction closes the obligation without penalty; temporary absence alone does not cancel it.
+Illness, combat, caravans, and cryptosleep **do not pause deadlines**. Caravans do not generate requests or simulate progress. A verified actual substance ingestion can still fulfill its promise while away. Open requests can expire while away, and accepted promises remain active. Accumulated recreation is retained, but bedroom and equipment holds reset on departure and need a fresh continuous day on return. Death, destruction, or leaving the player faction closes the obligation without penalty; temporary absence alone does not cancel it.
 
 Bed reassignment, failed room conditions, switching rooms or physical equipment, and removing equipment reset the affected hold. Room shape and item quality changes reset it even when they improve conditions. These events do not reset accumulated recreation.
 
@@ -159,6 +179,6 @@ Older unanswered equipment requests based on quality also close without conseque
 
 Equipment requests support ready stock and verified ordinary manufacturing recipes. They do not forecast traders or future purchases, solve multi-item clothing sets, or cover ideology-specific dress complaints. Custom recipes and recreation may be unsupported, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
 
-Release builds and automated checks pass, and history display has been verified in-game by the player. DLC branch fixtures cover Core alone, each expansion switch individually and combined switches; they do not load complete DLC configurations. No DLC configuration has been tested in-game for this update. Request generation, notifications, interface layout, full save loading and migration, and mod combinations still need in-game testing. Adding the mod to an existing save is implemented but has not been verified on a real save; safe removal is also unverified. Compilation and isolated checks do not establish correct gameplay behavior.
+The current mod has been tested in RimWorld by the player and works in that setup. Automated rule, save-field, XML and API checks supplement this testing; they do not establish compatibility with every DLC configuration. Individual and combined DLC switches have isolated coverage, but specific fully loaded DLC configurations have not been documented. Adding to an existing save is implemented; complete migration coverage and safe removal remain unverified.
 
 For implementation, build instructions, verification tools, and manual scenarios, see the [technical documentation](docs/API.md).
