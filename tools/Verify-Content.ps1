@@ -1,12 +1,16 @@
 param(
     [string]$RimWorldDir = 'C:\Games\Steam\steamapps\common\RimWorld',
+    [string]$RimWorldVersion = '1.6',
+    [string]$GameManagedDir,
     [string]$CecilPath = 'C:\Users\vladl\.nuget\packages\mono.cecil\0.11.4\lib\net40\Mono.Cecil.dll'
 )
 $ErrorActionPreference = 'Stop'
 $modRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'GamePaths.ps1')
+$paths = Get-PromiseGamePaths $RimWorldVersion $RimWorldDir $GameManagedDir
 Add-Type -Path $CecilPath
-$gameAssembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly((Join-Path $RimWorldDir 'RimWorldWin64_Data\Managed\Assembly-CSharp.dll'))
-$modAssembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly((Join-Path $modRoot '1.6\Assemblies\ColonyPromises.dll'))
+$gameAssembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($paths.Game)
+$modAssembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($paths.Mod)
 $patches = 0
 foreach ($type in $modAssembly.MainModule.Types) {
     foreach ($attribute in $type.CustomAttributes | Where-Object { $_.AttributeType.FullName -eq 'HarmonyLib.HarmonyPatch' -and $_.ConstructorArguments.Count -eq 2 }) {
@@ -17,7 +21,24 @@ foreach ($type in $modAssembly.MainModule.Types) {
         if ($methods.Count -ne 1) { throw "Patch target must be unambiguous: $typeName.$methodName" }
         foreach ($patchMethod in $type.Methods | Where-Object { $_.Name -in @('Prefix','Postfix') }) {
             foreach ($argument in $patchMethod.Parameters) {
-                if ($argument.Name -match '^__') { continue }
+                if ($argument.Name -eq '__state' -or $argument.Name -eq '__originalMethod') { continue }
+                $expectedType = $null
+                if ($argument.Name -eq '__instance') { $expectedType = $gameType }
+                elseif ($argument.Name -eq '__result') { $expectedType = $methods[0].ReturnType }
+                elseif ($argument.Name -match '^___(.+)$') {
+                    $field = $gameType.Fields | Where-Object Name -eq $Matches[1]
+                    if (!$field) { throw "Missing Harmony-injected field: $($type.Name).$($argument.Name)" }
+                    $expectedType = $field.FieldType
+                }
+                elseif ($argument.Name -match '^__(\d+)$') {
+                    $index = [int]$Matches[1]
+                    if ($index -ge $methods[0].Parameters.Count) { throw "Missing indexed Harmony argument: $($type.Name).$($argument.Name)" }
+                    $expectedType = $methods[0].Parameters[$index].ParameterType
+                }
+                if ($null -ne $expectedType) {
+                    if ($expectedType.FullName -ne $argument.ParameterType.FullName) { throw "Incompatible injected Harmony argument: $($type.Name).$($argument.Name)" }
+                    continue
+                }
                 $originalArgument = $methods[0].Parameters | Where-Object Name -eq $argument.Name
                 if (!$originalArgument -or $originalArgument.ParameterType.FullName -ne $argument.ParameterType.FullName) {
                     throw "Invalid Harmony argument: $($type.Name).$($argument.Name)"
@@ -33,7 +54,7 @@ foreach ($methodName in @('Notify_ContainedThingSpawnedOrDespawned','Notify_Terr
     $patches++
 }
 $xmlCount = 0
-foreach ($file in Get-ChildItem -LiteralPath $modRoot -Recurse -Filter '*.xml' | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' }) {
+foreach ($file in Get-ChildItem -LiteralPath $modRoot -Recurse -Filter '*.xml' | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' -and $_.FullName -notmatch '\\tools\\output\\' }) {
     [xml]$xml = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
     $xmlCount++
 }
@@ -85,6 +106,39 @@ $joyCalls = @($swimmingTypes | ForEach-Object { $_.Methods } | ForEach-Object {
     if ($_.HasBody) { $_.Body.Instructions | Where-Object { $_.OpCode.Name -in @('call','callvirt') } | ForEach-Object { $_.Operand.Name } }
 })
 if ('JoyTickCheckEnd' -notin $joyCalls) { throw 'Swimming no longer exposes the supported recreation tick callback.' }
+# Reflection-only fields must remain valid even when public call sites still compile.
+foreach ($entry in @(@('RimWorld.Pawn_DrugPolicyTracker','curPolicy'),
+    @('RimWorld.IdeoStyleTracker','hairFrequencies'), @('RimWorld.IdeoStyleTracker','beardFrequencies'),
+    @('RimWorld.IdeoStyleTracker','tattooFrequencies'))) {
+    $type = $gameAssembly.MainModule.Types | Where-Object FullName -eq $entry[0]
+    if (!($type.Fields | Where-Object Name -eq $entry[1])) { throw "Private game field changed: $($entry -join '.')" }
+}
+$ingestion = ($gameAssembly.MainModule.Types | Where-Object FullName -eq 'Verse.Thing').Methods | Where-Object Name -eq 'Ingested'
+if (!($ingestion.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'callvirt' -and $_.Operand.Name -eq 'DoIngestionOutcome' })) { throw 'Ingestion outcome callback changed.' }
+$joy = ($gameAssembly.MainModule.Types | Where-Object FullName -eq 'RimWorld.JoyUtility').Methods | Where-Object Name -eq 'JoyTickCheckEnd'
+if (!($joy.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'callvirt' -and $_.Operand.Name -eq 'EndJobWith' })) { throw 'Recheck recreation Prefix timing.' }
+$loader = ($gameAssembly.MainModule.Types | Where-Object FullName -eq 'Verse.ModAssemblyHandler').Methods | Where-Object Name -eq 'ReloadAll'
+if (!($loader.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'ldstr' -and $_.Operand -eq 'Assemblies/' })) { throw 'Assembly load-directory contract changed.' }
+[xml]$folders = Get-Content -LiteralPath (Join-Path $modRoot 'LoadFolders.xml') -Raw
+[xml]$about = Get-Content -LiteralPath (Join-Path $modRoot 'About/About.xml') -Raw
+foreach ($version in @('1.6','1.7')) {
+    $selected = @($folders.loadFolders.SelectSingleNode("v$version").li)
+    if (($selected -join ',') -ne "/,$version" -or $version -notin $about.ModMetaData.supportedVersions.li) { throw "Invalid load folders or supportedVersions for $version" }
+    $dlls = @($selected | ForEach-Object {
+        $directory = if ($_ -eq '/') { Join-Path $modRoot 'Assemblies' } else { Join-Path $modRoot "$_/Assemblies" }
+        if (Test-Path -LiteralPath $directory) { Get-ChildItem -LiteralPath $directory -Recurse -Filter '*.dll' }
+    })
+    if ($dlls.Count -ne 1 -or $dlls[0].FullName -ne (Join-Path $modRoot "$version\Assemblies\ColonyPromises.dll")) { throw "Incorrect or duplicate assemblies for $version" }
+    $built = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($dlls[0].FullName)
+    try {
+        $reference = $built.MainModule.AssemblyReferences | Where-Object Name -eq 'Assembly-CSharp'
+        $harmony = $built.MainModule.AssemblyReferences | Where-Object Name -eq '0Harmony'
+        $target = ($built.CustomAttributes | Where-Object { $_.AttributeType.FullName -eq 'System.Runtime.Versioning.TargetFrameworkAttribute' }).ConstructorArguments[0].Value
+        $expectedTarget = if ($version -eq '1.6') { '.NETFramework,Version=v4.7.2' } else { '.NETCoreApp,Version=v10.0' }
+        $expectedHarmony = if ($version -eq '1.6') { 2 } else { 3 }
+        if ("$($reference.Version.Major).$($reference.Version.Minor)" -ne $version -or $target -ne $expectedTarget -or $harmony.Version.Major -ne $expectedHarmony) { throw "Wrong game/runtime/Harmony reference in $version output." }
+    } finally { $built.Dispose() }
+}
 $gameAssembly.Dispose()
 $modAssembly.Dispose()
 Write-Output "Verified $patches Harmony targets, $xmlCount XML files, $($englishKeys.Count) keyed translations and placeholder parity."

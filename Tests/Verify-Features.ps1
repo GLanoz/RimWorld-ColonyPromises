@@ -1,15 +1,26 @@
-param([string]$RimWorldDir = 'C:\Games\Steam\steamapps\common\RimWorld', [string]$CecilPath)
+param([string]$RimWorldDir = 'C:\Games\Steam\steamapps\common\RimWorld', [string]$CecilPath, [string]$RimWorldVersion = '1.6', [string]$GameManagedDir, [switch]$RuntimeOnly, [switch]$VerifyHarmony, [string]$ExportSaveFixtures, [string]$ImportSaveFixtures, [string]$HarmonyPath)
 $ErrorActionPreference = 'Stop'
+if ($VerifyHarmony -and $RimWorldVersion -ne '1.7') { throw 'VerifyHarmony requires RimWorld 1.7 / Harmony 3. For 1.6 use Verify-Content and in-game Mono checks.' }
 $modRoot = Split-Path -Parent $PSScriptRoot
-dotnet build (Join-Path $PSScriptRoot 'GameChecks\ColonyPromises.GameChecks.csproj') -c Release "-p:RimWorldDir=$RimWorldDir"
+. (Join-Path $modRoot 'tools/GamePaths.ps1')
+$paths = Get-PromiseGamePaths $RimWorldVersion $RimWorldDir $GameManagedDir
+$GameManagedDir = $paths.Managed
+if (!$RuntimeOnly -and !$VerifyHarmony) {
+    $versionFile = Join-Path $RimWorldDir 'Version.txt'
+    if (!(Test-Path -LiteralPath $versionFile) -or !([IO.File]::ReadAllText($versionFile).Trim().StartsWith($RimWorldVersion + '.'))) {
+        throw 'Full feature checks require matching game Defs and Version.txt. Use RuntimeOnly for reference-only checks.'
+    }
+}
+if (!$HarmonyPath) { $HarmonyPath = "C:\Games\Steam\steamapps\workshop\content\294100\2009463077\$RimWorldVersion\Assemblies\0Harmony.dll" }
+dotnet build (Join-Path $PSScriptRoot 'GameChecks\ColonyPromises.GameChecks.csproj') -c Release "-p:RimWorldDir=$RimWorldDir" "-p:RimWorldVersion=$RimWorldVersion" "-p:GameManagedDir=$GameManagedDir" "-p:HarmonyPath=$HarmonyPath"
 if ($LASTEXITCODE -ne 0) { throw 'Feature fixture build failed.' }
 if (!$CecilPath) {
     $CecilPath = Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE '.nuget\packages\mono.cecil') -Recurse -Filter Mono.Cecil.dll |
         Where-Object { $_.Directory.Name -eq 'net40' } | Select-Object -First 1 -ExpandProperty FullName
 }
 Add-Type -Path $CecilPath
-$testAssembly = Join-Path $PSScriptRoot 'GameChecks\bin\Release\net10.0\Assembly-CSharp.dll'
-$gameAssembly = Join-Path $RimWorldDir 'RimWorldWin64_Data\Managed\Assembly-CSharp.dll'
+$testAssembly = Join-Path $paths.TestDir 'Assembly-CSharp.dll'
+$gameAssembly = $paths.Game
 # Only the disposable test copy is changed. Do not initialize or write the player's ModsConfig.
 $originalBytes = [IO.File]::ReadAllBytes($gameAssembly)
 try {
@@ -42,13 +53,19 @@ try {
     $processor.Replace($iconCall, [Mono.Cecil.Cil.Instruction]::Create([Mono.Cecil.Cil.OpCodes]::Ldnull))
     $assembly.Write($testAssembly)
     $assembly.Dispose()
+    $previousExport = $env:COLONY_PROMISES_COMPAT_EXPORT
+    $previousImport = $env:COLONY_PROMISES_COMPAT_IMPORT
+    $env:COLONY_PROMISES_COMPAT_EXPORT = $ExportSaveFixtures
+    $env:COLONY_PROMISES_COMPAT_IMPORT = $ImportSaveFixtures
     $previousGameData = $env:COLONY_PROMISES_GAME_DATA
     $previousGameRoot = $env:COLONY_PROMISES_GAME_ROOT
     $env:COLONY_PROMISES_GAME_DATA = Join-Path $RimWorldDir 'Data\Core\Defs\Drugs'
     $env:COLONY_PROMISES_GAME_ROOT = $RimWorldDir
     try {
-        dotnet (Join-Path $PSScriptRoot 'GameChecks\bin\Release\net10.0\ColonyPromises.GameChecks.dll') --features-only $modRoot
+        dotnet (Join-Path $paths.TestDir 'ColonyPromises.GameChecks.dll') $(if ($VerifyHarmony) { '--patches-only' } elseif ($RuntimeOnly) { '--features-runtime-only' } else { '--features-only' }) $modRoot
     } finally {
+        $env:COLONY_PROMISES_COMPAT_EXPORT = $previousExport
+        $env:COLONY_PROMISES_COMPAT_IMPORT = $previousImport
         $env:COLONY_PROMISES_GAME_DATA = $previousGameData
         $env:COLONY_PROMISES_GAME_ROOT = $previousGameRoot
     }

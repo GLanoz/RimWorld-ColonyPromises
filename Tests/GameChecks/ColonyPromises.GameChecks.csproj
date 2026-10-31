@@ -1,12 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+  <PropertyGroup>
+    <RimWorldVersion Condition="'$(RimWorldVersion)' == ''">1.6</RimWorldVersion>
+    <BaseIntermediateOutputPath>obj/$(RimWorldVersion)/</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
     <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
+    <HarmonyPath Condition="'$(HarmonyPath)' == ''">C:\Games\Steam\steamapps\workshop\content\294100\2009463077\$(RimWorldVersion)\Assemblies\0Harmony.dll</HarmonyPath>
+    <TargetFramework>net10.0</TargetFramework>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**</DefaultItemExcludes>
+    <OutputPath>bin/$(RimWorldVersion)/$(Configuration)/</OutputPath>
+    <GameManagedDir Condition="'$(GameManagedDir)' == '' and '$(RimWorldVersion)' == '1.6'">$(RimWorldDir)\RimWorldWin64_Data\Managed</GameManagedDir>
+    <GameManagedDir Condition="'$(GameManagedDir)' == '' and '$(RimWorldVersion)' == '1.7'">$(RimWorldDir)</GameManagedDir>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath></Reference>
-    <Reference Include="ColonyPromises"><HintPath>../../1.6/Assemblies/ColonyPromises.dll</HintPath></Reference>
+    <Reference Include="0Harmony"><HintPath>$(HarmonyPath)</HintPath></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameManagedDir)\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.CoreModule"><HintPath>$(GameManagedDir)\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="UnityStubs"><HintPath>$(GameManagedDir)/UnityStubs.dll</HintPath></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="Waylith"><HintPath>$(GameManagedDir)/Waylith.dll</HintPath></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="Waylith.UnityCompat"><HintPath>$(GameManagedDir)/Waylith.UnityCompat.dll</HintPath></Reference>
+    <Reference Include="ColonyPromises"><HintPath>../../$(RimWorldVersion)/Assemblies/ColonyPromises.dll</HintPath></Reference>
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

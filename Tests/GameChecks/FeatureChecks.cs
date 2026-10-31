@@ -33,7 +33,7 @@ public static class FeatureChecks
         try { Scribe.loader.InitLoading(path); Scribe.loader.curParent = record; record.ExposeData(); }
         finally { Scribe.loader.ForceStop(); }
     }
-    public static int Run(string root, string path)
+    public static int Run(string root, string path, bool includeGameDefs = true)
     {
         UnityEngine.Debug.unityLogger.logHandler = new ManagedLog();
         // The standalone host has no LoadedModManager. Supply only this fixture's saved types.
@@ -230,6 +230,7 @@ public static class FeatureChecks
                     "Letter contents render with plain numeric placeholders in " + folder);
             }
         } finally { Current.Game = oldGame; LanguageDatabase.activeLanguage = oldLanguage; LanguageDatabase.defaultLanguage = oldDefault; }
-        return checks + CardChecks.Run(root) + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path) + NeedsChecks.Run(root, path) + DlcChecks.Run(root, path) + DevRequestChecks.Run(root, path) + SubstanceChecks.Run(root, path) + ExpansionChecks.Run(root, path);
+        return checks + CardChecks.Run(root) + UIChecks.Run(root) + SharedBedroomChecks.Run(root, path) + DevRequestChecks.Run(root, path)
+            + (includeGameDefs ? NeedsChecks.Run(root, path) + DlcChecks.Run(root, path) + SubstanceChecks.Run(root, path) + ExpansionChecks.Run(root, path) : 0);
     }
 }

@@ -34,12 +34,17 @@ $previewBytes = $null
 $previewPath = Join-Path $ReleaseRoot 'About\preview.png'
 if (Test-Path -LiteralPath $previewPath) { $previewBytes = [IO.File]::ReadAllBytes($previewPath) }
 
-# Validate inputs before clearing only the explicitly selected release directory.
-foreach ($relative in @('About', 'Defs', 'Languages', 'LoadFolders.xml', '1.6\Assemblies\ColonyPromises.dll')) {
+# Validate both supported outputs before clearing only the selected release directory.
+$versions = @('1.6', '1.7')
+foreach ($relative in @('About', 'Defs', 'Languages', 'LoadFolders.xml') + @($versions | ForEach-Object { "$_\Assemblies\ColonyPromises.dll" })) {
     if (-not (Test-Path -LiteralPath (Join-Path $SourceRoot $relative))) { throw "Missing runtime input: $relative" }
 }
 [xml]$loadFolders = [IO.File]::ReadAllText((Join-Path $SourceRoot 'LoadFolders.xml'))
-if (($loadFolders.loadFolders.'v1.6'.li -join ',') -ne '/,1.6') { throw 'Unexpected RimWorld 1.6 load folders.' }
+[xml]$about = [IO.File]::ReadAllText((Join-Path $SourceRoot 'About/About.xml'))
+foreach ($version in $versions) {
+    if (($loadFolders.loadFolders.SelectSingleNode("v$version").li -join ',') -ne "/,$version") { throw "Unexpected RimWorld $version load folders." }
+    if ($version -notin $about.ModMetaData.supportedVersions.li) { throw "RimWorld $version is missing from About.xml." }
+}
 try {
     if (Test-Path -LiteralPath $ReleaseRoot) {
         foreach ($entry in Get-ChildItem -LiteralPath $ReleaseRoot -Force) {
@@ -52,9 +57,15 @@ try {
         Copy-Item -LiteralPath (Join-Path $SourceRoot $folder) -Destination $ReleaseRoot -Recurse
     }
     Copy-Item -LiteralPath (Join-Path $SourceRoot 'LoadFolders.xml') -Destination $ReleaseRoot
-    $assemblies = Join-Path $ReleaseRoot '1.6\Assemblies'
-    New-Item -ItemType Directory -Path $assemblies -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $SourceRoot '1.6\Assemblies\ColonyPromises.dll') -Destination $assemblies
+    foreach ($version in $versions) {
+        $assemblies = Join-Path $ReleaseRoot "$version\Assemblies"
+        New-Item -ItemType Directory -Path $assemblies -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $SourceRoot "$version\Assemblies\ColonyPromises.dll") -Destination $assemblies
+        if ((Get-FileHash -LiteralPath (Join-Path $assemblies 'ColonyPromises.dll')).Hash -ne
+            (Get-FileHash -LiteralPath (Join-Path $SourceRoot "$version\Assemblies\ColonyPromises.dll")).Hash) {
+            throw "Packaged RimWorld $version DLL does not match its build output."
+        }
+    }
 } finally {
     # Restore metadata even if copying runtime files fails.
     New-Item -ItemType Directory -Path (Join-Path $ReleaseRoot 'About') -Force | Out-Null

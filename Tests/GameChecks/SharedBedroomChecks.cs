@@ -288,6 +288,10 @@ public static class SharedBedroomChecks
         shared.Terms.ProgressTicks = 12345;
         var legacy = component.StateFor(Pawn(104, a.Faction));
         legacy.Active = new PromiseRecord { Kind = PromiseKind.Leisure, ProgressTicks = 777, DeadlineTick = 99999, SuccessMood = 9, FrozenConsequences = true };
+        legacy.Trust = 17;
+        legacy.SubstanceCooldownUntilTick = 987654;
+        legacy.KnownSubstances.Add("chemical:FixtureChemical");
+        legacy.RecentSuccesses.Add(new SuccessStamp { Kind = PromiseKind.Equipment, Tick = 333 });
         try {
             Scribe.saver.InitSaving(path, "save"); component.ExposeData();
             // Pawn bodies belong to the outer game save, not to this component fixture.
@@ -297,6 +301,11 @@ public static class SharedBedroomChecks
             Scribe.saver.FinalizeSaving();
         }
         finally { Scribe.saver.ForceStop(); }
+        string fixtureName = accepted ? "shared-active.xml" : "shared-request.xml";
+        string export = Environment.GetEnvironmentVariable("COLONY_PROMISES_COMPAT_EXPORT");
+        string import = Environment.GetEnvironmentVariable("COLONY_PROMISES_COMPAT_IMPORT");
+        if (!string.IsNullOrEmpty(export)) { Directory.CreateDirectory(export); File.Copy(path, Path.Combine(export, fixtureName), true); }
+        if (!string.IsNullOrEmpty(import)) File.Copy(Path.Combine(import, fixtureName), path, true);
         string xml = File.ReadAllText(path);
         Check(xml.Contains("sharedBedrooms") && xml.Contains("shared-bedroom-7"), "Canonical record and stable ID are saved");
         var loaded = new GameComponent_Promises(game);
@@ -325,6 +334,10 @@ public static class SharedBedroomChecks
                     : ReferenceEquals(loaded.StateFor(a).Request, loaded.StateFor(b).Request)), "Loading rebuilds both views of the same record");
             Check(loaded.StateFor(legacy.Pawn).Active.ProgressTicks == 777 && loaded.StateFor(legacy.Pawn).Active.SuccessMood == 9,
                 "Legacy individual progress and consequences are untouched");
+            var preserved = loaded.StateFor(legacy.Pawn);
+            Check(preserved.Trust == 17 && preserved.SubstanceCooldownUntilTick == 987654
+                && preserved.KnownSubstances.Single() == "chemical:FixtureChemical"
+                && preserved.RecentSuccesses.Single().Tick == 333, "Trust, chemical familiarity, cooldown and repeat history survive versioned Scribe loading");
             Check(accepted ? loaded.StateFor(a).HousingWitnesses.Count == 0 : loaded.StateFor(a).HousingWitnesses.Single().Mood == -2, "Loading preserves open-request evidence and cleared accepted-request evidence");
         }
         finally { Scribe.loader.ForceStop(); Scribe.mode = LoadSaveMode.Inactive; }

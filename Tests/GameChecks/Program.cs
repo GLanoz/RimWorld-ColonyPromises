@@ -175,13 +175,16 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        if (args.Length != 1 && !(args.Length == 2 && (args[0] == "--generation-only" || args[0] == "--features-only"))) throw new ArgumentException("Pass the absolute mod root.");
+        if (args.Length != 1 && !(args.Length == 2 && (args[0] == "--generation-only" || args[0] == "--features-only" || args[0] == "--features-runtime-only" || args[0] == "--patches-only" || args[0] == "--requests-only" || args[0] == "--invalidation-only"))) throw new ArgumentException("Pass the absolute mod root.");
         string temporaryFile = Path.GetTempFileName();
         try {
+            if (args.Length == 2 && args[0] == "--requests-only") { Console.WriteLine("Passed " + RequestChecks.Run(temporaryFile) + " request lifecycle and Scribe checks; no game was started."); return 0; }
+            if (args.Length == 2 && args[0] == "--invalidation-only") { Console.WriteLine("Passed " + InvalidationChecks.Run() + " compiled invalidation checks; no game was started."); return 0; }
+            if (args.Length == 2 && args[0] == "--patches-only") { VersionChecks.PatchBindings(); return 0; }
             if (args.Length == 2)
             {
-                Console.WriteLine("Passed " + (args[0] == "--features-only" ? FeatureChecks.Run(args[1], temporaryFile) : GenerationChecks.Run(args[1], temporaryFile))
-                    + (args[0] == "--features-only"
+                Console.WriteLine("Passed " + (args[0] != "--generation-only" ? FeatureChecks.Run(args[1], temporaryFile, args[0] != "--features-runtime-only") : GenerationChecks.Run(args[1], temporaryFile))
+                    + (args[0] != "--generation-only"
                         ? " visibility, notification, low-trust, recovery, invalidation, and isolated Scribe checks. Live maps remain unverified."
                         : " generation projection, queue fairness, scheduler, diagnostics, and isolated Scribe checks. Live maps remain unverified."));
                 return 0;

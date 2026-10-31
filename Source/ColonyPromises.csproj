@@ -1,20 +1,48 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <RimWorldVersion Condition="'$(RimWorldVersion)' == ''">1.7</RimWorldVersion>
+    <BaseIntermediateOutputPath>obj/$(RimWorldVersion)/</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework Condition="'$(RimWorldVersion)' == '1.6'">net472</TargetFramework>
+    <TargetFramework Condition="'$(RimWorldVersion)' == '1.7'">net10.0</TargetFramework>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**</DefaultItemExcludes>
     <Version>0.2.3</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
-    <HarmonyPath Condition="'$(HarmonyPath)' == ''">C:\Games\Steam\steamapps\workshop\content\294100\2009463077\1.6\Assemblies\0Harmony.dll</HarmonyPath>
-    <OutputPath>../1.6/Assemblies/</OutputPath>
+    <HarmonyPath Condition="'$(HarmonyPath)' == ''">C:\Games\Steam\steamapps\workshop\content\294100\2009463077\$(RimWorldVersion)\Assemblies\0Harmony.dll</HarmonyPath>
+    <GameManagedDir Condition="'$(GameManagedDir)' == '' and '$(RimWorldVersion)' == '1.6'">$(RimWorldDir)\RimWorldWin64_Data\Managed</GameManagedDir>
+    <GameManagedDir Condition="'$(GameManagedDir)' == '' and '$(RimWorldVersion)' == '1.7'">$(RimWorldDir)</GameManagedDir>
+    <OutputPath>../$(RimWorldVersion)/Assemblies/</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(RimWorldDir)\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameManagedDir)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.CoreModule"><HintPath>$(GameManagedDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.IMGUIModule"><HintPath>$(GameManagedDir)\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.TextRenderingModule"><HintPath>$(GameManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="UnityStubs"><HintPath>$(GameManagedDir)\UnityStubs.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="Waylith"><HintPath>$(GameManagedDir)\Waylith.dll</HintPath><Private>false</Private></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="Waylith.UnityCompat"><HintPath>$(GameManagedDir)\Waylith.UnityCompat.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="0Harmony"><HintPath>$(HarmonyPath)</HintPath><Private>false</Private></Reference>
   </ItemGroup>
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(RimWorldVersion)' != '1.6' and '$(RimWorldVersion)' != '1.7'" Text="RimWorldVersion must be 1.6 or 1.7." />
+    <Error Condition="!Exists('$(GameManagedDir)/Assembly-CSharp.dll')" Text="Game assemblies missing. Set RimWorldDir or GameManagedDir for RimWorld $(RimWorldVersion)." />
+    <Error Condition="!Exists('$(HarmonyPath)')" Text="Harmony missing. Set HarmonyPath to the $(RimWorldVersion) Harmony assembly." />
+    <GetAssemblyIdentity AssemblyFiles="$(GameManagedDir)/Assembly-CSharp.dll">
+      <Output TaskParameter="Assemblies" ItemName="GameIdentity" />
+    </GetAssemblyIdentity>
+    <Error Condition="!$([System.String]::Copy('%(GameIdentity.Version)').StartsWith('$(RimWorldVersion).'))" Text="Game assembly version %(GameIdentity.Version) does not match RimWorldVersion $(RimWorldVersion)." />
+    <GetAssemblyIdentity AssemblyFiles="$(HarmonyPath)">
+      <Output TaskParameter="Assemblies" ItemName="HarmonyIdentity" />
+    </GetAssemblyIdentity>
+    <Error Condition="'$(RimWorldVersion)' == '1.6' and !$([System.String]::Copy('%(HarmonyIdentity.Version)').StartsWith('2.'))" Text="RimWorld 1.6 requires its Harmony 2 assembly." />
+    <Error Condition="'$(RimWorldVersion)' == '1.7' and !$([System.String]::Copy('%(HarmonyIdentity.Version)').StartsWith('3.'))" Text="RimWorld 1.7 requires its Harmony 3 assembly." />
+  </Target>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
