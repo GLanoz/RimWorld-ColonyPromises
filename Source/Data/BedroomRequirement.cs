@@ -16,7 +16,11 @@ namespace ColonyPromises
         public static BedroomRequirement Capture(RoomRequirement source)
         {
             var result = new BedroomRequirement { LabelKey = source.labelKey };
-            if (source.GetType() == typeof(RoomRequirement_Area)) { result.Kind = "Area"; result.Value = ((RoomRequirement_Area)source).area; }
+            if (source.GetType() == typeof(RoomRequirement_HasAssignedThroneAnyOf)) { if (((RoomRequirement_HasAssignedThroneAnyOf)source).things == null) return null; result.Kind = "AssignedThrone"; result.Names.AddRange(((RoomRequirement_HasAssignedThroneAnyOf)source).things.Select(d => d.defName)); }
+            else if (source.GetType() == typeof(RoomRequirement_ThingAnyOfCount)) { result.Kind = "AnyThingCount"; result.Value = ((RoomRequirement_ThingAnyOfCount)source).count; result.Names.AddRange(((RoomRequirement_ThingAnyOfCount)source).things.Select(d => d.defName)); }
+            else if (source.GetType() == typeof(RoomRequirement_AllThingsAnyOfAreGlowing)) { result.Kind = "GlowingAny"; result.Names.AddRange(((RoomRequirement_AllThingsAnyOfAreGlowing)source).things.Select(d => d.defName)); }
+            else if (source.GetType() == typeof(RoomRequirement_ForbidAltars)) { result.Kind = "NoAltars"; }
+            else if (source.GetType() == typeof(RoomRequirement_Area)) { result.Kind = "Area"; result.Value = ((RoomRequirement_Area)source).area; }
             else if (source.GetType() == typeof(RoomRequirement_Impressiveness)) { result.Kind = "Impressiveness"; result.Value = ((RoomRequirement_Impressiveness)source).impressiveness; }
             else if (source.GetType() == typeof(RoomRequirement_TerrainWithTags)) { result.Kind = "Floor"; result.Names.AddRange(((RoomRequirement_TerrainWithTags)source).tags); }
             else if (source.GetType() == typeof(RoomRequirement_Thing)) { result.Kind = "Thing"; result.Names.Add(((RoomRequirement_Thing)source).thingDef.defName); }
@@ -32,6 +36,7 @@ namespace ColonyPromises
             RoomRequirement result;
             switch (Kind)
             {
+                case "NoAltars": result = new RoomRequirement_ForbidAltars(); break;
                 case "Area": result = new RoomRequirement_Area { area = Value }; break;
                 case "Impressiveness": result = new RoomRequirement_Impressiveness { impressiveness = Value }; break;
                 case "Floor": result = new RoomRequirement_TerrainWithTags { tags = new List<string>(Names) }; break;
@@ -42,10 +47,16 @@ namespace ColonyPromises
                     if (def == null) return null;
                     result = Kind == "ThingCount" ? new RoomRequirement_ThingCount { thingDef = def, count = Value }
                         : new RoomRequirement_Thing { thingDef = def }; break;
+                case "AnyThingCount":
+                case "GlowingAny":
+                case "AssignedThrone":
                 case "AnyThing":
                     var defs = Names.Select(DefDatabase<ThingDef>.GetNamedSilentFail).Where(d => d != null).ToList();
                     if (defs.Count == 0) return null;
-                    result = new RoomRequirement_ThingAnyOf { things = defs }; break;
+                    result = Kind == "AnyThingCount" ? new RoomRequirement_ThingAnyOfCount { things = defs, count = Value }
+                        : Kind == "GlowingAny" ? new RoomRequirement_AllThingsAnyOfAreGlowing { things = defs }
+                        : Kind == "AssignedThrone" ? new RoomRequirement_HasAssignedThroneAnyOf { things = defs }
+                        : new RoomRequirement_ThingAnyOf { things = defs }; break;
                 default: return null;
             }
             result.labelKey = LabelKey;

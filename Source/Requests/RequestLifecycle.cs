@@ -12,6 +12,11 @@ namespace ColonyPromises
             r.LastCheckTick = r.LastLeisureCreditTick = now;
             r.ResetHold();
             r.SubstanceConsumedTick = -1;
+            if (r.Kind == PromiseKind.Style)
+            {
+                r.OriginalHair = state.Pawn.story?.hairDef; r.OriginalBeard = state.Pawn.style?.beardDef;
+                r.StyleChangedTick = -1;
+            }
             state.Request = null;
             state.Active = r;
             RequestGenerator.ResetObservations(state, true);

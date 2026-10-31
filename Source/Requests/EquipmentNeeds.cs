@@ -9,7 +9,7 @@ namespace ColonyPromises
 {
     public static class EquipmentNeeds
     {
-        public static readonly IReadOnlyList<string> Causes = Array.AsReadOnly(new[] { "ApparelDamaged", "Naked", "BrawlerUnhappy", "WeaponRanged", "WeaponMelee", "WeaponUpgrade" });
+        public static readonly IReadOnlyList<string> Causes = Array.AsReadOnly(new[] { "ApparelDamaged", "Naked", "BrawlerUnhappy", "WeaponRanged", "WeaponMelee", "WeaponUpgrade", "RoyalApparel", "IdeoRoleApparel", "IdeoDesiredApparel" });
         public static bool AcquisitionCause(string cause) => cause == "WeaponRanged" || cause == "WeaponMelee";
 
         public static bool? AcquisitionType(int shooting, int melee, bool? preferred, bool? equipped)
@@ -114,6 +114,7 @@ namespace ColonyPromises
 
         public static RequestCandidate Evaluate(Pawn pawn, RequestEvaluation result, string requestedCause = null)
         {
+            if (ExpansionRequests.IsApparel(requestedCause)) return ExpansionRequests.Apparel(pawn, result, requestedCause);
             result.Reason = "CP_GearNoCause";
             var details = new List<string>();
             var ranged = PreferredRanged(pawn, out string weaponReason);
@@ -221,7 +222,7 @@ namespace ColonyPromises
             }
             result.Current = string.Join("\n", details);
             if (ModsConfig.IdeologyActive) result.Current += "\n" + "CP_GearIdeology".Translate();
-            return null;
+            return requestedCause == null ? ExpansionRequests.Apparel(pawn, result, null) : null;
         }
 
         public static string Reason(ColonistRequest request) => request?.Terms?.NeedBasedEquipment == true
@@ -231,6 +232,7 @@ namespace ColonyPromises
 
         public static bool CauseCurrent(Pawn pawn, PromiseRecord r)
         {
+            if (ExpansionRequests.IsApparel(r.EquipmentCause)) return ExpansionRequests.CurrentApparel(pawn, r);
             if (AcquisitionCause(r.EquipmentCause)) return r.NeedBasedEquipment
                 && AcquisitionType(pawn) == (r.EquipmentCause == "WeaponRanged")
                 && WeaponTypeMatches(r.EquipmentDef, r.EquipmentCause == "WeaponRanged")
@@ -281,6 +283,8 @@ namespace ColonyPromises
         {
             if (!MatchesParameters(item, r)) return false;
             if (!r.NeedBasedEquipment) return true;
+            if (r.ExpansionRequest && (r.ApparelRequirement != null && !r.ApparelRequirement.ApparelMeetsRequirement(item.def)
+                || r.ProblemThing is Apparel problem && problem != item && pawn.apparel.WornApparel.Contains(problem))) return false;
             if (r.EquipmentCause == "ApparelDamaged" && r.ProblemThing is Apparel original && original != item
                 && pawn.apparel.WornApparel.Contains(original) && Damaged(pawn, original)) return false;
             return UsableDefinition(pawn, r) && EquipmentUtility.CanEquip(item, pawn)

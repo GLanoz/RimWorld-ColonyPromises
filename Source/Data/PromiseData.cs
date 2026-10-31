@@ -4,7 +4,7 @@ using Verse;
 
 namespace ColonyPromises
 {
-    public enum PromiseKind { Bedroom, Leisure, Equipment, Substance }
+    public enum PromiseKind { Bedroom, Leisure, Equipment, Substance, ThroneRoom, Style }
     public enum PromiseOutcome { Fulfilled, Broken, Withdrawn, Closed, Declined, Expired, SatisfiedUnaccepted, Obsolete }
 
     public sealed class PromiseRecord : IExposable
@@ -42,6 +42,17 @@ namespace ColonyPromises
         public ChemicalDef SubstanceChemical;
         public HediffDef SubstanceEffect;
         public int SubstanceConsumedTick = -1;
+        public bool ExpansionRequest;
+        public RoyalTitleDef SourceTitle;
+        public string SourceIdeology;
+        public int SourcePreceptId = -1;
+        public ApparelRequirement ApparelRequirement;
+        public bool StyleBeard;
+        public HairDef TargetHair;
+        public BeardDef TargetBeard;
+        public HairDef OriginalHair;
+        public BeardDef OriginalBeard;
+        public int StyleChangedTick = -1;
         public int LastCheckTick = -1;
         public int LastLeisureCreditTick;
         public bool PreviouslySatisfied;
@@ -126,6 +137,17 @@ namespace ColonyPromises
             Scribe_Defs.Look(ref SubstanceChemical, "substanceChemical");
             Scribe_Defs.Look(ref SubstanceEffect, "substanceEffect");
             Scribe_Values.Look(ref SubstanceConsumedTick, "substanceConsumedTick", -1);
+            Scribe_Values.Look(ref ExpansionRequest, "expansionRequest");
+            Scribe_Defs.Look(ref SourceTitle, "expansionTitle");
+            Scribe_Values.Look(ref SourceIdeology, "expansionIdeology");
+            Scribe_Values.Look(ref SourcePreceptId, "expansionPrecept", -1);
+            Scribe_Deep.Look(ref ApparelRequirement, "expansionApparelRequirement");
+            Scribe_Values.Look(ref StyleBeard, "styleBeard");
+            Scribe_Defs.Look(ref TargetHair, "targetHair");
+            Scribe_Defs.Look(ref TargetBeard, "targetBeard");
+            Scribe_Defs.Look(ref OriginalHair, "originalHair");
+            Scribe_Defs.Look(ref OriginalBeard, "originalBeard");
+            Scribe_Values.Look(ref StyleChangedTick, "styleChangedTick", -1);
             Scribe_Values.Look(ref LastCheckTick, "lastCheckTick", -1);
             Scribe_Values.Look(ref LastLeisureCreditTick, "lastLeisureCreditTick");
             Scribe_Values.Look(ref PreviouslySatisfied, "previouslySatisfied");

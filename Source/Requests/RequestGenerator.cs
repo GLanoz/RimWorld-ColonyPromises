@@ -47,6 +47,8 @@ namespace ColonyPromises
                 case PromiseKind.Leisure: result.Candidate = LeisureNeeds.Evaluate(pawn, result); break;
                 case PromiseKind.Equipment: result.Candidate = EquipmentNeeds.Evaluate(pawn, result,
                     devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
+                case PromiseKind.ThroneRoom: result.Candidate = ExpansionRequests.Throne(pawn, result); break;
+                case PromiseKind.Style: result.Candidate = ExpansionRequests.Style(pawn, result, devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
                 case PromiseKind.Substance: result.Candidate = SubstanceNeeds.Evaluate(pawn, result,
                     devBypassCooldown && Prefs.DevMode, devBypassCooldown && Prefs.DevMode ? equipmentCause : null); break;
             }
@@ -164,6 +166,15 @@ namespace ColonyPromises
             if (request.Terms.DevManual) return DevRequests.ValidTerms(pawn, request.Terms);
             var condition = PromiseConditions.Get(request.Terms.Kind);
             if (condition == null || !condition.ValidParameters(request.Terms)) return false;
+            if (request.Terms.Kind == PromiseKind.ThroneRoom)
+            {
+                var candidate = ExpansionRequests.Throne(pawn, new RequestEvaluation());
+                return candidate != null && candidate.Terms.SourceTitle == request.Terms.SourceTitle
+                    && DlcCompatibility.SameBedroomRequirements(candidate.Terms, request.Terms);
+            }
+            if (request.Terms.Kind == PromiseKind.Style) return ExpansionRequests.UnwantedStyle(pawn, request.Terms.StyleBeard)
+                && ExpansionRequests.StyleAllowed(pawn, ExpansionRequests.TargetStyle(request.Terms))
+                && ExpansionRequests.IdeologyKey(pawn) == request.Terms.SourceIdeology && ExpansionRequests.StylingAvailable(pawn);
             if (request.Terms.Kind == PromiseKind.Bedroom)
             {
                 var terms = request.Terms;
@@ -199,8 +210,8 @@ namespace ColonyPromises
                 HousingReasons = candidate.HousingReasons,
                 Magnitude = candidate.Magnitude, OfferedTick = now, ExpiryTick = terms.DeadlineTick,
                 DeadlineDays = terms.Kind == PromiseKind.Substance ? RequestRules.SubstanceDeadlineDays
-                    : RequestRules.Deadline((int)terms.Kind, candidate.Magnitude),
-                Announced = false, RecoveryEnabled = terms.Kind != PromiseKind.Substance
+                    : RequestRules.Deadline(terms.Kind == PromiseKind.ThroneRoom ? 0 : (int)terms.Kind, candidate.Magnitude),
+                Announced = false, RecoveryEnabled = terms.Kind != PromiseKind.Substance && terms.Kind != PromiseKind.Style
             };
         }
 

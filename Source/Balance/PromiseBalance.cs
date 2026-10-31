@@ -91,6 +91,7 @@ namespace ColonyPromises
         public const int ExperimentTrust = 7;
         public const int ExperimentMemoryDays = 3;
         public const int SubstanceDeadlineDays = 4;
+        public const int StyleRequiredTicks = 1;
         public const int WeaponUpgradeSkill = 10;
         // Quality enum values: Normal = 2, Good = 3. Keep this rules file game-independent.
         public const int WeaponUpgradeBaseQuality = 2;

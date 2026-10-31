@@ -374,4 +374,34 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_SubstanceNoAddiction>No matching addiction</CP_SubstanceNoAddiction>
   <CP_SubstanceReady>Eligible target</CP_SubstanceReady>
   <CP_SubstancePawnBlocked>Cannot use this substance under current pawn rules</CP_SubstancePawnBlocked>
+  <CP_Type_ThroneRoom>Throne room</CP_Type_ThroneRoom>
+  <CP_Type_Style>Appearance</CP_Type_Style>
+  <CP_Type_HairStyle>New hairstyle</CP_Type_HairStyle>
+  <CP_Type_BeardStyle>New beard style</CP_Type_BeardStyle>
+  <CP_ExpansionNotApplicable>No applicable unmet expansion requirement.</CP_ExpansionNotApplicable>
+  <CP_ThroneReason>Wants a throne room that meets their title's requirements.</CP_ThroneReason>
+  <CP_ThroneAction>Assign a throne in a suitable room and meet the listed title requirements for {0} continuous hours.</CP_ThroneAction>
+  <CP_HairReason>Their current hairstyle does not suit their beliefs.</CP_HairReason>
+  <CP_BeardReason>Their current beard style does not suit their beliefs.</CP_BeardReason>
+  <CP_HairAction>Change their hairstyle to {0} after accepting.</CP_HairAction>
+  <CP_BeardAction>Change their beard style to {0} after accepting.</CP_BeardAction>
+  <CP_StyleCurrent>Current style: {0}.</CP_StyleCurrent>
+  <CP_StyleNoSolution>No acceptable alternative style or reachable styling station.</CP_StyleNoSolution>
+  <CP_StylePending>Waiting for the promised style change.</CP_StylePending>
+  <CP_StyleProgress>Style changed: {0}/1.</CP_StyleProgress>
+  <CP_ExpansionApparelPartial>This promise covers one garment. Other clothing requirements may remain.</CP_ExpansionApparelPartial>
+  <CP_GearReason_RoyalApparel>Wants clothing appropriate to their title.</CP_GearReason_RoyalApparel>
+  <CP_GearReason_IdeoRoleApparel>Wants clothing suited to their role.</CP_GearReason_IdeoRoleApparel>
+  <CP_GearReason_IdeoDesiredApparel>Wants clothing favored by their beliefs.</CP_GearReason_IdeoDesiredApparel>
+  <CP_CardReason_RoyalApparel>Wants clothing appropriate to their title. This promise covers one garment.</CP_CardReason_RoyalApparel>
+  <CP_CardReason_IdeoRoleApparel>Wants clothing suited to their role. This promise covers one garment.</CP_CardReason_IdeoRoleApparel>
+  <CP_CardReason_IdeoDesiredApparel>Wants to wear clothing favored by their beliefs.</CP_CardReason_IdeoDesiredApparel>
+  <CP_DevType_ThroneRoom>Title throne room</CP_DevType_ThroneRoom>
+  <CP_DevType_HairStyle>Change hairstyle</CP_DevType_HairStyle>
+  <CP_DevType_BeardStyle>Change beard style</CP_DevType_BeardStyle>
+  <CP_DevType_RoyalApparel>Title clothing</CP_DevType_RoyalApparel>
+  <CP_DevType_IdeoRoleApparel>Role clothing</CP_DevType_IdeoRoleApparel>
+  <CP_DevType_IdeoDesiredApparel>Desired ideological clothing</CP_DevType_IdeoDesiredApparel>
+  <CP_StyleDataUnavailable>Style preferences are not initialized; observation cannot verify this need yet.</CP_StyleDataUnavailable>
+  <CP_ThroneUnsupported>An active title has a throne-room requirement that cannot be captured reliably.</CP_ThroneUnsupported>
 </LanguageData>

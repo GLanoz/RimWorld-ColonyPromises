@@ -17,7 +17,7 @@ namespace ColonyPromises
             else
             {
                 bool same = r.PreviouslySatisfied && observation.Thing == r.StableThing
-                    && (r.Kind != PromiseKind.Bedroom || observation.Room == r.ObservedRoom);
+                    && ((r.Kind != PromiseKind.Bedroom && r.Kind != PromiseKind.ThroneRoom) || observation.Room == r.ObservedRoom);
                 if (!same) r.ProgressTicks = 0;
                 else r.ProgressTicks += ProgressMath.VerifiedDelta(r.LastCheckTick, now, r.DeadlineTick);
                 r.StableThing = observation.Thing;

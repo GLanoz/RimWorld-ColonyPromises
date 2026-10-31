@@ -28,7 +28,7 @@ namespace ColonyPromises
         {
             var r = request.Terms;
             if (r.FrozenConsequences) return;
-            int kind = (int)r.Kind;
+            int kind = r.Kind == PromiseKind.ThroneRoom ? 0 : (int)r.Kind;
             int magnitude = request.Magnitude;
             float factor = RewardFactor(state, r.Kind, tick);
             bool experiment = r.Kind == PromiseKind.Substance && r.SubstanceExperiment;
@@ -56,6 +56,9 @@ namespace ColonyPromises
             SubstanceNeeds.StartCooldown(state, record, tick);
             if (outcome != PromiseOutcome.Fulfilled && outcome != PromiseOutcome.Broken && outcome != PromiseOutcome.Withdrawn)
             {
+                if (record.ExpansionRequest && record.FrozenConsequences && outcome == PromiseOutcome.Closed)
+                    state.CooldownUntilTick = System.Math.Max(state.CooldownUntilTick,
+                        tick + record.CooldownDays * PromiseBalance.TicksPerDay);
                 record.RecordConsequences(0, 0);
                 return;
             }

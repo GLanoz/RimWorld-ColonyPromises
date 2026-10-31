@@ -374,4 +374,34 @@
   <CP_SubstanceNoAddiction>Немає відповідної залежності</CP_SubstanceNoAddiction>
   <CP_SubstanceReady>Придатна ціль</CP_SubstanceReady>
   <CP_SubstancePawnBlocked>Колоніст не може вживати цю речовину за чинними правилами</CP_SubstancePawnBlocked>
+  <CP_Type_ThroneRoom>Тронна зала</CP_Type_ThroneRoom>
+  <CP_Type_Style>Зовнішність</CP_Type_Style>
+  <CP_Type_HairStyle>Нова зачіска</CP_Type_HairStyle>
+  <CP_Type_BeardStyle>Новий стиль бороди</CP_Type_BeardStyle>
+  <CP_ExpansionNotApplicable>Немає незадоволеної вимоги активного доповнення.</CP_ExpansionNotApplicable>
+  <CP_ThroneReason>Хоче тронну залу, що відповідає вимогам титулу.</CP_ThroneReason>
+  <CP_ThroneAction>Призначте трон у придатній кімнаті та виконайте перелічені вимоги титулу протягом {0} годин без перерви.</CP_ThroneAction>
+  <CP_HairReason>Нинішня зачіска не відповідає переконанням колоніста.</CP_HairReason>
+  <CP_BeardReason>Нинішній стиль бороди не відповідає переконанням колоніста.</CP_BeardReason>
+  <CP_HairAction>Після прийняття змініть зачіску на «{0}».</CP_HairAction>
+  <CP_BeardAction>Після прийняття змініть стиль бороди на «{0}».</CP_BeardAction>
+  <CP_StyleCurrent>Нинішній стиль: {0}.</CP_StyleCurrent>
+  <CP_StyleNoSolution>Немає прийнятного нового стилю або доступної станції стилізації.</CP_StyleNoSolution>
+  <CP_StylePending>Очікується обіцяна зміна стилю.</CP_StylePending>
+  <CP_StyleProgress>Стиль змінено: {0}/1.</CP_StyleProgress>
+  <CP_ExpansionApparelPartial>Ця обіцянка стосується одного предмета одягу. Інші вимоги можуть залишитися.</CP_ExpansionApparelPartial>
+  <CP_GearReason_RoyalApparel>Хоче одяг, що відповідає титулу.</CP_GearReason_RoyalApparel>
+  <CP_GearReason_IdeoRoleApparel>Хоче одяг, що відповідає ролі.</CP_GearReason_IdeoRoleApparel>
+  <CP_GearReason_IdeoDesiredApparel>Хоче одяг, який схвалюють його переконання.</CP_GearReason_IdeoDesiredApparel>
+  <CP_CardReason_RoyalApparel>Хоче одяг, що відповідає титулу. Обіцянка стосується одного предмета.</CP_CardReason_RoyalApparel>
+  <CP_CardReason_IdeoRoleApparel>Хоче одяг, що відповідає ролі. Обіцянка стосується одного предмета.</CP_CardReason_IdeoRoleApparel>
+  <CP_CardReason_IdeoDesiredApparel>Хоче носити одяг, який схвалюють його переконання.</CP_CardReason_IdeoDesiredApparel>
+  <CP_DevType_ThroneRoom>Тронна зала за титулом</CP_DevType_ThroneRoom>
+  <CP_DevType_HairStyle>Зміна зачіски</CP_DevType_HairStyle>
+  <CP_DevType_BeardStyle>Зміна стилю бороди</CP_DevType_BeardStyle>
+  <CP_DevType_RoyalApparel>Одяг за титулом</CP_DevType_RoyalApparel>
+  <CP_DevType_IdeoRoleApparel>Одяг за роллю</CP_DevType_IdeoRoleApparel>
+  <CP_DevType_IdeoDesiredApparel>Бажаний ідеологією одяг</CP_DevType_IdeoDesiredApparel>
+  <CP_StyleDataUnavailable>Уподобання стилю ще не визначені; наразі потребу неможливо перевірити.</CP_StyleDataUnavailable>
+  <CP_ThroneUnsupported>Чинний титул має вимогу до тронної зали, яку неможливо надійно зафіксувати.</CP_ThroneUnsupported>
 </LanguageData>

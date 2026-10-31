@@ -42,6 +42,32 @@ namespace ColonyPromises
         private static void Configure(Pawn pawn, DevRequestType type, PromiseRecord terms)
         {
             if (!Prefs.DevMode) return;
+            if (!ExpansionRequests.Enabled(type.Cause ?? type.Key)) { Report("CP_ExpansionNotApplicable".Translate()); return; }
+            if (type.Kind == PromiseKind.ThroneRoom)
+            {
+                var royal = ExpansionRequests.ThroneTerms(pawn);
+                if (royal == null) { Report("CP_ExpansionNotApplicable".Translate()); return; }
+                royal.DevTest = royal.DevManual = true; Create(pawn, type, royal); return;
+            }
+            if (type.Kind == PromiseKind.Style)
+            {
+                Show(ExpansionRequests.Styles(pawn, type.Cause == "BeardStyle").Select(style =>
+                    new FloatMenuOption(style.LabelCap, () => {
+                        var record = ExpansionRequests.StyleTerms(pawn, type.Cause == "BeardStyle", style);
+                        record.DevTest = record.DevManual = true; Create(pawn, type, record);
+                    })));
+                return;
+            }
+            if (ExpansionRequests.IsApparel(type.Cause))
+            {
+                var options = ExpansionRequests.ApparelOptions(pawn, type.Cause, true)
+                    .Where(r => ExpansionRequests.UsableApparel(pawn, r)).ToList();
+                if (options.Count == 0) { Report("CP_DlcGearNoSolution".Translate()); return; }
+                Show(options.Select(record => new FloatMenuOption(record.EquipmentDef.LabelCap, () => {
+                    record.DevTest = record.DevManual = true; Create(pawn, type, record);
+                })));
+                return;
+            }
             if (type.Kind == PromiseKind.Bedroom)
             {
                 Show(Enumerable.Range(0, RoomStatDefOf.Impressiveness.scoreStages.Count).Select(stage =>

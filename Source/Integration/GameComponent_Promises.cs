@@ -181,6 +181,7 @@ namespace ColonyPromises
                 Resolve(state, PromiseOutcome.Closed, now);
                 return;
             }
+            if (!ExpansionRequests.Applicable(pawn, r)) { Resolve(state, PromiseOutcome.Closed, now); return; }
             var condition = PromiseConditions.Get(r.Kind);
             PromiseProgress.Observe(r, condition, pawn, now);
             // Fulfillment always wins over expiry when the verified progress meets the target.
@@ -239,12 +240,18 @@ namespace ColonyPromises
         }
 
         public void RoomChanged(Room room, bool shapeChanged)
+            => InvalidateRoom(room, shapeChanged, null);
+
+        public void ThroneLightingChanged(Room room) => InvalidateRoom(room, false, PromiseKind.ThroneRoom);
+
+        private void InvalidateRoom(Room room, bool shapeChanged, PromiseKind? onlyKind)
         {
             if (Scribe.mode != LoadSaveMode.Inactive) return;
             foreach (var state in active.Values.Concat(open.Values))
             {
                 var r = state.Active ?? state.Request?.Terms;
-                if (r == null || r.Kind != PromiseKind.Bedroom || r.ObservedRoom != room) continue;
+                if (onlyKind.HasValue && r?.Kind != onlyKind.Value) continue;
+                if (r == null || (r.Kind != PromiseKind.Bedroom && r.Kind != PromiseKind.ThroneRoom) || r.ObservedRoom != room) continue;
                 if (shapeChanged || !PromiseConditions.Get(r.Kind).Observe(state.Pawn, r).Satisfied) r.ResetHold();
             }
         }

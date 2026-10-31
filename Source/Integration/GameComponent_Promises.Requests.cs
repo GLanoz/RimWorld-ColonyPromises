@@ -97,6 +97,8 @@ namespace ColonyPromises
                 return;
             }
             bool observable = RequestMaintenance.Observable(pawn);
+            if (request.Terms.ExpansionRequest && !ExpansionRequests.Applicable(pawn, request.Terms))
+            { CloseRequest(state, PromiseOutcome.Obsolete, now); return; }
             if (request.Terms.DevManual)
             {
                 if (now >= request.ExpiryTick) CloseRequest(state, PromiseOutcome.Expired, now);

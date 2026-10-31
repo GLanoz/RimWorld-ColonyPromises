@@ -25,7 +25,7 @@ namespace ColonyPromises
     {
         private static readonly Dictionary<PromiseKind, IPromiseCondition> Conditions = new[]
         {
-            (IPromiseCondition)new BedroomCondition(), new LeisureCondition(), new EquipmentCondition(), new SubstanceCondition()
+            (IPromiseCondition)new BedroomCondition(), new LeisureCondition(), new EquipmentCondition(), new SubstanceCondition(), new ThroneRoomCondition(), new StyleCondition()
         }.ToDictionary(c => c.Kind);
         public static IPromiseCondition Get(PromiseKind kind) => Conditions.TryGetValue(kind, out var value) ? value : null;
         public static IEnumerable<IPromiseCondition> All => Conditions.Values;
@@ -130,6 +130,7 @@ namespace ColonyPromises
             + (r.RequireCoverage ? "\n" + "CP_GearCoverage".Translate().ToString() : "")
             + (r.RequireMelee ? "\n" + "CP_GearMelee".Translate().ToString() : "")
             + (r.MinimumHitPointsFraction > 0 ? " " + "CP_Durability".Translate(PromiseText.Number(r.MinimumHitPointsFraction * 100)).ToString() : "")
-            + (r.AvoidHumanLeather ? " " + "CP_NoHumanLeather".Translate().ToString() : "");
+            + (r.AvoidHumanLeather ? " " + "CP_NoHumanLeather".Translate().ToString() : "")
+            + (r.ExpansionRequest ? "\n" + "CP_ExpansionApparelPartial".Translate().ToString() : "");
     }
 }

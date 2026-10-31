@@ -20,7 +20,7 @@ namespace ColonyPromises
     {
         // Test variants use the existing condition registry and persisted term fields.
         public static IEnumerable<DevRequestType> Types => Variants.Concat(EquipmentVariants)
-            .Where(t => PromiseConditions.Get(t.Kind) != null);
+            .Where(t => PromiseConditions.Get(t.Kind) != null && ExpansionRequests.Enabled(t.Cause ?? t.Key));
         private static readonly DevRequestType[] EquipmentVariants = EquipmentNeeds.Causes.Select(c =>
             new DevRequestType { Key = c, Cause = c, Kind = PromiseKind.Equipment }).ToArray();
         private static readonly DevRequestType[] Variants = {
@@ -31,13 +31,18 @@ namespace ColonyPromises
             new DevRequestType { Key = "Shared", Kind = PromiseKind.Bedroom, Shared = true },
             new DevRequestType { Key = "SharedBarracks", Kind = PromiseKind.Bedroom, Shared = true, Barracks = true },
             new DevRequestType { Key = "Leisure", Kind = PromiseKind.Leisure },
+            new DevRequestType { Key = "ThroneRoom", Cause = "ThroneRoom", Kind = PromiseKind.ThroneRoom },
+            new DevRequestType { Key = "HairStyle", Cause = "HairStyle", Kind = PromiseKind.Style },
+            new DevRequestType { Key = "BeardStyle", Cause = "BeardStyle", Kind = PromiseKind.Style },
             new DevRequestType { Key = "SubstanceTry", Cause = "SubstanceTry", Kind = PromiseKind.Substance },
             new DevRequestType { Key = "SubstanceAddiction", Cause = "SubstanceAddiction", Kind = PromiseKind.Substance }
         };
         public static bool Occupied(ColonistPromises state) => state?.Active != null || state?.Request != null || state?.SharedId != null;
 
         public static bool Matches(DevRequestType type, RequestCandidate candidate, Pawn pawn) => candidate != null
-            && candidate.Terms.Kind == type.Kind && (type.Kind == PromiseKind.Leisure
+            && candidate.Terms.Kind == type.Kind && (type.Kind == PromiseKind.ThroneRoom
+            || type.Kind == PromiseKind.Style && candidate.Terms.StyleBeard == (type.Cause == "BeardStyle")
+            || type.Kind == PromiseKind.Leisure
             || type.Kind == PromiseKind.Equipment && candidate.Terms.EquipmentCause == type.Cause
             || type.Kind == PromiseKind.Substance && candidate.Terms.SubstanceExperiment == (type.Cause == "SubstanceTry")
             || type.Kind == PromiseKind.Bedroom && candidate.Terms.IsShared == type.Shared
@@ -68,6 +73,12 @@ namespace ColonyPromises
                 || SharedBedroomRules.Validity(r.ParticipantA, r.ParticipantB) != SharedPairValidity.Valid
                 || !RequestMaintenance.Observable(r.ParticipantB) || r.ParticipantA.Map != r.ParticipantB.Map)) return false;
             if (r.IsShared && !SharedBedroomRules.HasUsableBedDefinition(r.ParticipantA, r.ParticipantB)) return false;
+            if (r.Kind == PromiseKind.ThroneRoom) return ModsConfig.RoyaltyActive && ExpansionRequests.ThroneTerms(pawn) != null;
+            if (r.Kind == PromiseKind.Style) return ModsConfig.IdeologyActive && pawn.style?.CanDesireLookChange == true && ExpansionRequests.StyleAllowed(pawn, ExpansionRequests.TargetStyle(r))
+                && ExpansionRequests.CurrentStyle(pawn, r.StyleBeard) != ExpansionRequests.TargetStyle(r);
+            if (r.ExpansionRequest && r.Kind == PromiseKind.Equipment) return r.RequiredTicks == PromiseBalance.HoldTicks
+                && ExpansionRequests.Applicable(pawn, r)
+                && ExpansionRequests.UsableApparel(pawn, r);
             if (r.Kind == PromiseKind.Leisure) return pawn.needs?.joy != null;
             if (r.Kind == PromiseKind.Substance) return SubstanceNeeds.Allowed(pawn, r.SubstanceDef, r.SubstanceExperiment)
                 && (r.SubstanceExperiment || SubstanceNeeds.Addictions(pawn).Any(a => a.Chemical == r.SubstanceChemical));

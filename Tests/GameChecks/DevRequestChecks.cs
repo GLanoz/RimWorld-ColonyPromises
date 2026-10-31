@@ -47,7 +47,7 @@ public static class DevRequestChecks
             }
             Check(DevRequests.Types.Select(t => t.Key).Distinct().Count() == DevRequests.Types.Count(), "No duplicate test variants");
             Check(DevRequests.Types.Where(t => t.Kind == PromiseKind.Equipment).Select(t => t.Cause)
-                .SequenceEqual(EquipmentNeeds.Causes), "Equipment test variants share the generator's supported causes");
+                .SequenceEqual(EquipmentNeeds.Causes.Where(ExpansionRequests.Enabled)), "Equipment test variants share the generator's supported causes");
             Check(!component.ClearDevRecord(a, record) && sa.Request != null, "Cleanup has a code-level Dev guard");
             prefs.devMode = true;
             Check(DevRequests.Occupied(sa), "Open request blocks replacement");

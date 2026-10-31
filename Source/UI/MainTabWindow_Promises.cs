@@ -153,7 +153,7 @@ namespace ColonyPromises
                 return (record.RequiresBarracks ? "CP_ShortBarracks" : record.IsShared ? "CP_ShortSharedBedroom" : "CP_ShortBedroom").Translate(BedroomCondition.RoomLabel(record.RoomStage));
             if (record.Kind == PromiseKind.Leisure)
                 return "CP_ShortLeisure".Translate(PromiseText.Number(record.RequiredTicks / (float)PromiseBalance.TicksPerHour));
-            if (record.Kind == PromiseKind.Substance) return PromiseCardText.Conditions(record);
+            if (record.Kind == PromiseKind.Substance || record.Kind == PromiseKind.ThroneRoom || record.Kind == PromiseKind.Style) return PromiseCardText.Conditions(record);
             return (record.QualityOptional ? "CP_GearShort" : "CP_ShortEquipment").Translate(record.EquipmentDef?.LabelCap.ToString() ?? "CP_MissingParameter".Translate().ToString(),
                 record.QualityOptional ? "CP_QualityNotRequired".Translate().ToString() : record.MinimumQuality.GetLabel()).ToString()
                 + (record.MinimumHitPointsFraction > 0 ? " " + "CP_ShortDurability".Translate(
@@ -226,7 +226,8 @@ namespace ColonyPromises
                 var r = displayed = state.Active;
                 Label(ref y, width, "CP_Active".Translate(PromiseCardText.Title(r, pawn)));
                 Label(ref y, width, PromiseCardText.Conditions(r));
-                Label(ref y, width, r.Kind == PromiseKind.Substance ? "CP_SubstanceProgress".Translate(r.ProgressTicks > 0 ? 1 : 0).ToString()
+                Label(ref y, width, r.Kind == PromiseKind.Style ? "CP_StyleProgress".Translate(r.StyleChangedTick >= 0 ? 1 : 0).ToString()
+                    : r.Kind == PromiseKind.Substance ? "CP_SubstanceProgress".Translate(r.ProgressTicks > 0 ? 1 : 0).ToString()
                     : "CP_Progress".Translate(PromiseText.Number(r.ProgressTicks / (float)PromiseBalance.TicksPerHour), PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour)).ToString());
                 Label(ref y, width, "CP_Remaining".Translate(PromiseText.Number(Math.Max(0, r.DeadlineTick - now) / (float)PromiseBalance.TicksPerDay)));
                 string blocked = PromiseCardText.ProgressBlock(pawn, r);

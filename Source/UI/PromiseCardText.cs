@@ -9,6 +9,8 @@ namespace ColonyPromises
     {
         public static string Title(PromiseRecord r, Pawn selected)
         {
+            if (r.Kind == PromiseKind.ThroneRoom) return "CP_Type_ThroneRoom".Translate();
+            if (r.Kind == PromiseKind.Style) return (r.StyleBeard ? "CP_Type_BeardStyle" : "CP_Type_HairStyle").Translate();
             if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryTitle" : "CP_SubstanceAddictionTitle").Translate();
             if (r.IsShared) return (r.RequiresBarracks ? "CP_CardSharedBarracks" : "CP_CardSharedBedroom")
                 .Translate(r.PartnerOf(selected)?.LabelShort ?? "CP_MissingColonist".Translate().ToString());
@@ -28,6 +30,8 @@ namespace ColonyPromises
             var r = request.Terms;
             if (r.DevManual) return "CP_DevManualReason".Translate();
             if (r.IsShared) return SharedPromiseText.RequestReason(request);
+            if (r.Kind == PromiseKind.ThroneRoom) return "CP_ThroneReason".Translate();
+            if (r.Kind == PromiseKind.Style) return (r.StyleBeard ? "CP_BeardReason" : "CP_HairReason").Translate();
             if (r.Kind == PromiseKind.Leisure) return "CP_CardReasonLeisure".Translate();
             if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryReason" : "CP_SubstanceAddictionReason")
                 .Translate(r.SubstanceExperiment ? r.SubstanceDef?.LabelCap.ToString() : r.SubstanceChemical?.LabelCap.ToString());
@@ -39,6 +43,8 @@ namespace ColonyPromises
 
         public static string Conditions(PromiseRecord r)
         {
+            if (r.Kind == PromiseKind.ThroneRoom) return "CP_ThroneAction".Translate(PromiseBalance.HoldTicks / PromiseBalance.TicksPerHour);
+            if (r.Kind == PromiseKind.Style) return new StyleCondition().Describe(r);
             string hours = PromiseText.Number(r.RequiredTicks / (float)PromiseBalance.TicksPerHour);
             if (r.Kind == PromiseKind.Leisure) return "CP_CardLeisure".Translate(hours);
             if (r.Kind == PromiseKind.Substance) return (r.SubstanceExperiment ? "CP_SubstanceTryAction" : "CP_SubstanceAddictionAction")
@@ -70,11 +76,12 @@ namespace ColonyPromises
             if (r.IsShared && (!PromiseConditions.Observable(r.ParticipantA) || !PromiseConditions.Observable(r.ParticipantB)
                 || r.ParticipantA.Map != r.ParticipantB.Map)) return "CP_CardPartnerAway".Translate();
             if (r.Kind == PromiseKind.Leisure) return LeisureCondition.CanCredit(pawn) ? null : "CP_CardNotResting".Translate().ToString();
+            if (r.Kind == PromiseKind.Style) return r.StyleChangedTick >= 0 ? null : "CP_StylePending".Translate().ToString();
             if (r.Kind == PromiseKind.Substance) return r.SubstanceConsumedTick >= 0 ? null : "CP_SubstancePending".Translate().ToString();
             var condition = PromiseConditions.Get(r.Kind);
             if (condition == null || !condition.ValidParameters(r)) return "CP_InvalidParameters".Translate();
             return condition.Observe(pawn, r).Satisfied ? null
-                : (r.Kind == PromiseKind.Bedroom ? "CP_CardRoomPending" : "CP_CardGearPending").Translate().ToString();
+                : ((r.Kind == PromiseKind.Bedroom || r.Kind == PromiseKind.ThroneRoom) ? "CP_CardRoomPending" : "CP_CardGearPending").Translate().ToString();
         }
     }
 }
