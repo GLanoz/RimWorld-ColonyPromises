@@ -1,18 +1,18 @@
 # Colony Promises
 
-Version **0.2.3** for RimWorld **1.6**.
+Version **0.2.3** for RimWorld **1.6**, with experimental support for the **1.7 beta**.
 
 Colonists ask for better housing, time for recreation, suitable equipment, or a substance after a need or supported personal desire has persisted. You can accept a request as a promise, decline it, or leave it unanswered. Keeping and breaking promises affects mood and trust in the colony's leadership, without changing personal relationships between colonists.
 
 ## Requirements and installation
 
-- RimWorld **1.6**; the current build targets **1.6.4871 rev591**.
+- RimWorld **1.6**, or the experimental **1.7.4995 rev309** beta. Later beta builds may need another compatibility check.
 - **Harmony**, enabled and loaded before Colony Promises.
 - No DLC required. English and Ukrainian interfaces are included.
 
-All five RimWorld 1.6 expansions are optional: Royalty, Ideology, Biotech, Anomaly and Odyssey. The mod uses the game's active needs, thoughts and usability rules rather than granting expansion features. Royal bedroom requirements, beliefs about shared beds/clothing/drugs, genetic and mutant restrictions, and gravship home-map rules are considered where they affect existing requests. Genetic chemical dependency is not an ordinary addiction request, and psilocap's special effects are not supported experimental targets. See the testing limits below.
+All five available expansions are optional: Royalty, Ideology, Biotech, Anomaly and Odyssey. The mod uses the game's active needs, thoughts and usability rules rather than granting expansion features. Royal bedroom requirements, beliefs about shared beds/clothing/drugs, genetic and mutant restrictions, and gravship home-map rules are considered where they affect existing requests. Genetic chemical dependency is not an ordinary addiction request, and psilocap's special effects are not supported experimental targets. See the testing limits below.
 
-Copy the ready-to-use Colony Promises folder into RimWorld's `Mods` folder. It should contain `About/`, `Defs/`, `Languages/`, `LoadFolders.xml`, and `1.6/Assemblies/ColonyPromises.dll`. Enable Harmony and Colony Promises, keep Harmony before Colony Promises in the load order, then restart. Harmony is a separate dependency; its DLL and the game's DLLs are not included.
+Copy the ready-to-use Colony Promises folder into RimWorld's `Mods` folder. It should contain `About/`, `Defs/`, `Languages/`, `LoadFolders.xml`, and separate `1.6/Assemblies/ColonyPromises.dll` and `1.7/Assemblies/ColonyPromises.dll` files. The game loads only its own assembly. Use the Harmony release for your game version. Enable Harmony and Colony Promises, keep Harmony before Colony Promises in the load order, then restart. Harmony is a separate dependency; its DLL and the game's DLLs are not included.
 
 ## Receiving and answering requests
 
@@ -78,7 +78,7 @@ The request names an obtainable model and uses the usual two-day observation and
 Clothing requests and the Brawler weapon complaint require a current negative effect caused by a supported equipment problem for two observed days. A separate weapon-upgrade desire uses the rules below, without adding a negative mood thought. General unhappiness alone does not create requests. Missing equipment supports only the specific causes described here.
 
 - **Damaged clothing:** replace a specific worn piece with the same type at **80% condition or better**. The game's complaint excludes locked clothing and items that do not care about damage. The request addresses that piece; other damaged clothing can still cause dissatisfaction.
-- **Unwanted nudity:** provide one compatible garment covering the missing basic body areas. A nude colonist who has no supported negative effect does not request clothing. Core's nudity complaint is disabled with Ideology; ideology-specific dress complaints are currently unsupported.
+- **Unwanted nudity:** provide one compatible garment covering the missing basic body areas. A nude colonist who has no supported negative effect does not request clothing. Core's nudity complaint is disabled with Ideology; the optional requests below cover active role requirements and desired garments.
 
 With Royalty or Ideology, a replacement cannot remove the only garment satisfying an active title or role requirement. Relevant desired clothing and gender-specific nudity preferences also constrain new targets. If the colonist's beliefs reject human-leather clothing, the request explicitly excludes that material, including when checking available manufacturing supplies. These safeguards do not turn every ideological clothing complaint into a new request. Royalty's clothing-quality preference does not add a quality floor to a worn-clothing request.
 
@@ -93,6 +93,20 @@ Clothing replacements and the Brawler solution have **no minimum quality require
 A solution may be reachable, permitted loose stock or an item the colony can manufacture with an unlocked recipe, usable workbench, suitable crafter, and available materials. Core and loaded-mod items can qualify. Unsupported production routes and speculative future trades are not assumed feasible. Lack of stock does not erase the underlying need; diagnostics distinguish a need from an available solution.
 
 The **same physical item must remain equipped for one game day**. Storage and inventory do not count. Clothing for nudity must provide the required coverage, and a melee weapon must be the primary weapon. Accepted terms remain binding after the original negative effect disappears.
+
+### Optional DLC requests
+
+**Royalty: throne room.** A titled colonist with an actual negative throne-room thought can ask for an assigned throne and a room meeting the applicable title requirements. Exempt colonists do not ask. The requirement includes the game's area, impressiveness, flooring, furniture, counts, lit braziers and excluded objects where applicable. Keep the same assigned throne and qualifying room for **24 continuous verified hours**. Reassignment, room changes or losing a required condition reset progress. Missing thrones use the larger room reward/deadline tier; improvements to an assigned throne room use the smaller tier.
+
+**Royalty: title clothing.** A confirmed unmet title clothing or clothing-quality requirement can produce a request for one suitable garment. Alternatives come from the game's requirements, with body, quality, compatibility and supply checks. A request covers the named item, not every outstanding clothing complaint. Its reward and one-day equipped hold use the normal equipment rules.
+
+**Ideology: role or desired clothing.** Colonists can request a garment required by their active role, or clothing favored by an applicable apparel precept. Missing desired apparel is a wish for the precept's benefit, not a new negative thought. Unwanted nudity and prohibited materials remain separate constraints; a target cannot conflict with applicable role/title requirements or desired clothing. These requests also cover one garment and use normal equipment rewards and holding time.
+
+**Ideology: hairstyle or beard.** A colonist can request a specific acceptable alternative when the current element is disallowed by their beliefs and the game considers it unwanted. Gene, age, gender and special-character restrictions apply. Natural requests need a reachable styling station. Fulfillment requires changing the requested element to the named style **after acceptance**; changing only the other element, constructing a station or starting the job does not count. No continuous hold is needed. The baseline reward is **+4 mood for five days and +4 trust**, with a **four-day** deadline and the existing trust/repeat reductions.
+
+All use the usual two-day observation, response window, queue, single slot and cooldowns. Accepted terms stay fixed. Losing the applicable title requirement, role or ideology closes the new obligation without penalty and retains its cooldown; temporary lack of stock, a station or map access does not cancel it. Promotion does not replace an existing throne-room target. Each new subtype appears in both Dev creation modes only while its DLC is active. Manual tests can bypass dissatisfaction and supply, but still require meaningful title/role/precept data or an allowed style target.
+
+Meditation-place requests are not included. The game allows multiple ways to meditate, so lacking a dedicated object alone does not establish a reliable unmet need.
 
 ### Substances
 
@@ -177,8 +191,8 @@ Accepted housing promises remain binding even if their original negative thought
 
 Older unanswered equipment requests based on quality also close without consequences. Old equipment observation time cannot establish a current complaint. Already accepted equipment promises keep their quality requirements, progress, deadlines, and effects.
 
-Equipment requests support ready stock and verified ordinary manufacturing recipes. They do not forecast traders or future purchases, solve multi-item clothing sets, or cover ideology-specific dress complaints. Custom recipes and recreation may be unsupported, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
+Equipment requests support ready stock and verified ordinary manufacturing recipes. They do not forecast traders or future purchases, solve multi-item clothing sets, or solve arbitrary forbidden-apparel complaints. Custom recipes and recreation may be unsupported, and other mods' unusual equipment, ownership, room, or usability rules may not be fully recognized. Very brief changes outside normal game events can escape detection. Compatibility with every mod combination is not guaranteed.
 
-The current mod has been tested in RimWorld by the player and works in that setup. Automated rule, save-field, XML and API checks supplement this testing; they do not establish compatibility with every DLC configuration. Individual and combined DLC switches have isolated coverage, but specific fully loaded DLC configurations have not been documented. Adding to an existing save is implemented; complete migration coverage and safe removal remain unverified.
+The existing 1.6 feature set has been tested in-game by the player. The new Royalty/Ideology requests and the 1.7 beta build have assembly, definition and isolated automated checks, but have not been run in-game. The latest 1.6 checks use preserved game DLLs; a full 1.6 installation is unavailable. DLC switch fixtures do not establish compatibility with every fully loaded configuration. Adding to existing saves is implemented; isolated 1.6-to-1.7 data loading passes, while complete save migration and safe removal remain unverified. Test a copy before moving a colony to the beta; loading a 1.7 save in 1.6 is not supported.
 
 For implementation, build instructions, verification tools, and manual scenarios, see the [technical documentation](docs/API.md).

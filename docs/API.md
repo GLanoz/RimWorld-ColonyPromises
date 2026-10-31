@@ -2,16 +2,21 @@
 
 ## Target and scope
 
-Colony Promises targets **RimWorld 1.6**, with API signatures and relevant call paths checked against **1.6.4871 rev591** (`Assembly-CSharp.dll`, assembly version **1.6.9676.17735**). Harmony is the only required mod dependency; DLC is optional. Assembly inspection establishes API availability, not behavior in a running game. The [README](../README.md) is the player guide and contains the current reward and deadline table. This file is the single technical reference, including build instructions and test scenarios.
+Colony Promises **0.2.3** supports RimWorld **1.6** and experimentally targets the **1.7 beta**. Harmony is the only required mod dependency; DLC remains optional. The [README](../README.md) describes player rules and rewards.
 
-Mod version **0.2.3** is separate from the supported game version. The local `Version.txt` reports **1.6.4871 rev590**, while the referenced DLL's `VersionControl` derives **1.6.4871 rev591** from assembly version **1.6.9676.17735**. API checks target that DLL; `About.xml`, `LoadFolders.xml` and the versioned output folder continue to declare RimWorld **1.6** only.
+| Game target | Verified binaries | Available validation |
+| --- | --- | --- |
+| 1.6.4871 rev591 | Preserved `Assembly-CSharp.dll` **1.6.9676.17735**, Harmony **2.4.3.0** | Release compilation, API/IL checks and isolated runtime/Scribe fixtures; no complete 1.6 installation or current Defs |
+| 1.7.4995 rev309 beta (`Version.txt`) | `Assembly-CSharp.dll` **1.7.9800.9270**, `RimWorld.dll` **1.7.4995.309**, Harmony **3.0.0.0** | Release compilation, local Core/DLC definition projections, isolated fixtures and Harmony installation in a managed host; no game launch |
+
+The 1.7 runtime is .NET 10. Its assemblies live in the installation root, with Unity-compatible types supplied by `UnityStubs`, `Waylith` and `Waylith.UnityCompat`; 1.6 uses .NET Framework and Unity modules under `RimWorldWin64_Data/Managed`. The used public APIs and patch signatures remain compatible, so version differences are confined to build references and framework selection. No gameplay adapter or balance change is needed for this beta build. Later betas are not automatically verified.
 
 ## Project structure
 
 | Location | Responsibility |
 | --- | --- |
 | `About/`, `Defs/`, `Languages/` | Metadata, button/letter/thought definitions, English and Ukrainian localization |
-| `LoadFolders.xml`, `1.6/Assemblies/` | RimWorld 1.6 loads root content and the versioned assembly |
+| `LoadFolders.xml`, `1.6/Assemblies/`, `1.7/Assemblies/` | Each game loads root content and only its matching assembly |
 | `Source/Data/` | Saved promises, requests, observations, trust, history, and independent success/recovery ledgers |
 | `Source/Balance/` | `PromiseBalance`, `RequestRules`, `TrustRules`, and pure time arithmetic |
 | `Source/Promises/` | Condition registry and shared continuous-hold progress |
@@ -21,7 +26,7 @@ Mod version **0.2.3** is separate from the supported game version. The local `Ve
 | `Source/UI/` | Tab, list/count badge, letters, history, and formatted effect text |
 | `Source/Diagnostics/` | Development-mode rendering using the generation evaluator |
 | `Tests/`, `Tests/GameChecks/` | Pure rules, compiled fixtures, and the shared translator/Scribe host |
-| `tools/` | Assembly, XML, and localization verification |
+| `tools/` | Version-aware reference selection, content verification and runtime packaging |
 
 `Source/ColonyPromises.csproj` uses recursive SDK source inclusion. The core-check project links `Source/Balance/PromiseBalance.cs` and excludes game fixture sources. Moving files does not require changing the `ColonyPromises` namespace. Preserve saved type identities, enum values, Scribe keys, existing DefNames, and `lanoz.colonypromises` when reorganizing or extending the project.
 
@@ -31,17 +36,22 @@ Natural and Dev shared-room checks use `SharedBedroomRules.HasUsableBedDefinitio
 
 ## Build and runtime files
 
-Use a .NET SDK and .NET Framework 4.7.2 reference assemblies to build the `net472` mod. Automated .NET hosts additionally require the **.NET 10 SDK**. The project references the Windows installation layout, `RimWorldWin64_Data/Managed`, and a separately installed Harmony `0Harmony.dll` for RimWorld 1.6. In a versioned Harmony package, use `1.6/Assemblies/0Harmony.dll`; override `HarmonyPath` when your installation differs.
+Use the **.NET 10 SDK**, .NET Framework 4.7.2 reference assemblies for 1.6, and each game's own assemblies and Harmony package. Build both outputs from the same source, using separate intermediate directories. The default build target is `RimWorldVersion=1.7`; pass `RimWorldVersion=1.6` explicitly for the stable game. Each target keeps its own DLL.
 
-Run from the repository root, replacing the example paths with your installations:
+Run from the repository root and replace these example paths:
 
 ```powershell
-dotnet build Source/ColonyPromises.csproj -c Release -p:RimWorldDir="C:\Path\To\RimWorld" -p:HarmonyPath="C:\Path\To\0Harmony.dll"
+dotnet build Source/ColonyPromises.csproj -c Release -p:RimWorldVersion=1.6 -p:RimWorldDir="C:/Games/RimWorld-1.6" -p:HarmonyPath="C:/Mods/Harmony/1.6/Assemblies/0Harmony.dll"
+dotnet build Source/ColonyPromises.csproj -c Release -p:RimWorldVersion=1.7 -p:RimWorldDir="C:/Games/RimWorld-1.7" -p:HarmonyPath="C:/Mods/Harmony/1.7/Assemblies/0Harmony.dll"
 ```
 
-The output is `1.6/Assemblies/ColonyPromises.dll`. Game and Harmony references have `Private=false` and must not be redistributed. An installable package needs only `About/`, `Defs/`, `Languages/`, `LoadFolders.xml`, and the versioned DLL, plus resources actually used by the mod. Preserve an existing preview or Workshop ID when updating a package. Source, tests, tools, documentation, intermediates, and third-party DLLs do not belong in it.
+For a separate preserved reference directory, pass `-p:GameManagedDir="C:/References/RimWorld-1.6"`. A reference-only directory supports compilation and API checks, not Def loading or a game launch. Game and Harmony identities are checked before resolving references, preventing the wrong game/runtime build from being placed in a version folder. Keep private reference copies outside runtime folders and Git.
 
-After a successful build, run `powershell -NoProfile -ExecutionPolicy Bypass -File tools/Prepare-Release.ps1`. It updates the sibling `ColonyPromises-release` directory; `-ReleaseRoot` selects another destination outside the source tree. The script preserves the release preview and Workshop ID before cleanup, copies a source-only ID when needed, and restores the ID to `About/PublishedFileId.txt`. Different source/release IDs stop packaging before any changes. When neither folder has an ID, none is created. `PublishedFileId.txt` is local metadata ignored by Git at every directory level.
+Outputs are `1.6/Assemblies/ColonyPromises.dll` (`net472`) and `1.7/Assemblies/ColonyPromises.dll` (`net10.0`). Game, engine and Harmony references have `Private=false`. `LoadFolders.xml` selects `/` plus `1.6` or `1.7`; the game's assembly loader searches `Assemblies/` within those selected roots, so the two DLLs cannot be loaded together through these rules. Content checks validate both mappings and each output's game, framework and Harmony references.
+
+The package contains only `About/`, `Defs/`, `Languages/`, `LoadFolders.xml` and both versioned DLLs. Sources, tests, tools, documentation, intermediates and third-party DLLs stay outside it.
+
+After both successful builds, run `powershell -NoProfile -ExecutionPolicy Bypass -File tools/Prepare-Release.ps1`. It updates the sibling `ColonyPromises-release` directory; `-ReleaseRoot` selects another destination outside the source tree. The script validates both load mappings and DLL inputs, checks copied DLL hashes, and preserves the release preview and Workshop ID before cleanup, copies a source-only ID when needed, and restores the ID to `About/PublishedFileId.txt`. Different source/release IDs stop packaging before any changes. When neither folder has an ID, none is created. `PublishedFileId.txt` is local metadata ignored by Git at every directory level.
 
 ## Main game APIs
 
@@ -258,37 +268,43 @@ Royalty's `TitleNoPersonalBedroom` and `TitleBedroomRequirementsNotMet` are nega
 
 Snapshots are stored under the new optional `bedroomRequirements` key; old accepted records leave it null. Shared snapshots combine both participants' requirements without adding another authoritative record. They are fixed values, so titles or beliefs changing later cannot rewrite accepted conditions. Before pending satisfaction/recovery, visibility, lifecycle checks and acceptance check the current requirement signature; an incompatible unanswered request closes obsolete without effects. Existing room/terrain events and periodic checks evaluate the additional conditions through the same observer.
 
-New equipment evaluation uses actual apparel compatibility and active title/role requirements to avoid stripping their only satisfying garment. Desired ideological apparel uses its target gender; active royal requirements take priority as in the inspected game rule. Ideological nudity preference is checked for the affected gender. Exact negative human-leather precept thoughts select a saved `avoidHumanLeather` condition, checked against both equipped/stock items and recipe materials. Missing flags default false for old accepted gear. The game uses `requiredMinimumApparelQuality` in apparel scoring; the inspected missing-apparel thought checks required garment coverage, not that quality. No new quality floor is inferred from the scoring preference. This integration does not implement arbitrary ideological clothing/material complaints or multi-garment solutions.
+New equipment evaluation uses actual apparel compatibility and active title/role requirements to avoid stripping their only satisfying garment. Desired ideological apparel uses its target gender; active royal requirements take priority as in the inspected game rule. Ideological nudity preference is checked for the affected gender. Exact negative human-leather precept thoughts select a saved `avoidHumanLeather` condition, checked against both equipped/stock items and recipe materials. Missing flags default false for old accepted gear. The game uses `requiredMinimumApparelQuality` in apparel scoring; the inspected missing-apparel thought checks required garment coverage, not that quality. No new quality floor is inferred from the scoring preference. The optional request types below cover role and desired clothing; arbitrary forbidden-material complaints and multi-garment solutions remain unsupported.
 
 Core housing thoughts are still evaluated through their game workers and nullifiers; no privacy request is inferred from ideology or expectations alone. `ThoughtWorker.FailState` calls `CanGetThought`, including precept/gene/trait restrictions. Shared sleep continues to use `WillingToShareBed` for both pawns, including spouse and non-spouse history-event rules. Biotech development stage/body coverage, nonviolence, manipulation, role use and biocoding remain checked through the existing APIs. Anomaly pawns without mood or joy do not receive the corresponding requests. Odyssey swimming can count only through the ordinary recognized recreation activity hook; travel, flight, research or other expansion activities are not added to recreation accounting.
 
 ### Commands and fixture boundaries
 
-Build Release first so fixtures use the current DLL. Run from the repository root; PowerShell fixtures use fresh Windows PowerShell processes. Content verification also requires a Mono.Cecil DLL through `CecilPath`.
+Build the selected Release DLL first. All entry points accept `-RimWorldVersion` (default `1.6`), `-RimWorldDir`, and optional `-GameManagedDir`. The request and invalidation fixtures now share the .NET 10 GameChecks host with generation/history rather than loading game code into Windows PowerShell. Content verification also accepts `-CecilPath` for Mono.Cecil. Run from the repository root; examples below select 1.7.
 
 ```powershell
 dotnet run --project Tests/ColonyPromises.CoreChecks.csproj -c Release
-powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Requests.ps1 -RimWorldDir "C:\Path\To\RimWorld"
-powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Invalidation.ps1 -RimWorldDir "C:\Path\To\RimWorld"
-powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Generation.ps1 -RimWorldDir "C:\Path\To\RimWorld"
-powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Features.ps1 -RimWorldDir "C:\Path\To\RimWorld"
-powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-History.ps1 -RimWorldDir "C:\Path\To\RimWorld"
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -RimWorldDir "C:\Path\To\RimWorld" -CecilPath "C:\Path\To\Mono.Cecil.dll"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Requests.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Invalidation.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Generation.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-Features.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7"
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Verify-History.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/Verify-Content.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7" -CecilPath "C:/Tools/Mono.Cecil.dll"
 ```
 
 | Check | Purpose |
 | --- | --- |
 | Core | Pure progress clipping, duplicate credit, deficit gaps, bounded targets, cooldowns, reward arithmetic |
-| Requests | Compiled acceptance/closure, penalty-free outcomes, snapshots, repeat retention, old/new Scribe fields |
+| Requests | Compiled acceptance/closure, penalized decline versus penalty-free expiry, snapshots, repeat retention, old/new Scribe fields |
 | Invalidation | Bedless `UnclaimBed` and Prefix; exact-item hold resets without clearing unrelated progress |
 | Generation | Shared projection, read-only diagnostics, capped queue fairness, schedules, migration defaults, Dev guard, bilingual text |
 | Features | Notice/settings flags, list/count transitions, low-trust/repeat rewards, recovery proof/gates/ledgers, pending invalidation; UI navigation and bilingual summaries; shared pair identity, slots, bed/room ownership, common aliases/holds, personal effects, penalty-free closure, notices, recovery, and Scribe references |
 | History | Real translator for every outcome in both languages, applied effects/clamping, missing metadata, serialization |
 | Content | Patch signatures/arguments, XML, source localization keys, bilingual placeholder parity |
 
-`Tests/GameChecks` runs the real translator under .NET 10 because its .NET Standard 2.1 dependencies are absent from Windows PowerShell's CLR. Fixtures provide isolated language data and saved-type lookup, excluding engine back-compatibility converters from field round-trips. Shared fixtures register external pawn references with the actual Scribe cross-reference resolver and check canonical alias restoration. Cached room/bed fixtures exercise standard ownership/role predicates; they do not simulate a full map, live room calculation, ideologies, Unity windows, or complete migration. Signature/IL checks do not confirm live Harmony execution.
+With a complete 1.6 installation, repeat those commands with `-RimWorldVersion 1.6` and its own paths. When only 1.6 reference DLLs are available, run Requests, Invalidation, Generation, History and Content with `-GameManagedDir`; run Features with **`-RuntimeOnly`**. That mode omits game-Defs-dependent suites rather than interpreting 1.7 XML as 1.6 data. Test binaries/intermediates are separated by game version.
 
-Run the GameChecks-based scripts sequentially: Features, Generation and History share the output directory, and Features temporarily patches its disposable game DLL copy. Concurrent builds/runs can overwrite that copy. The script passes the selected installation to Core/DLC XML fixtures and restores the environment afterwards.
+For 1.7, `Verify-Features.ps1 -RimWorldVersion 1.7 -RimWorldDir "C:/Games/RimWorld-1.7" -VerifyHarmony` installs and removes the production patches in its disposable managed host. This verifies Harmony 3 binding/detours, not gameplay callback behavior. Harmony 2 installation cannot be exercised in the available .NET 10 or Windows PowerShell hosts because of runtime dependencies; 1.6 uses static binding checks and still needs its in-game Mono validation.
+
+To check cross-version mod fields, run 1.6 Features with `-RuntimeOnly -ExportSaveFixtures "tools/output/saves-1.6"`, then 1.7 Features with `-ImportSaveFixtures "tools/output/saves-1.6"` (use an absolute fixture path when launching from elsewhere). The 1.7 Scribe resolver reads XML produced by 1.6, including canonical shared links, frozen personal effects, progress, notice flags, trust, substance familiarity/cooldown and repeat history. These are generated component fixtures, not complete player saves; original saves are never touched. No reverse 1.7-to-1.6 save compatibility is promised.
+
+`Tests/GameChecks` runs the real translator under .NET 10 because its .NET Standard 2.1 dependencies are absent from Windows PowerShell's CLR. Fixtures provide isolated language data and saved-type lookup, excluding engine back-compatibility converters from field round-trips. Shared fixtures register external pawn references with the actual Scribe cross-reference resolver and check canonical alias restoration. Cached room/bed fixtures exercise standard ownership/role predicates; they do not simulate a full map, live room calculation, ideologies, Unity windows, or complete migration. Signature/IL checks alone do not confirm runtime patch installation or live gameplay.
+
+Run the GameChecks-based scripts sequentially: all suites for a given game version share the output directory, and Features temporarily patches its disposable game DLL copy. Concurrent builds/runs can overwrite that copy. The script passes the selected installation to Core/DLC XML fixtures and restores the environment afterwards.
 
 `Verify-Features.ps1` also uses Mono.Cecil (pass `-CecilPath` if it is not available in the local NuGet cache). In the disposable test copy of `Assembly-CSharp.dll`, it skips `ModsConfig`'s initializer and substitutes null for the royal tracker's command-icon load, preserving its collections and all tested rule methods. This avoids Unity startup and any access to the player's mod configuration. It restores that copy afterwards; the installed game and packaged mod DLL are unchanged. DLC fixtures set the actual cached active switches, covering Core, each individual switch and all combinations. These are branch tests with supplied data, not full DLC Def loading. Fixtures cover absent trackers/joy, highest-title selection, room thresholds, captured values, unknown requirements, clothing-role preservation, gender-specific nudity, material matching, localization and Scribe defaults. Local Royalty XML is checked for supported requirement types.
 
@@ -302,7 +318,7 @@ Run the GameChecks-based scripts sequentially: Features, Generation and History 
 | Odyssey only | Actual swimming job and recreation callback; psilocap rejection from actual XML; gravship home API path | Configuration not recorded |
 | Combined DLC | All cached switch combinations; Royalty + Ideology furniture/clothing interaction; Anomaly suitability with other switches | Complete loaded configurations not tested |
 
-The game assembly and Defs for all five expansions are locally available. Switch fixtures supply selected data and do not emulate the expansion loader. Metadata requires only Harmony; runtime XML contains no unconditional expansion-specific references. Common game APIs handle enabled content without exposing DLC assets when absent.
+The current 1.7 game assembly and Defs for all five expansions are locally available; only preserved DLLs remain for 1.6. The table describes isolated 1.7 switch/definition coverage, not fully loaded game configurations. Switch fixtures supply selected data and do not emulate the expansion loader. Metadata requires only Harmony; runtime XML contains no unconditional expansion-specific references. Common game APIs handle enabled content without exposing DLC assets when absent.
 
 | Existing function | Expansion integration and boundary |
 | --- | --- |
@@ -317,11 +333,58 @@ The game assembly and Defs for all five expansions are locally available. Switch
 
 `Verify-Content.ps1` checks the relied-on game call paths for bed sharing/usability, equipment roles, drug suitability/dependency, gene/ideology/hediff need rules, gravship home recognition and swimming's joy callback. These checks establish available API paths, not live outcomes.
 
-Housing fixtures read effect stages from the referenced installation's Core XML, exercise the compiled evidence predicates, minimum-category selector, candidate builder with supplied verified issues, anchoring, acceptance, bilingual attribution, and Scribe defaults/references. The .NET host cannot initialize the game's Unity-dependent mod configuration to run complete thought workers and nullifiers. Those runtime paths are inspected against the game assembly and remain in-game checks. If the installation differs from the project default, set `COLONY_PROMISES_GAME_ROOT` for the housing fixture's XML input.
+Housing fixtures read effect stages from the referenced installation's Core XML, exercise the compiled evidence predicates, minimum-category selector, candidate builder with supplied verified issues, anchoring, acceptance, bilingual attribution, and Scribe defaults/references. The fixture host does not initialize the game's mod configuration or complete thought/nullifier system. Those runtime paths are inspected against the game assembly and remain in-game checks. If the installation differs from the project default, set `COLONY_PROMISES_GAME_ROOT` for the housing fixture's XML input.
 
-The player has confirmed that the current mod works in RimWorld. Specific DLC configurations and individual test scenarios have not been recorded, so that confirmation is not a claim of exhaustive DLC compatibility. Automated regressions separately cover readonly acceptance, substance summaries, fresh/ambiguous familiarity snapshots, existing timing and frozen outcomes. Full configuration coverage, realistic map transitions and complete save reconstruction require targeted gameplay tests. Safe removal remains unverified.
+The player has confirmed that the previous 1.6 feature set works in RimWorld; the newly added expansion requests and 1.7 beta port have not been run in-game. Specific DLC configurations and individual test scenarios have not been recorded, so that confirmation is not a claim of exhaustive DLC compatibility. Automated regressions separately cover readonly acceptance, substance summaries, fresh/ambiguous familiarity snapshots, existing timing and frozen outcomes. Full configuration coverage, realistic map transitions and complete save reconstruction require targeted gameplay tests. Safe removal remains unverified.
+
+## Optional expansion request types
+
+`ExpansionRequests` evaluates new Royalty/Ideology needs through the existing generator. Existing kind values 0-3 are unchanged; `ThroneRoom` (4) and `Style` (5) are appended. New clothing causes remain `Equipment`: `RoyalApparel`, `IdeoRoleApparel`, `IdeoDesiredApparel`. They share the existing equipment condition, availability solver, queue, snapshots, history and cooldowns. Expansion variants are filtered from the common Dev registry when their DLC is inactive; creation also validates the registry and terms in code.
+
+### Royalty
+
+Throne-room evidence is a real negative `TitleNoThroneRoom` or `TitleThroneroomRequirementsNotMet` thought, respecting the worker's grace/exemption rules. `HighestTitleWithThroneRoomRequirements` selects applicable title data. `BedroomRequirement` additionally snapshots `HasAssignedThroneAnyOf`, `ThingAnyOfCount`, `AllThingsAnyOfAreGlowing` and `ForbidAltars`; unsupported custom requirement classes block formation with a diagnostic reason. All shipped throne-room requirement classes are covered from the local XML.
+
+`ThroneRoomCondition` checks the actual assigned throne/assignment comp, same-map observable pawn, indoor room validation and every captured requirement. No bedroom-role predicate is reused for a throne room. The same throne and room must remain valid for the existing one-day hold. Throne claim/unclaim and room events invalidate the hold; `CompGlower.UpdateLit` rechecks only tracked throne rooms so required lighting cannot briefly disappear between periodic checks. The room reward/deadline tier is selected through the existing room balance mapping (larger when no throne is assigned), not new reward constants.
+
+Title clothing requires a confirmed `TitleApparelRequirementNotMet` or `TitleApparelMinQualityNotMet`. Active `AllRequirements` sources and `AllAllowedApparelForPawn` provide alternatives, rather than a DefName list. A quality complaint targets replacement of a particular below-threshold garment with the same model at the title's quality floor; the original garment cannot remain as the purported replacement. Other unmet garments are explicitly outside this one-item promise.
+
+Meditation is deferred: `FocusTypesAvailableForPawn`, `AllMeditationSpotCandidates`, `CanMeditateNow` and `FindMeditationSpot` allow multiple focus/spot and in-bed routes. No verified personal deficit was found that could be inferred simply from a missing meditation object. No meditation subtype or speculative negative thought is registered.
+
+### Ideology
+
+Role clothing evaluates a fresh `Thought_IdeoRoleApparelRequirementNotMet` with its actual `sourcePrecept`, plus active unmet role requirements. Desired clothing uses `Precept_Apparel` with `PreceptComp_Apparel_Desired`/`DesiredStrong`, target gender and a missing named garment. Actual desired-apparel thoughts are positive; no negative thought is invented. All new garment options preserve title/role garments, applicable desired clothing, body usability, nudity preferences and the existing material restriction. When Royalty and Ideology coexist, a target conflicting with a desired garment is rejected even if a title requirement otherwise takes precedence in generation. A lack of feasible stock/crafting does not erase the observed need.
+
+Style formation requires `CanDesireLookChange`, a current hair/beard frequency of `Never`, and `WantsToUseStyle == false`. This excludes unwanted styles caused only by unrelated physical/gene restrictions. Targets use the same game's style acceptance, age/gender, gene and mutant rules. Uninitialized saved frequency maps are not lazily initialized by UI inspection; they produce a diagnostic blocker. Natural requests need an accessible styling station, while manual tests can create the structural target without ready supply.
+
+`StyleCondition` fixes one exact `HairDef` or `BeardDef`. Acceptance captures the current element as the original. A Postfix on `Notify_StyleItemChanged` runs after the normal style finalization writes hair/beard state. Only the matching element changing from that original to the fixed target, after acceptance and within the deadline, earns one credit; an old appearance, other-element change or job start earns none. Saved credit prevents replay. `StyleRequiredTicks` is one event, not an effect duration or hold timer. Styles use the baseline equipment reward/deadline and do not enable unaccepted trust recovery.
+
+### Applicability and save data
+
+New records opt into `expansionRequest`; older records default false and retain their behavior. Added fields hold `expansionTitle`, `expansionIdeology`, `expansionPrecept`, a deep `expansionApparelRequirement`, hair/beard targets/originals and `styleChangedTick` (-1). Requirement lists are copied rather than aliased to mutable title data. No existing enum value, Scribe key or serialized type identity is renamed.
+
+The accepted lifecycle checks applicability separately from availability. Loss of the applicable title requirement, role/precept or ideology closes without mood/trust effects and preserves the accepted cooldown. Promotion retains old throne targets; at the same or a lower rank, the captured requirement must remain equivalent. A changed ideological waiver can therefore close an obsolete obligation rather than silently weakening it. Role/desired-clothing sources use the saved ideology identity and precept ID. A style preference change can make the original need cease or the fixed target inapplicable. Missing stock, station access, illness or temporary absence alone never establishes lost applicability; deadlines continue. Already accepted older promise types are untouched.
+
+`ExpansionChecks` reads shipped Royalty requirements, title thoughts, Ideology apparel precepts and Core hair/beard identities, supplementing controlled pawn/room fixtures. It covers expansion gates across cached DLC switch combinations, alternative apparel categories, frozen copies, verified room hold/reset, title exemptions/changes, element-specific post-acceptance credit, rewards, localization, Scribe fields and legacy defaults. These are isolated tests, not a loaded-map or live Harmony test. Natural generation and both Dev modes still require the gameplay checks below.
+
+In copied saves, test Core alone, Royalty alone, Ideology alone, both together, then your full DLC set:
+
+- With Royalty, use a non-exempt titled adult whose Needs tab shows an actual throne complaint. After two observed days expect one offer. Accept, assign the required throne and fulfill the detailed requirements for a day. Remove/reassign it, change room shape, extinguish a required brazier or add a forbidden building: progress resets. Promote after acceptance: old targets/effects stay fixed. Remove the title/exempt the pawn: one penalty-free closure, cooldown retained.
+- For title clothing, leave a real required category unmet; verify allowed alternatives and production-only availability. Test low-quality royal clothing separately. For Ideology, use an assigned role with missing required apparel or an applicable desired-apparel precept. Wearing an already sufficient garment blocks the need. With both DLC, conflicting role/title/desired options must yield no target. One garment may leave other complaints; its text must say so.
+- Give an eligible colonist an ideologically disallowed hairstyle (or beard) with allowed alternatives and a reachable station. Observe for two days. Accept and change only the other element: no completion. Finish the named element: one result. Test before acceptance, after the deadline, with gene-forced styles, after ideology reform and after reload.
+- In the existing **Create test request...** menu select each new subtype in current-needs and manual modes. Manual throne terms come from the applicable title; manual clothing options from active title/role/precept alternatives; manual style chooses an allowed different element. Verify occupied slots and DLC-off actions are blocked, no natural offer schedule changes, acceptance uses ordinary consequences and cleanup applies none.
+- Save during throne holding and after style credit; load current/old saves and check fixed targets, progress, aliases and consequence history. Confirm decline retains its displayed penalty and unanswered expiry remains free of penalties. Check both languages, long item/style labels and every detail/confirmation.
 
 ## Manual test scenarios
+
+### Version-port smoke test
+
+Use separate test copies for 1.6 and **1.7.4995 rev309**. Start with Core and the matching Harmony build; repeat in Royalty, Ideology, both together, and the relevant Biotech/Anomaly/Odyssey configurations. Confirm only one Colony Promises assembly loads and no missing Def/type/patch errors appear. These configurations have not been launched as part of this port.
+
+Open both tabs in English and Ukrainian, check long names, scaling, sorting, letters and reminders. Through both Dev creation modes exercise each registered subtype: individual bedroom/improvement, shared bedroom, recreation, worn/nudity/title/role/desired clothing, Brawler replacement, ranged/melee acquisition, same-model quality upgrade, both substance requests, throne room, hair and beard. Check ordinary acceptance, real progress/ingestion/style changes, completion once, actual history effects, penalized decline, penalty-free expiry and withdrawal. Break bed/item/throne continuity and test caravan absence without pausing deadlines.
+
+Save and reload before/after each event. For migration, copy a real 1.6 save containing shared and individual active promises and a substance journal, then open only the copy in 1.7 if the game permits it. Compare fixed targets, deadlines, progress, personal effects, shared aliases, trust/history and cooldowns. Save/reload the beta copy again; do not overwrite the original or try to move the beta save back to 1.6.
+
 
 Use copied saves, first with Core, Harmony, and Colony Promises only. Enable Development mode; inspect Promises, Needs, and the error log. Add DLC/mod combinations after a baseline run. These are expectations derived from code, not a record of completed gameplay tests.
 
