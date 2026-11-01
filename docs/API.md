@@ -2,7 +2,7 @@
 
 ## Target and scope
 
-Colony Promises **0.2.3** supports RimWorld **1.6** and experimentally targets the **1.7 beta**. Harmony is the only required mod dependency; DLC remains optional. The [README](../README.md) describes player rules and rewards.
+Colony Promises **0.2.4** supports RimWorld **1.6** and experimentally targets the **1.7 beta**. Harmony is the only required mod dependency; DLC remains optional. The [README](../README.md) describes player rules and rewards.
 
 | Game target | Verified binaries | Available validation |
 | --- | --- | --- |
