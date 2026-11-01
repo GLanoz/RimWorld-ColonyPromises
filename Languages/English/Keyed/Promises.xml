@@ -404,4 +404,6 @@ Next request: after {6} days.</CP_CardPenalties>
   <CP_DevType_IdeoDesiredApparel>Desired ideological clothing</CP_DevType_IdeoDesiredApparel>
   <CP_StyleDataUnavailable>Style preferences are not initialized; observation cannot verify this need yet.</CP_StyleDataUnavailable>
   <CP_ThroneUnsupported>An active title has a throne-room requirement that cannot be captured reliably.</CP_ThroneUnsupported>
+  <CP_ButtonRequestCount>Open requests: {0}</CP_ButtonRequestCount>
+  <CP_ButtonPromiseCount>Active promises: {0}</CP_ButtonPromiseCount>
 </LanguageData>

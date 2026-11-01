@@ -53,6 +53,12 @@ foreach ($methodName in @('Notify_ContainedThingSpawnedOrDespawned','Notify_Terr
     if (@($roomType.Methods | Where-Object Name -eq $methodName).Count -ne 1) { throw "Room patch target unavailable: $methodName" }
     $patches++
 }
+$bar = $gameAssembly.MainModule.Types | Where-Object FullName -eq 'RimWorld.MainButtonsRoot'
+if (@($bar.Methods | Where-Object Name -eq 'DoButtons').Count -ne 1 -or
+    !($bar.Fields | Where-Object { $_.Name -eq 'allButtonsInOrder' -and $_.FieldType.FullName -eq 'System.Collections.Generic.List`1<RimWorld.MainButtonDef>' })) {
+    throw 'Adaptive main-button target is unavailable.'
+}
+$patches++
 $xmlCount = 0
 foreach ($file in Get-ChildItem -LiteralPath $modRoot -Recurse -Filter '*.xml' | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' -and $_.FullName -notmatch '\\tools\\output\\' }) {
     [xml]$xml = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
@@ -139,6 +145,21 @@ foreach ($version in @('1.6','1.7')) {
         if ("$($reference.Version.Major).$($reference.Version.Minor)" -ne $version -or $target -ne $expectedTarget -or $harmony.Version.Major -ne $expectedHarmony) { throw "Wrong game/runtime/Harmony reference in $version output." }
     } finally { $built.Dispose() }
 }
+[xml]$mainButton = Get-Content -LiteralPath (Join-Path $modRoot 'Defs/MainButtonDefs/Promises.xml') -Raw
+if ($mainButton.Defs.MainButtonDef.minimized -ne 'true' -or $mainButton.Defs.MainButtonDef.iconPath -ne 'UI/MainButtons/Promises') { throw 'Promises must use its icon and native minimized mode.' }
+$mainType = $gameAssembly.MainModule.Types | Where-Object FullName -eq 'RimWorld.MainButtonDef'
+if (!($mainType.Fields | Where-Object { $_.Name -eq 'iconPath' -and $_.FieldType.FullName -eq 'System.String' }) -or
+    !($mainType.Fields | Where-Object { $_.Name -eq 'minimized' -and $_.FieldType.FullName -eq 'System.Boolean' })) { throw 'Native icon/minimized API changed.' }
+Add-Type -AssemblyName System.Drawing
+$texture = [Drawing.Bitmap]::FromFile((Join-Path $modRoot 'Textures/UI/MainButtons/Promises.png'))
+try {
+    if ($texture.Width -ne 128 -or $texture.Height -ne 128 -or $texture.GetPixel(0,0).A -ne 0) { throw 'Icon size or transparent border is invalid.' }
+    $clear = 0; $ink = 0
+    for ($y = 0; $y -lt 128; $y++) { for ($x = 0; $x -lt 128; $x++) {
+        if ($texture.GetPixel($x,$y).A -eq 0) { $clear++ } else { $ink++ }
+    } }
+    if ($clear -eq 0 -or $ink -eq 0) { throw 'Icon must contain both visible artwork and genuine transparency.' }
+} finally { $texture.Dispose() }
 $gameAssembly.Dispose()
 $modAssembly.Dispose()
 Write-Output "Verified $patches Harmony targets, $xmlCount XML files, $($englishKeys.Count) keyed translations and placeholder parity."

@@ -17,8 +17,11 @@ public static class VersionChecks
         try
         {
             instance.PatchAll(typeof(PromiseRecord).Assembly);
+            typeof(PromiseRecord).Assembly.GetType("ColonyPromises.AdaptivePromisesButtonPatch")
+                .GetMethod("Install", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(null, new object[] { instance });
             int count = instance.GetPatchedMethods().Count();
-            if (count != 19) throw new Exception("Not all production patches were installed: " + count);
+            if (count != 20) throw new Exception("Not all production patches were installed: " + count);
             Console.WriteLine("Installed and removed " + count + " production Harmony patches in an isolated host; no game was started.");
             return count;
         }

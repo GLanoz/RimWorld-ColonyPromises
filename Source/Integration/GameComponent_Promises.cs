@@ -12,7 +12,9 @@ namespace ColonyPromises
         private readonly Dictionary<Pawn, ColonistPromises> byPawn = new Dictionary<Pawn, ColonistPromises>();
         private readonly Dictionary<Pawn, ColonistPromises> active = new Dictionary<Pawn, ColonistPromises>();
         private readonly Dictionary<Pawn, ColonistPromises> open = new Dictionary<Pawn, ColonistPromises>();
-        public List<ColonistPromises> OpenRequests(int now) => open.Values.Where(s => (s.Shared == null || s.Pawn == s.Shared.First) && RequestMaintenance.Visible(s, now))
+        private IEnumerable<ColonistPromises> VisibleOpenRequests(int now) => open.Values.Where(s =>
+            (s.Shared == null || s.Pawn == s.Shared.First) && RequestMaintenance.Visible(s, now));
+        public List<ColonistPromises> OpenRequests(int now) => VisibleOpenRequests(now)
             .OrderBy(s => s.Request.OfferedTick).ThenBy(s => s.Pawn.thingIDNumber).ToList();
         private int nextCheck;
         private int nextObservation;

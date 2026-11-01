@@ -12,7 +12,9 @@ namespace ColonyPromises
         public ColonyPromisesMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<ColonyPromisesSettings>();
-            new Harmony("colonypromises.core").PatchAll();
+            var harmony = new Harmony("colonypromises.core");
+            harmony.PatchAll();
+            AdaptivePromisesButtonPatch.Install(harmony);
         }
         public override string SettingsCategory() => "Colony Promises";
         public override void DoSettingsWindowContents(UnityEngine.Rect inRect)

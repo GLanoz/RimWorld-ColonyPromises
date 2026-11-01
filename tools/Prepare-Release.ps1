@@ -36,7 +36,7 @@ if (Test-Path -LiteralPath $previewPath) { $previewBytes = [IO.File]::ReadAllByt
 
 # Validate both supported outputs before clearing only the selected release directory.
 $versions = @('1.6', '1.7')
-foreach ($relative in @('About', 'Defs', 'Languages', 'LoadFolders.xml') + @($versions | ForEach-Object { "$_\Assemblies\ColonyPromises.dll" })) {
+foreach ($relative in @('About', 'Defs', 'Languages', 'LoadFolders.xml', 'Textures/UI/MainButtons/Promises.png') + @($versions | ForEach-Object { "$_\Assemblies\ColonyPromises.dll" })) {
     if (-not (Test-Path -LiteralPath (Join-Path $SourceRoot $relative))) { throw "Missing runtime input: $relative" }
 }
 [xml]$loadFolders = [IO.File]::ReadAllText((Join-Path $SourceRoot 'LoadFolders.xml'))
@@ -57,6 +57,9 @@ try {
         Copy-Item -LiteralPath (Join-Path $SourceRoot $folder) -Destination $ReleaseRoot -Recurse
     }
     Copy-Item -LiteralPath (Join-Path $SourceRoot 'LoadFolders.xml') -Destination $ReleaseRoot
+    $textureFolder = Join-Path $ReleaseRoot 'Textures/UI/MainButtons'
+    New-Item -ItemType Directory -Path $textureFolder -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $SourceRoot 'Textures/UI/MainButtons/Promises.png') -Destination $textureFolder
     foreach ($version in $versions) {
         $assemblies = Join-Path $ReleaseRoot "$version\Assemblies"
         New-Item -ItemType Directory -Path $assemblies -Force | Out-Null

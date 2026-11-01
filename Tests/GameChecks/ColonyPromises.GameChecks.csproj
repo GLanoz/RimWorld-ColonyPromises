@@ -17,6 +17,7 @@
   <ItemGroup>
     <Reference Include="0Harmony"><HintPath>$(HarmonyPath)</HintPath></Reference>
     <Reference Include="Assembly-CSharp"><HintPath>$(GameManagedDir)\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.IMGUIModule"><HintPath>$(GameManagedDir)/UnityEngine.IMGUIModule.dll</HintPath></Reference>
     <Reference Condition="'$(RimWorldVersion)' == '1.6'" Include="UnityEngine.CoreModule"><HintPath>$(GameManagedDir)\UnityEngine.CoreModule.dll</HintPath></Reference>
     <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="UnityStubs"><HintPath>$(GameManagedDir)/UnityStubs.dll</HintPath></Reference>
     <Reference Condition="'$(RimWorldVersion)' == '1.7'" Include="Waylith"><HintPath>$(GameManagedDir)/Waylith.dll</HintPath></Reference>

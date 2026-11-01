@@ -404,4 +404,6 @@
   <CP_DevType_IdeoDesiredApparel>Бажаний ідеологією одяг</CP_DevType_IdeoDesiredApparel>
   <CP_StyleDataUnavailable>Уподобання стилю ще не визначені; наразі потребу неможливо перевірити.</CP_StyleDataUnavailable>
   <CP_ThroneUnsupported>Чинний титул має вимогу до тронної зали, яку неможливо надійно зафіксувати.</CP_ThroneUnsupported>
+  <CP_ButtonRequestCount>Відкриті прохання: {0}</CP_ButtonRequestCount>
+  <CP_ButtonPromiseCount>Активні обіцянки: {0}</CP_ButtonPromiseCount>
 </LanguageData>
