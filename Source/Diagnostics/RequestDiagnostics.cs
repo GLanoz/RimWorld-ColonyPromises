@@ -6,6 +6,16 @@ namespace ColonyPromises
 {
     public static class RequestDiagnostics
     {
+        public static string MoodTrustSummary(ColonistPromises state)
+        {
+            var average = MoodTrust.Average(state);
+            return "CP_DebugMoodTrust".Translate(
+                average.HasValue ? PromiseText.Number(average.Value * 100) + "%" : "CP_DebugMoodTrustPending".Translate().ToString(),
+                PromiseText.Number(state.MoodTrustProgressTicks / (float)PromiseBalance.TicksPerHour),
+                PromiseText.Number(TrustRules.MoodTrustPeriodTicks / (float)PromiseBalance.TicksPerHour),
+                PromiseText.Signed(MoodTrust.Direction(state.Trust, average) * TrustRules.MoodTrustStep)).ToString();
+        }
+
         public static string Describe(ColonistPromises state, PromiseKind kind, int now)
         {
             var evaluation = RequestGenerator.Evaluate(state.Pawn, kind);

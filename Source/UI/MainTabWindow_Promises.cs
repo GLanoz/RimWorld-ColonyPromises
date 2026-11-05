@@ -311,6 +311,7 @@ namespace ColonyPromises
             if (Prefs.DevMode && diagnosticsExpanded)
             {
                 y += 12;
+                Label(ref y, width, RequestDiagnostics.MoodTrustSummary(state));
                 string exclusion = PromiseConditions.EligibilityReason(pawn);
                 Label(ref y, width, "CP_DebugEligible".Translate(
                     exclusion == null ? "CP_DebugYes".Translate().ToString() : exclusion.Translate().ToString()));

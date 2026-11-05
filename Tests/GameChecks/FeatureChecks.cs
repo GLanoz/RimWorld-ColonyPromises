@@ -204,8 +204,15 @@ public static class FeatureChecks
                 typeof(TickManager).GetField("ticksGameInt", fields).SetValue(game.tickManager, now);
                 moodComponent.GameComponentTick();
             }
-            Check(moodState.Trust == 48 && moodState.MoodTrustProgressTicks == 0 && moodState.MoodTrustDirection == 0,
+            Check(moodState.Trust == 48 && moodState.MoodTrustProgressTicks == 0 && !moodState.HasMoodTrustSample,
                 "Component never credits an absent colonist's available mood value");
+            moodState.MoodTrustProgressTicks = 5000;
+            moodState.MoodTrustWeightedSum = (double)0.7f * 5000;
+            moodState.HasMoodTrustSample = true;
+            moodComponent.InvalidatePawn(pawn);
+            Check(!moodState.HasMoodTrustSample && moodState.LastMoodTrustTick == -1
+                && moodState.MoodTrustProgressTicks == 5000 && moodState.MoodTrustWeightedSum == (double)0.7f * 5000,
+                "Departure between scheduled checks pauses sampling while preserving the collected average");
             typeof(TickManager).GetField("ticksGameInt", fields).SetValue(game.tickManager, 1000);
             // The 1.6 standalone host cannot initialize native Unity notification types.
             // The complete notification path is exercised against 1.7; both versions
@@ -224,10 +231,13 @@ public static class FeatureChecks
                         var completionState = completionComponent.StateFor(pawn);
                         completionState.Trust = startingTrust;
                         completionState.MoodTrustProgressTicks = 30000;
-                        completionState.MoodTrustDirection = 1;
+                        completionState.MoodTrustWeightedSum = (double)0.7f * 30000;
+                        completionState.HasMoodTrustSample = true;
                         completionState.LastMoodTrustTick = 900;
                         completionComponent.FinalizeInit();
-                        Check(completionState.LastMoodTrustTick == -1 && completionState.MoodTrustProgressTicks == 30000,
+                        Check(completionState.LastMoodTrustTick == -1 && !completionState.HasMoodTrustSample
+                            && completionState.MoodTrustProgressTicks == 30000
+                            && completionState.MoodTrustWeightedSum == (double)0.7f * 30000,
                             "Component loading restarts mood sampling without erasing verified time");
                         completionState.Request = Request(PromiseKind.Leisure);
                         RequestLifecycle.Accept(completionState, completionState.Request, 1000);
@@ -305,8 +315,20 @@ public static class FeatureChecks
                 Check("CP_TrustImpact".Translate("40", "25").ToString().Contains("25"), "Trust explanation renders in " + folder);
                 string moodTrustRules = PromiseText.MoodTrustRules();
                 Check(moodTrustRules.Contains("65") && moodTrustRules.Contains("35") && moodTrustRules.Contains("50")
-                    && moodTrustRules.Contains("60") && !moodTrustRules.Contains("{") && !moodTrustRules.Contains("CP_"),
+                    && moodTrustRules.Contains(PromiseText.Number(2.5f)) && !moodTrustRules.Contains("{") && !moodTrustRules.Contains("CP_"),
                     "Passive mood-trust rules use actual balance values in " + folder);
+                var diagnosticState = new ColonistPromises { Trust = 49, MoodTrustProgressTicks = 42 * PromiseBalance.TicksPerHour,
+                    MoodTrustWeightedSum = (double)0.7f * 42 * PromiseBalance.TicksPerHour };
+                double diagnosticSum = diagnosticState.MoodTrustWeightedSum;
+                string moodDiagnostic = RequestDiagnostics.MoodTrustSummary(diagnosticState);
+                Check(moodDiagnostic.Contains("42/60") && moodDiagnostic.Contains("70%") && moodDiagnostic.Contains("+1")
+                    && !moodDiagnostic.Contains("{") && !moodDiagnostic.Contains("CP_"),
+                    "Development diagnostics show actual average, progress and expected result in " + folder);
+                Check(diagnosticState.MoodTrustWeightedSum == diagnosticSum && diagnosticState.LastMoodTrustTick == -1,
+                    "Viewing average diagnostics cannot mutate saved data in " + folder);
+                diagnosticState.Trust = 50;
+                Check(RequestDiagnostics.MoodTrustSummary(diagnosticState).EndsWith("0."),
+                    "Development projection respects the recovery ceiling in " + folder);
                 Check("CP_UnpromisedRecovery".Translate("2", "proof", "0").ToString().Contains("+2"), "Recovery preview renders in " + folder);
                 Check("CP_RequestLetterText".Translate("Pawn", "conditions", "0.5").ToString().Contains("0.5"),
                     "Letter contents render with plain numeric placeholders in " + folder);

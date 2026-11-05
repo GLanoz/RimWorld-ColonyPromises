@@ -190,7 +190,10 @@ namespace ColonyPromises
         public SharedBedroomCommitment Shared; // Runtime alias to the component's authoritative record.
         public int Trust = PromiseBalance.InitialTrust;
         public int MoodTrustProgressTicks;
-        public int MoodTrustDirection;
+        public double MoodTrustWeightedSum;
+        public int MoodTrustAverageVersion = 1;
+        public bool HasMoodTrustSample;
+        public float LastMoodTrustValue;
         public int LastMoodTrustTick = -1;
         public int CooldownUntilTick;
         public int LastGenerationCheck = -1;
@@ -213,8 +216,19 @@ namespace ColonyPromises
             Scribe_Values.Look(ref SharedId, "sharedId");
             Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
             Scribe_Values.Look(ref MoodTrustProgressTicks, "moodTrustProgressTicks");
-            Scribe_Values.Look(ref MoodTrustDirection, "moodTrustDirection");
+            Scribe_Values.Look(ref MoodTrustWeightedSum, "moodTrustWeightedSum");
+            Scribe_Values.Look(ref MoodTrustAverageVersion, "moodTrustAverageVersion", 0);
+            Scribe_Values.Look(ref HasMoodTrustSample, "hasMoodTrustSample");
+            Scribe_Values.Look(ref LastMoodTrustValue, "lastMoodTrustValue");
             Scribe_Values.Look(ref LastMoodTrustTick, "lastMoodTrustTick", -1);
+            if (Scribe.mode == LoadSaveMode.LoadingVars && MoodTrustAverageVersion == 0)
+            {
+                // Old streak duration contains no evidence of an average mood.
+                MoodTrustProgressTicks = 0;
+                MoodTrustWeightedSum = 0;
+                MoodTrust.RestartSampling(this);
+                MoodTrustAverageVersion = 1;
+            }
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
             Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
             Scribe_Values.Look(ref NextUnpromisedRecoveryTick, "nextUnpromisedRecoveryTick");

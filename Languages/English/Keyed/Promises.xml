@@ -3,7 +3,9 @@
   <CP_SelectColonist>Select a colonist</CP_SelectColonist>
   <CP_NoColonists>No eligible colonists. Promises are available to free adult player colonists, excluding guests, prisoners and slaves.</CP_NoColonists>
   <CP_Trust>{0} — trust: {1}/{2}</CP_Trust>
-  <CP_MoodTrustRules>Every {4} continuous hours at {0}% mood or higher restores {2} trust, up to {3}. At {1}% mood or lower, the same time costs {2} trust, down to zero. Neutral mood or a break in observation restarts the count. Time away from a map is not counted. Promise rewards can still raise trust above {3}.</CP_MoodTrustRules>
+  <CP_MoodTrustRules>Every {4} days of observation, average mood of at least {0}% restores {2} trust up to {3}; at most {1}% costs {2} trust down to zero. Between these thresholds, trust stays unchanged. Time away is not counted. Promises can still raise trust above {3}.</CP_MoodTrustRules>
+  <CP_DebugMoodTrust>Mood-based trust — average: {0}; observed: {1}/{2} h; expected trust change at this average: {3}.</CP_DebugMoodTrust>
+  <CP_DebugMoodTrustPending>not sampled</CP_DebugMoodTrustPending>
   <CP_Type_Bedroom>Private bedroom</CP_Type_Bedroom>
   <CP_Type_Leisure>Recreation</CP_Type_Leisure>
   <CP_Type_Equipment>Equipment</CP_Type_Equipment>

@@ -11,109 +11,164 @@ public static class MoodTrustChecks
         checks++;
         if (!value) throw new Exception(message);
     }
-    static int ObserveFor(ColonistPromises state, float? mood, int start, int duration)
+    static bool Near(double a, double b) => Math.Abs(a - b) < 0.000001;
+    static int ObserveFor(ColonistPromises state, float mood, int start, int duration, float? nextMood = null)
     {
         int delta = MoodTrust.Observe(state, mood, start);
-        for (int now = start + TrustRules.MoodObservationInterval; now <= start + duration; now += TrustRules.MoodObservationInterval)
-            delta += MoodTrust.Observe(state, mood, now);
+        int end = start + duration;
+        for (int now = start; now < end;)
+        {
+            now = Math.Min(end, now + TrustRules.MoodObservationInterval);
+            delta += MoodTrust.Observe(state, now == end ? nextMood ?? mood : mood, now);
+        }
         return delta;
     }
-    static ColonistPromises RoundTrip(ColonistPromises state, string path)
+    static ColonistPromises Load(string path)
     {
         try
         {
-            Scribe.saver.InitSaving(path, "save"); state.ExposeData(); Scribe.saver.FinalizeSaving();
             var loaded = new ColonistPromises();
             Scribe.loader.InitLoading(path); Scribe.loader.curParent = loaded; loaded.ExposeData();
             return loaded;
         }
-        finally { Scribe.saver.ForceStop(); Scribe.loader.ForceStop(); }
+        finally { Scribe.loader.ForceStop(); }
+    }
+    static ColonistPromises RoundTrip(ColonistPromises state, string path)
+    {
+        try { Scribe.saver.InitSaving(path, "save"); state.ExposeData(); Scribe.saver.FinalizeSaving(); }
+        finally { Scribe.saver.ForceStop(); }
+        return Load(path);
     }
     public static int Run(string path)
     {
         checks = 0;
         int period = TrustRules.MoodTrustPeriodTicks, interval = TrustRules.MoodObservationInterval;
-        var state = new ColonistPromises { Trust = 47 };
-        Check(ObserveFor(state, 1f, 0, PromiseBalance.TicksPerDay) == 0 && state.Trust == 47,
-            "One good day is insufficient for the new 2.5-day period");
-        state = new ColonistPromises { Trust = 47 };
-        Check(ObserveFor(state, 0.65f, 0, period - interval) == 0 && state.Trust == 47,
-            "Good mood cannot restore trust before a verified period");
-        Check(MoodTrust.Observe(state, 0.65f, period) == 1 && state.Trust == 48,
-            "Exactly 65 percent mood restores one trust per 2.5-day period");
-        Check(ObserveFor(state, 1f, period, 4 * period) == 2 && state.Trust == 50,
-            "Passive recovery stops at 50 rather than exceeding it");
-        state = new ColonistPromises { Trust = 80 };
-        Check(ObserveFor(state, 1f, 0, period) == 0 && state.Trust == 80,
-            "Good mood does not reduce trust earned above 50");
-        Check(ObserveFor(state, 0.35f, period, period) == -1 && state.Trust == 79,
-            "Exactly 35 percent mood costs one trust per 2.5-day period even above 50");
-        state = new ColonistPromises { Trust = 1 };
-        Check(ObserveFor(state, 0f, 0, 3 * period) == -1 && state.Trust == 0,
-            "Poor mood stops at zero");
-        Check(ObserveFor(state, 1f, 3 * period, period) == 1 && state.Trust == 1,
-            "Zero trust can recover through good mood without a promise");
-        foreach (float? mood in new float?[] { 0.36f, 0.64f, null, float.NaN })
+        foreach (float mood in new[] { 0.65f, 0.35f, 0.5f })
         {
-            state = new ColonistPromises { Trust = 30 };
-            ObserveFor(state, 1f, 0, period / 2);
-            Check(MoodTrust.Observe(state, mood, period / 2 + interval) == 0 && state.MoodTrustProgressTicks == 0,
-                "Neutral or unavailable mood resets the continuous count");
-            Check(ObserveFor(state, 1f, period, period - interval) == 0 && state.Trust == 30,
-                "A new good mood streak cannot reuse old time");
+            var state = new ColonistPromises { Trust = 30 };
+            Check(ObserveFor(state, mood, 0, period - interval) == 0 && state.Trust == 30,
+                "A partial window never changes trust");
+            int expected = mood == 0.65f ? 1 : mood == 0.35f ? -1 : 0;
+            Check(MoodTrust.Observe(state, mood, period) == expected && state.Trust == 30 + expected,
+                "Exact average thresholds and neutral average determine the result");
+            Check(state.MoodTrustProgressTicks == 0 && state.MoodTrustWeightedSum == 0,
+                "Every outcome consumes the entire non-overlapping period");
+            Check(MoodTrust.Observe(state, mood, period) == 0 && state.Trust == 30 + expected,
+                "Duplicate boundary event cannot apply a result twice");
+            Check(ObserveFor(state, mood, period, period) == expected && state.Trust == 30 + 2 * expected,
+                "The next period starts independently after any outcome");
         }
-        state = new ColonistPromises { Trust = 30 };
-        ObserveFor(state, 0f, 0, period / 2);
-        Check(ObserveFor(state, 1f, period / 2, period - interval) == 0 && state.Trust == 30,
-            "A short poor mood streak cannot count toward good mood recovery");
-        int ticks = state.MoodTrustProgressTicks;
-        int last = state.LastMoodTrustTick;
-        Check(MoodTrust.Observe(state, 1f, last) == 0 && state.MoodTrustProgressTicks == ticks,
-            "Repeated same-tick observation adds nothing");
-        MoodTrust.Observe(state, 1f, last + interval + 1);
-        Check(state.MoodTrustProgressTicks == 0 && state.Trust == 30, "Unobserved time resets the streak without credit");
-        ObserveFor(state, 1f, 3 * period, period / 2);
-        MoodTrust.Observe(state, 1f, 1);
-        Check(state.MoodTrustProgressTicks == 0, "A reversed clock cannot add mood time");
-
-        state = new ColonistPromises { Trust = 30 };
-        ObserveFor(state, 1f, 0, period / 2);
-        var loaded = RoundTrip(state, path);
-        Check(loaded.Trust == 30 && loaded.MoodTrustProgressTicks == period / 2
-            && loaded.MoodTrustDirection == 1 && loaded.LastMoodTrustTick == period / 2,
-            "Mood observation fields and trust survive real Scribe field serialization");
-        Check(MoodTrust.Observe(loaded, 1f, period / 2) == 0 && loaded.MoodTrustProgressTicks == period / 2,
-            "Loading at the same tick adds no progress");
-        loaded.LastMoodTrustTick = -1; // GameComponent.FinalizeInit restarts sampling after loading.
-        Check(MoodTrust.Observe(loaded, 1f, period / 2) == 0 && loaded.MoodTrustProgressTicks == period / 2,
-            "A fresh sampling clock retains verified progress but credits no loading time");
-        Check(ObserveFor(loaded, 1f, period / 2, period / 2) == 1 && loaded.Trust == 31,
-            "A saved partial period completes only after the remaining verified time");
-        File.WriteAllText(path, "<save><trust>27</trust></save>");
-        try
+        foreach (int trust in new[] { 0, 49, 50, 80 })
         {
-            loaded = new ColonistPromises(); Scribe.loader.InitLoading(path); Scribe.loader.curParent = loaded; loaded.ExposeData();
-            Check(loaded.Trust == 27 && loaded.LastMoodTrustTick == -1 && loaded.MoodTrustProgressTicks == 0
-                && loaded.MoodTrustDirection == 0, "Old saves retain trust without invented mood history");
+            var good = new ColonistPromises { Trust = trust };
+            var poor = new ColonistPromises { Trust = trust };
+            int gain = trust < 50 ? 1 : 0, loss = trust > 0 ? -1 : 0;
+            Check(ObserveFor(good, 1f, 0, period) == gain && good.Trust == trust + gain,
+                "Recovery respects zero, 49, 50 and trust above 50");
+            Check(ObserveFor(poor, 0f, 0, period) == loss && poor.Trust == trust + loss,
+                "Poor average can reduce high trust but never goes below zero");
+            Check(good.MoodTrustProgressTicks == 0 && poor.MoodTrustProgressTicks == 0,
+                "Capped results still consume their observation period");
         }
-        finally { Scribe.loader.ForceStop(); }
+        var mixed = new ColonistPromises { Trust = 30 };
+        ObserveFor(mixed, 0.8f, 0, period / 2, 0.5f);
+        Check(ObserveFor(mixed, 0.5f, period / 2, period / 2) == 1 && mixed.Trust == 31,
+            "Mixed good and neutral intervals averaging 65 percent grant recovery");
+        mixed = new ColonistPromises { Trust = 30 };
+        ObserveFor(mixed, 0.2f, 0, period / 2, 0.5f);
+        Check(ObserveFor(mixed, 0.5f, period / 2, period / 2) == -1 && mixed.Trust == 29,
+            "Mixed poor and neutral intervals averaging 35 percent cost trust");
+        mixed = new ColonistPromises { Trust = 30 };
+        ObserveFor(mixed, 1f, 0, period / 3, 0.5f);
+        ObserveFor(mixed, 0.5f, period / 3, period / 3, 0f);
+        Check(ObserveFor(mixed, 0f, 2 * period / 3, period / 3) == 0 && mixed.Trust == 30
+            && mixed.MoodTrustProgressTicks == 0, "Good, neutral and poor mood all contribute without resetting the average");
 
-        state = new ColonistPromises { Trust = 30 };
-        state.Request = RequestGenerator.Offer(new RequestCandidate {
+        var varying = new ColonistPromises { Trust = 30 };
+        MoodTrust.Observe(varying, 0.9f, 0);
+        MoodTrust.Observe(varying, 0.3f, 1000);
+        MoodTrust.Observe(varying, 0.6f, 3000);
+        Check(varying.MoodTrustProgressTicks == 3000 && Near(MoodTrust.Average(varying).Value, 0.5),
+            "The average weights intervals by duration rather than sample count");
+        double sum = varying.MoodTrustWeightedSum;
+        MoodTrust.Observe(varying, 1f, 3000);
+        MoodTrust.Observe(varying, 1f, 2999);
+        Check(varying.MoodTrustProgressTicks == 3000 && varying.MoodTrustWeightedSum == sum,
+            "Duplicate and reversed timestamps never credit an interval twice");
+        MoodTrust.Observe(varying, 1f, 3000 + interval + 1);
+        Check(varying.MoodTrustProgressTicks == 3000 && varying.MoodTrustWeightedSum == sum,
+            "A missed check preserves existing data without filling the gap");
+        MoodTrust.Observe(varying, null, 10000);
+        MoodTrust.Observe(varying, null, 100000);
+        MoodTrust.Observe(varying, 0.7f, 200000);
+        Check(varying.MoodTrustProgressTicks == 3000 && varying.MoodTrustWeightedSum == sum,
+            "Absence and the first return observation never fill unverified time");
+        MoodTrust.Observe(varying, 0.7f, 200000 + interval);
+        Check(varying.MoodTrustProgressTicks == 3000 + interval, "Observation resumes after a pause without discarding prior data");
+        foreach (float invalid in new[] { float.NaN, float.PositiveInfinity, -0.1f, 1.1f })
+        {
+            int duration = varying.MoodTrustProgressTicks;
+            MoodTrust.Observe(varying, invalid, varying.LastMoodTrustTick + interval);
+            Check(varying.MoodTrustProgressTicks == duration && !varying.HasMoodTrustSample,
+                "Unusable mood values pause sampling without contaminating the average");
+        }
+        var boundary = new ColonistPromises { Trust = 30, MoodTrustProgressTicks = period - 1000,
+            MoodTrustWeightedSum = (double)0.7f * (period - 1000), LastMoodTrustTick = 0,
+            LastMoodTrustValue = 0.7f, HasMoodTrustSample = true };
+        Check(MoodTrust.Observe(boundary, 0.2f, interval) == 1 && boundary.Trust == 31
+            && boundary.MoodTrustProgressTicks == interval - 1000
+            && Near(boundary.MoodTrustWeightedSum, (double)0.7f * (interval - 1000)),
+            "An interval crossing 60 hours is split exactly between the old and new periods");
+        Check(MoodTrust.Observe(boundary, 0.2f, interval) == 0 && boundary.Trust == 31,
+            "The split interval is never replayed");
+        var loadedBoundary = RoundTrip(boundary, path);
+        MoodTrust.RestartSampling(loadedBoundary);
+        Check(MoodTrust.Observe(loadedBoundary, 0.7f, 10000) == 0 && loadedBoundary.Trust == 31
+            && loadedBoundary.MoodTrustProgressTicks == interval - 1000,
+            "Loading after a boundary cannot replay the already applied trust adjustment");
+        Check(ObserveFor(loadedBoundary, 0.7f, 10000, period - loadedBoundary.MoodTrustProgressTicks) == 1
+            && loadedBoundary.Trust == 32 && loadedBoundary.MoodTrustProgressTicks == 0,
+            "Saved carry-over belongs only to the next independent window");
+        var saved = new ColonistPromises { Trust = 30 };
+        ObserveFor(saved, 0.7f, 0, 42 * PromiseBalance.TicksPerHour);
+        var loaded = RoundTrip(saved, path);
+        Check(loaded.MoodTrustAverageVersion == 1 && loaded.MoodTrustProgressTicks == saved.MoodTrustProgressTicks
+            && loaded.MoodTrustWeightedSum == saved.MoodTrustWeightedSum && loaded.LastMoodTrustTick == saved.LastMoodTrustTick
+            && loaded.HasMoodTrustSample && loaded.LastMoodTrustValue == saved.LastMoodTrustValue,
+            "Scribe preserves the sum, duration, sample validity and timestamps");
+        MoodTrust.Observe(loaded, 0.7f, loaded.LastMoodTrustTick);
+        Check(loaded.MoodTrustProgressTicks == saved.MoodTrustProgressTicks && loaded.Trust == 30,
+            "Loading at the saved tick adds no progress");
+        MoodTrust.RestartSampling(loaded);
+        Check(ObserveFor(loaded, 0.7f, 500000, period - saved.MoodTrustProgressTicks) == 1 && loaded.Trust == 31,
+            "Restarting sampling preserves 42 verified hours and needs only 18 more after loading");
+        foreach (string oldXml in new[] {
+            "<save><trust>27</trust></save>",
+            "<save><trust>27</trust><moodTrustProgressTicks>100000</moodTrustProgressTicks><moodTrustDirection>1</moodTrustDirection><lastMoodTrustTick>123000</lastMoodTrustTick></save>" })
+        {
+            File.WriteAllText(path, oldXml); loaded = Load(path);
+            Check(loaded.Trust == 27 && loaded.MoodTrustProgressTicks == 0 && loaded.MoodTrustWeightedSum == 0
+                && loaded.LastMoodTrustTick == -1 && !loaded.HasMoodTrustSample && loaded.MoodTrustAverageVersion == 1,
+                "Old saves and streaks start an empty average without changing trust");
+            loaded = RoundTrip(loaded, path);
+            Check(loaded.Trust == 27 && loaded.MoodTrustProgressTicks == 0, "Migration remains stable on the next save");
+        }
+        var accepted = new ColonistPromises { Trust = 30 };
+        accepted.Request = RequestGenerator.Offer(new RequestCandidate {
             Terms = new PromiseRecord { Kind = PromiseKind.Leisure, RequiredTicks = 10000 }, Magnitude = 0 }, 0);
-        RequestLifecycle.Accept(state, state.Request, 0);
-        int reward = state.Active.SuccessTrust;
-        float moodReward = state.Active.SuccessMood;
-        ObserveFor(state, 1f, 0, period);
-        Check(state.Active.SuccessTrust == reward && state.Active.SuccessMood == moodReward,
-            "Passive changes cannot rewrite accepted promise rewards");
-        PromiseConsequences.Apply(state, state.Active, PromiseOutcome.Fulfilled, period);
-        Check(state.Trust == 31 + reward && state.Active.AppliedTrust == reward,
-            "Promise rewards remain separate from passive recovery");
-        state = new ColonistPromises { Trust = 30 };
-        int direction = MoodTrust.Direction(state.Trust, 1f);
-        Check(direction == 1 && state.MoodTrustProgressTicks == 0 && state.LastMoodTrustTick == -1,
-            "Read-only mood evaluation does not enroll time or modify state");
+        RequestLifecycle.Accept(accepted, accepted.Request, 0);
+        int reward = accepted.Active.SuccessTrust;
+        float moodReward = accepted.Active.SuccessMood;
+        ObserveFor(accepted, 1f, 0, period);
+        Check(accepted.Active.SuccessTrust == reward && accepted.Active.SuccessMood == moodReward,
+            "Average-based changes never rewrite accepted rewards");
+        PromiseConsequences.Apply(accepted, accepted.Active, PromiseOutcome.Fulfilled, period);
+        Check(accepted.Trust == 31 + reward && accepted.Active.AppliedTrust == reward, "Promise rewards remain separate");
+        sum = varying.MoodTrustWeightedSum;
+        int ticks = varying.MoodTrustProgressTicks;
+        MoodTrust.Direction(varying.Trust, MoodTrust.Average(varying));
+        Check(sum == varying.MoodTrustWeightedSum && ticks == varying.MoodTrustProgressTicks,
+            "Reading the average and projected outcome cannot mutate the observation");
         return checks;
     }
 }

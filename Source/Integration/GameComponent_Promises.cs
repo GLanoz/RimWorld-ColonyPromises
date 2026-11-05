@@ -63,7 +63,7 @@ namespace ColonyPromises
             foreach (var state in colonists.Where(s => s?.Pawn != null))
             {
                 // Preserve verified progress, but never credit a loading interval.
-                state.LastMoodTrustTick = -1;
+                MoodTrust.RestartSampling(state);
                 byPawn[state.Pawn] = state;
                 if (state.Active == null)
                 {
@@ -231,6 +231,7 @@ namespace ColonyPromises
         public void InvalidatePawn(Pawn pawn)
         {
             if (Scribe.mode != LoadSaveMode.Inactive) return;
+            if (byPawn.TryGetValue(pawn, out var observed)) MoodTrust.RestartSampling(observed);
             if (!active.TryGetValue(pawn, out var state)) open.TryGetValue(pawn, out state);
             var record = state?.Active ?? state?.Request?.Terms;
             if (record != null && PromiseConditions.Get(record.Kind)?.UsesContinuousHold == true) record.ResetHold();
