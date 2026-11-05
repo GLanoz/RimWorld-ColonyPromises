@@ -8,7 +8,7 @@
     <TargetFramework Condition="'$(RimWorldVersion)' == '1.6'">net472</TargetFramework>
     <TargetFramework Condition="'$(RimWorldVersion)' == '1.7'">net10.0</TargetFramework>
     <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**</DefaultItemExcludes>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <RimWorldDir Condition="'$(RimWorldDir)' == ''">C:\Games\Steam\steamapps\common\RimWorld</RimWorldDir>
