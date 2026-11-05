@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThoughtDef>
+    <defName>CP_LeadershipTrust</defName>
+    <thoughtClass>ColonyPromises.Thought_LeadershipTrust</thoughtClass>
+    <workerClass>ColonyPromises.ThoughtWorker_LeadershipTrust</workerClass>
+    <validWhileDespawned>true</validWhileDespawned>
+    <stages>
+      <li><label>No one here listens to me</label><description>I don't trust the colony's leadership to listen to me.</description><baseMoodEffect>-5</baseMoodEffect></li>
+      <li><label>No one here listens to me</label><description>I don't trust the colony's leadership to listen to me.</description><baseMoodEffect>-4</baseMoodEffect></li>
+      <li><label>No one here listens to me</label><description>I don't trust the colony's leadership to listen to me.</description><baseMoodEffect>-3</baseMoodEffect></li>
+      <li><label>No one here listens to me</label><description>I don't trust the colony's leadership to listen to me.</description><baseMoodEffect>-2</baseMoodEffect></li>
+      <li><label>No one here listens to me</label><description>I don't trust the colony's leadership to listen to me.</description><baseMoodEffect>-1</baseMoodEffect></li>
+      <li><label>I feel heard here</label><description>I trust the colony's leadership to listen to me.</description><baseMoodEffect>1</baseMoodEffect></li>
+      <li><label>I feel heard here</label><description>I trust the colony's leadership to listen to me.</description><baseMoodEffect>2</baseMoodEffect></li>
+      <li><label>I feel heard here</label><description>I trust the colony's leadership to listen to me.</description><baseMoodEffect>3</baseMoodEffect></li>
+      <li><label>I feel heard here</label><description>I trust the colony's leadership to listen to me.</description><baseMoodEffect>4</baseMoodEffect></li>
+      <li><label>I feel heard here</label><description>I trust the colony's leadership to listen to me.</description><baseMoodEffect>5</baseMoodEffect></li>
+    </stages>
+  </ThoughtDef>
+</Defs>

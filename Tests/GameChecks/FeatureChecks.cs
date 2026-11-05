@@ -183,6 +183,7 @@ public static class FeatureChecks
             typeof(GameComponent_Promises).GetField("nextObservation", fields).SetValue(moodComponent, int.MaxValue);
             typeof(GameComponent_Promises).GetField("nextCheck", fields).SetValue(moodComponent, int.MaxValue);
             typeof(Thing).GetField("mapIndexOrState", fields).SetValue(pawn, (sbyte)0);
+            checks += TrustMoodChecks.Run(root, path, pawn);
             pawn.needs.mood.CurLevel = 0.7f;
             int moodPeriodEnd = 1000 + TrustRules.MoodTrustPeriodTicks;
             for (int now = 1000; now <= moodPeriodEnd; now += TrustRules.MoodObservationInterval)

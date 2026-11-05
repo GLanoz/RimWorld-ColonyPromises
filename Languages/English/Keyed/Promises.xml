@@ -3,7 +3,7 @@
   <CP_SelectColonist>Select a colonist</CP_SelectColonist>
   <CP_NoColonists>No eligible colonists. Promises are available to free adult player colonists, excluding guests, prisoners and slaves.</CP_NoColonists>
   <CP_Trust>{0} — trust: {1}/{2}</CP_Trust>
-  <CP_MoodTrustRules>Every {4} days of observation, average mood of at least {0}% restores {2} trust up to {3}; at most {1}% costs {2} trust down to zero. Between these thresholds, trust stays unchanged. Time away is not counted. Promises can still raise trust above {3}.</CP_MoodTrustRules>
+  <CP_MoodTrustRules>Trust below 50 lowers mood by 1–5; above 50 raises it by 1–5. Every {4} days of observation, average mood of at least {0}% restores {2} trust up to {3}; at most {1}% costs {2} trust down to zero. The ongoing trust thought is excluded from this average. Time away is not counted. Promises can still raise trust above {3}.</CP_MoodTrustRules>
   <CP_DebugMoodTrust>Mood-based trust — average: {0}; observed: {1}/{2} h; expected trust change at this average: {3}.</CP_DebugMoodTrust>
   <CP_DebugMoodTrustPending>not sampled</CP_DebugMoodTrustPending>
   <CP_Type_Bedroom>Private bedroom</CP_Type_Bedroom>
@@ -53,7 +53,7 @@ Fulfill within {2} days after accepting.
   <CP_Decline>Decline…</CP_Decline>
   <CP_DeclineConfirm>Decline this request? New requests can appear after {0} days.</CP_DeclineConfirm>
   <CP_NoRequest>No open request or active promise.</CP_NoRequest>
-  <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining has a small penalty; leaving a request unanswered has none. Trust stays between 0 and 100 and gives no permanent mood bonus.</CP_RequestRules>
+  <CP_RequestRules>Requests follow two observed days of unmet needs, and appear gradually. You cannot choose arbitrary requirements. Declining has a small penalty; leaving a request unanswered has none.</CP_RequestRules>
   <CP_RequestUnavailable>This request is no longer open or its response time has expired.</CP_RequestUnavailable>
   <CP_RequestOutdated>This request can no longer be accepted. Its need or available solution has changed.</CP_RequestOutdated>
   <CP_NewRequest>{0} requests: {1}. Review it in Promises.</CP_NewRequest>
@@ -126,7 +126,7 @@ Fulfill within {2} days after accepting.
 
 Reply within {2} days. Open Promises to accept or decline.</CP_RequestLetterText>
   <CP_RemindersSetting>Remind me half a day before an unanswered request expires</CP_RemindersSetting>
-  <CP_TrustImpact>Below {0} trust, new promises give smaller success mood rewards; current mood factor: {1}%. Success still restores trust. There is no permanent low-trust mood penalty.</CP_TrustImpact>
+  <CP_TrustImpact>Trust below 50 lowers mood by 1–5; above 50 raises it by 1–5. At 50 there is no effect. Below {0} trust, new promises give smaller success mood rewards; current mood factor: {1}%. Success still restores trust.</CP_TrustImpact>
   <CP_UnpromisedRecovery>Meeting this request without promising can restore +{0} trust, with no mood bonus. {1} Progress: {2} hours. Finish before the reply deadline. Recovery has its own cooldown and repeat limit.</CP_UnpromisedRecovery>
   <CP_RecoveryHold>Keep the requested bed/room or equipped item valid continuously for {0} verified hours.</CP_RecoveryHold>
   <CP_RecoveryLeisure>Accumulate {0} recognized recreation hours while this request is open and restore joy to at least 35%. Acceptance starts promise progress from zero.</CP_RecoveryLeisure>

@@ -64,6 +64,8 @@ namespace ColonyPromises
             {
                 // Preserve verified progress, but never credit a loading interval.
                 MoodTrust.RestartSampling(state);
+                state.NeutralMood = null;
+                TrustMood.NotifyChanged(state.Pawn);
                 byPawn[state.Pawn] = state;
                 if (state.Active == null)
                 {
@@ -172,7 +174,7 @@ namespace ColonyPromises
             {
                 foreach (var state in colonists)
                     if (state != null) MoodTrust.Observe(state, PromiseConditions.Observable(state.Pawn)
-                        ? (float?)state.Pawn.needs.mood.CurLevel : null, now);
+                        ? (float?)(state.HasTrustNeutralMood ? state.TrustNeutralMoodLevel : state.Pawn.needs.mood.CurLevel) : null, now);
                 nextMoodTrustCheck = now + TrustRules.MoodObservationInterval;
             }
             if (now < nextCheck) return;

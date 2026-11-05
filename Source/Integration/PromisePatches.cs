@@ -26,6 +26,17 @@ namespace ColonyPromises
         }
     }
 
+    [HarmonyPatch(typeof(Need_Mood), nameof(Need_Mood.NeedInterval))]
+    internal static class TrustNeutralMoodPatch
+    {
+        private static void Prefix(Need_Mood __instance, Pawn ___pawn)
+        {
+            var component = GameComponent_Promises.Current;
+            if (component != null && PromiseConditions.Observable(___pawn))
+                TrustMood.Advance(component.StateFor(___pawn), __instance, Find.TickManager.TicksGame);
+        }
+    }
+
     [HarmonyPatch(typeof(JoyUtility), nameof(JoyUtility.JoyTickCheckEnd))]
     internal static class RecreationActivityPatch
     {

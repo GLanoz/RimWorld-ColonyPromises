@@ -188,7 +188,21 @@ namespace ColonyPromises
         public Pawn Pawn;
         public string SharedId;
         public SharedBedroomCommitment Shared; // Runtime alias to the component's authoritative record.
-        public int Trust = PromiseBalance.InitialTrust;
+        private int trust = PromiseBalance.InitialTrust;
+        public int Trust
+        {
+            get => trust;
+            set
+            {
+                if (trust == value) return;
+                trust = value;
+                TrustMood.NotifyChanged(Pawn);
+            }
+        }
+        public bool HasTrustNeutralMood;
+        public float TrustNeutralMoodLevel;
+        public int LastTrustNeutralMoodTick = -1;
+        public TrustNeutralMood NeutralMood; // Runtime-only reader; never serialized as a pawn need.
         public int MoodTrustProgressTicks;
         public double MoodTrustWeightedSum;
         public int MoodTrustAverageVersion = 1;
@@ -214,7 +228,10 @@ namespace ColonyPromises
         {
             Scribe_References.Look(ref Pawn, "pawn");
             Scribe_Values.Look(ref SharedId, "sharedId");
-            Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
+            Scribe_Values.Look(ref trust, "trust", PromiseBalance.InitialTrust);
+            Scribe_Values.Look(ref HasTrustNeutralMood, "hasTrustNeutralMood");
+            Scribe_Values.Look(ref TrustNeutralMoodLevel, "trustNeutralMoodLevel");
+            Scribe_Values.Look(ref LastTrustNeutralMoodTick, "lastTrustNeutralMoodTick", -1);
             Scribe_Values.Look(ref MoodTrustProgressTicks, "moodTrustProgressTicks");
             Scribe_Values.Look(ref MoodTrustWeightedSum, "moodTrustWeightedSum");
             Scribe_Values.Look(ref MoodTrustAverageVersion, "moodTrustAverageVersion", 0);

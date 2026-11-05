@@ -26,7 +26,13 @@ foreach ($type in $modAssembly.MainModule.Types) {
                 if ($argument.Name -eq '__instance') { $expectedType = $gameType }
                 elseif ($argument.Name -eq '__result') { $expectedType = $methods[0].ReturnType }
                 elseif ($argument.Name -match '^___(.+)$') {
-                    $field = $gameType.Fields | Where-Object Name -eq $Matches[1]
+                    $fieldName = $Matches[1]
+                    $fieldOwner = $gameType
+                    $field = $null
+                    while ($fieldOwner -and !$field) {
+                        $field = $fieldOwner.Fields | Where-Object Name -eq $fieldName
+                        $fieldOwner = if (!$field -and $fieldOwner.BaseType) { $fieldOwner.BaseType.Resolve() } else { $null }
+                    }
                     if (!$field) { throw "Missing Harmony-injected field: $($type.Name).$($argument.Name)" }
                     $expectedType = $field.FieldType
                 }

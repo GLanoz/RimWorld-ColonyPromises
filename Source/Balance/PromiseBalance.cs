@@ -37,6 +37,9 @@ namespace ColonyPromises
 
     public static class TrustRules
     {
+        public const int MoodNeutralTrust = 50;
+        public const int MoodTrustBandSize = 10;
+        public const int MaxOngoingMood = 5;
         public const int MoodObservationInterval = 2500;
         public const int MoodTrustPeriodTicks = PromiseBalance.TicksPerDay * 5 / 2;
         public const int PassiveRecoveryTarget = 50;
