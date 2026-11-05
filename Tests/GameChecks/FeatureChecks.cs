@@ -46,6 +46,7 @@ public static class FeatureChecks
         foreach (var type in new[] { typeof(SuccessStamp), typeof(PromiseRecord), typeof(ColonistRequest) })
             typeCache[Activator.CreateInstance(keyType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, new object[] { type.FullName, null }, null)] = type;
+        checks += MoodTrustChecks.Run(path);
         Check(TrustRules.MoodFactor(0) == 0.25f && TrustRules.MoodFactor(40) == 1 && TrustRules.MoodFactor(100) == 1,
             "Low trust has bounded endpoints");
         float previous = 0;
@@ -174,6 +175,83 @@ public static class FeatureChecks
             var world = Empty<World>(); world.factionManager = Empty<FactionManager>();
             typeof(FactionManager).GetField("ofPlayer", fields).SetValue(world.factionManager, faction);
             typeof(Game).GetField("worldInt", fields).SetValue(game, world);
+            world.worldPawns = new WorldPawns();
+            typeof(Game).GetField("maps", fields).SetValue(game, new List<Map> { Empty<Map>() });
+            var moodComponent = new GameComponent_Promises(game);
+            var moodState = moodComponent.StateFor(pawn);
+            moodState.Trust = 47;
+            typeof(GameComponent_Promises).GetField("nextObservation", fields).SetValue(moodComponent, int.MaxValue);
+            typeof(GameComponent_Promises).GetField("nextCheck", fields).SetValue(moodComponent, int.MaxValue);
+            typeof(Thing).GetField("mapIndexOrState", fields).SetValue(pawn, (sbyte)0);
+            pawn.needs.mood.CurLevel = 0.7f;
+            int moodPeriodEnd = 1000 + TrustRules.MoodTrustPeriodTicks;
+            for (int now = 1000; now <= moodPeriodEnd; now += TrustRules.MoodObservationInterval)
+            {
+                typeof(TickManager).GetField("ticksGameInt", fields).SetValue(game.tickManager, now);
+                moodComponent.GameComponentTick();
+            }
+            Check(moodComponent.PeekState(pawn).Trust == 48 && moodState.LastMoodTrustTick == moodPeriodEnd,
+                "Real component schedule reads actual mood and restores trust after a verified period: trust=" + moodState.Trust
+                + "; mood=" + pawn.needs.mood.CurLevel + "; eligible=" + PromiseConditions.EligibilityReason(pawn)
+                + "; spawned=" + pawn.Spawned + "; suspended=" + pawn.Suspended + "; progress=" + moodState.MoodTrustProgressTicks);
+            moodComponent.GameComponentTick();
+            Check(moodState.Trust == 48 && moodState.MoodTrustProgressTicks == 0,
+                "Same-tick component calls cannot duplicate passive trust");
+            typeof(Thing).GetField("mapIndexOrState", fields).SetValue(pawn, (sbyte)-1);
+            for (int now = moodPeriodEnd + TrustRules.MoodObservationInterval;
+                now <= moodPeriodEnd + TrustRules.MoodTrustPeriodTicks; now += TrustRules.MoodObservationInterval)
+            {
+                typeof(TickManager).GetField("ticksGameInt", fields).SetValue(game.tickManager, now);
+                moodComponent.GameComponentTick();
+            }
+            Check(moodState.Trust == 48 && moodState.MoodTrustProgressTicks == 0 && moodState.MoodTrustDirection == 0,
+                "Component never credits an absent colonist's available mood value");
+            typeof(TickManager).GetField("ticksGameInt", fields).SetValue(game.tickManager, 1000);
+            // The 1.6 standalone host cannot initialize native Unity notification types.
+            // The complete notification path is exercised against 1.7; both versions
+            // retain the separate consequence, shared completion and Scribe fixtures.
+            if (typeof(Pawn).Assembly.GetName().Version.Minor == 7)
+            {
+                var previousPositiveEvent = MessageTypeDefOf.PositiveEvent;
+                try
+                {
+                    MessageTypeDefOf.PositiveEvent = new MessageTypeDef { defName = "FixturePositiveEvent" };
+                    LanguageDatabase.activeLanguage = LanguageDatabase.defaultLanguage = HistoryChecks.Language(root, "English");
+                    pawn.Name = new NameSingle("RecoveryFixture");
+                    foreach (int startingTrust in new[] { 0, 47, 99 })
+                    {
+                        var completionComponent = new GameComponent_Promises(game);
+                        var completionState = completionComponent.StateFor(pawn);
+                        completionState.Trust = startingTrust;
+                        completionState.MoodTrustProgressTicks = 30000;
+                        completionState.MoodTrustDirection = 1;
+                        completionState.LastMoodTrustTick = 900;
+                        completionComponent.FinalizeInit();
+                        Check(completionState.LastMoodTrustTick == -1 && completionState.MoodTrustProgressTicks == 30000,
+                            "Component loading restarts mood sampling without erasing verified time");
+                        completionState.Request = Request(PromiseKind.Leisure);
+                        RequestLifecycle.Accept(completionState, completionState.Request, 1000);
+                        var completionRecord = completionState.Active;
+                        completionRecord.ProgressTicks = completionRecord.RequiredTicks;
+                        int reward = completionRecord.SuccessTrust;
+                        var activeIndex = (Dictionary<Pawn, ColonistPromises>)typeof(GameComponent_Promises)
+                            .GetField("active", fields).GetValue(completionComponent);
+                        activeIndex[pawn] = completionState;
+                        var checkPromise = typeof(GameComponent_Promises).GetMethod("Check", fields);
+                        checkPromise.Invoke(completionComponent, new object[] { completionState, 1250 });
+                        Check(completionState.Active == null && !activeIndex.ContainsKey(pawn)
+                            && completionState.History.Count == 1 && completionState.History[0].Outcome == PromiseOutcome.Fulfilled,
+                            "GameComponent commits verified fulfillment and releases the active slot");
+                        Check(completionComponent.PeekState(pawn).Trust == startingTrust + reward
+                            && completionState.History[0].AppliedTrust == reward && reward > 0,
+                            "GameComponent fulfillment updates the same trust state read by the UI");
+                        checkPromise.Invoke(completionComponent, new object[] { completionState, 1500 });
+                        Check(completionState.Trust == startingTrust + reward && completionState.History.Count == 1,
+                            "Repeated GameComponent check cannot duplicate fulfillment or trust");
+                    }
+                }
+                finally { MessageTypeDefOf.PositiveEvent = previousPositiveEvent; }
+            }
             var open = (Dictionary<Pawn, ColonistPromises>)typeof(GameComponent_Promises).GetField("open", fields).GetValue(component);
             var thing = Empty<Thing>(); thing.thingIDNumber = 88;
             var tracked = new ColonistPromises { Pawn = pawn, Request = Request() };
@@ -225,6 +303,10 @@ public static class FeatureChecks
                 string history = PromiseHistory.Format(recovered, 60100);
                 Check(history.Contains("+2") && !history.Contains("CP_") && !history.Contains("{"), "History shows actual recovery in " + folder);
                 Check("CP_TrustImpact".Translate("40", "25").ToString().Contains("25"), "Trust explanation renders in " + folder);
+                string moodTrustRules = PromiseText.MoodTrustRules();
+                Check(moodTrustRules.Contains("65") && moodTrustRules.Contains("35") && moodTrustRules.Contains("50")
+                    && moodTrustRules.Contains("60") && !moodTrustRules.Contains("{") && !moodTrustRules.Contains("CP_"),
+                    "Passive mood-trust rules use actual balance values in " + folder);
                 Check("CP_UnpromisedRecovery".Translate("2", "proof", "0").ToString().Contains("+2"), "Recovery preview renders in " + folder);
                 Check("CP_RequestLetterText".Translate("Pawn", "conditions", "0.5").ToString().Contains("0.5"),
                     "Letter contents render with plain numeric placeholders in " + folder);

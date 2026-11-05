@@ -7,7 +7,7 @@ Colony Promises **0.2.4** supports RimWorld **1.6** and experimentally targets t
 | Game target | Verified binaries | Available validation |
 | --- | --- | --- |
 | 1.6.4871 rev591 | Preserved `Assembly-CSharp.dll` **1.6.9676.17735**, Harmony **2.4.3.0** | Release compilation, API/IL checks and isolated runtime/Scribe fixtures; no complete 1.6 installation or current Defs |
-| 1.7.4995 rev309 beta (`Version.txt`) | `Assembly-CSharp.dll` **1.7.9800.9270**, `RimWorld.dll` **1.7.4995.309**, Harmony **3.0.0.0** | Release compilation, local Core/DLC definition projections, isolated fixtures and Harmony installation in a managed host; no game launch |
+| 1.7.4998 rev1299 beta (`Version.txt`) | `Assembly-CSharp.dll` **1.7.9803.38985**, `RimWorld.dll` **1.7.4998.1299**, Harmony **3.0.0.0** | Release compilation, local Core/DLC definition projections, isolated fixtures and Harmony installation in a managed host; no game launch |
 
 The 1.7 runtime is .NET 10. Its assemblies live in the installation root, with Unity-compatible types supplied by `UnityStubs`, `Waylith` and `Waylith.UnityCompat`; 1.6 uses .NET Framework and Unity modules under `RimWorldWin64_Data/Managed`. The used public APIs and patch signatures remain compatible, so version differences are confined to build references and framework selection. No gameplay adapter or balance change is needed for this beta build. Later betas are not automatically verified.
 
@@ -236,6 +236,14 @@ Significance is binary: missing bedroom/two-stage improvement, more than four re
 
 New success mood also multiplies by `0.25 + 0.75 * min(clamped trust, 40) / 40`, rounded to two decimals away from zero. Acceptance freezes effects, durations, and cooldown, including trust deltas clamped against acceptance-time trust. Application clamps again and records the actual delta. Existing frozen records stay unchanged; unfrozen legacy records retain their completion-time calculation.
 
+### Passive mood and trust
+
+`MoodTrust` samples the actual `Need_Mood.CurLevel` through the existing eligibility and map-observability checks. Its separate component schedule runs every 2,500 ticks, independently of requests and accepted promises. `TrustRules` holds the thresholds (65% good, 35% poor), 2.5-day period (150,000 ticks / 60 hours), one-point step and recovery ceiling of 50. Neutral mood, changed direction, missing observations, reversed clocks and gaps longer than one sampling interval reset the streak. Mood below the recovery ceiling is not itself a request cause. Poor mood can lower trust from any level to zero; good mood never reduces existing trust above 50.
+
+Per-colonist `moodTrustProgressTicks`, `moodTrustDirection` and `lastMoodTrustTick` are new Scribe fields with zero/unknown defaults for old saves. `FinalizeInit` restarts the sampling clock while retaining verified progress. No elapsed loading or absent time is credited. Passive changes do not touch frozen consequence snapshots, repeat ledgers, mood memories or outcome history. `Direction` and the localized explanation are read-only; only the periodic component calls `Observe`.
+
+`MoodTrustChecks` covers threshold boundaries, full-period timing, neutral/poor interruptions, recovery from zero, the ceiling of 50, trust above 50, missing observations, duplicate/reversed ticks, old fields, Scribe round-trips and independence from accepted rewards. In a copied save, set trust to 47 and sustain mood at or above 65% for 2.5 days: expect 48, eventually stopping at 50. With trust 2 and mood at or below 35%, expect 1 after 2.5 days and eventually 0. Interrupt a half-day streak with neutral mood or a caravan; the next point requires a fresh 2.5-day period. Save/reload halfway through an uninterrupted streak: the remaining 1.25 verified days should suffice. Inspect the bilingual trust tooltip and complete a promise to confirm its saved reward still applies separately. These are manual scenarios, not claims of in-game verification.
+
 ### Unaccepted recovery
 
 Only new offers set `RecoveryEnabled`. Availability requires the same open request, no active promise, trust at most 20, a passed ten-day recovery gate, and no same-kind recovery within fifteen days. Old requests default disabled; history is never replayed.
@@ -387,7 +395,7 @@ In copied saves, test Core alone, Royalty alone, Ideology alone, both together, 
 
 ### Version-port smoke test
 
-Use separate test copies for 1.6 and **1.7.4995 rev309**. Start with Core and the matching Harmony build; repeat in Royalty, Ideology, both together, and the relevant Biotech/Anomaly/Odyssey configurations. Confirm only one Colony Promises assembly loads and no missing Def/type/patch errors appear. These configurations have not been launched as part of this port.
+Use separate test copies for 1.6 and **1.7.4998 rev1299**. Start with Core and the matching Harmony build; repeat in Royalty, Ideology, both together, and the relevant Biotech/Anomaly/Odyssey configurations. Confirm only one Colony Promises assembly loads and no missing Def/type/patch errors appear. These configurations have not been launched as part of this port.
 
 Open both tabs in English and Ukrainian, check long names, scaling, sorting, letters and reminders. Through both Dev creation modes exercise each registered subtype: individual bedroom/improvement, shared bedroom, recreation, worn/nudity/title/role/desired clothing, Brawler replacement, ranged/melee acquisition, same-model quality upgrade, both substance requests, throne room, hair and beard. Check ordinary acceptance, real progress/ingestion/style changes, completion once, actual history effects, penalized decline, penalty-free expiry and withdrawal. Break bed/item/throne continuity and test caravan absence without pausing deadlines.
 

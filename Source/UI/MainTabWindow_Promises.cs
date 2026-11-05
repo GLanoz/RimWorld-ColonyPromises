@@ -217,7 +217,9 @@ namespace ColonyPromises
             float width = Math.Max(1, rect.width - 20);
             Widgets.BeginScrollView(rect, ref detailsScroll, new Rect(0, 0, width, Math.Max(rect.height, detailHeight)));
             float y = 0;
+            float trustTop = y;
             Label(ref y, width, "CP_Trust".Translate(pawn.LabelShort, state.Trust, PromiseBalance.MaxTrust));
+            TooltipHandler.TipRegion(new Rect(0, trustTop, width, y - trustTop), PromiseText.MoodTrustRules());
             var other = SharedPromiseText.PartnerFor(state.Shared, pawn);
             PromiseRecord displayed = null;
             ColonistRequest displayedRequest = null;
@@ -298,6 +300,7 @@ namespace ColonyPromises
                 }
                 Label(ref y, width, "CP_TrustImpact".Translate(TrustRules.LowTrustThreshold,
                     PromiseText.Number(TrustRules.MoodFactor(state.Trust) * 100)));
+                Label(ref y, width, PromiseText.MoodTrustRules());
                 Label(ref y, width, "CP_RepeatRules".Translate(PromiseBalance.RepeatWindowDays));
                 Label(ref y, width, "CP_RequestRules".Translate());
             }

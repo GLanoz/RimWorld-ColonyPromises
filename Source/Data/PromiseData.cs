@@ -189,6 +189,9 @@ namespace ColonyPromises
         public string SharedId;
         public SharedBedroomCommitment Shared; // Runtime alias to the component's authoritative record.
         public int Trust = PromiseBalance.InitialTrust;
+        public int MoodTrustProgressTicks;
+        public int MoodTrustDirection;
+        public int LastMoodTrustTick = -1;
         public int CooldownUntilTick;
         public int LastGenerationCheck = -1;
         public int NextUnpromisedRecoveryTick;
@@ -209,6 +212,9 @@ namespace ColonyPromises
             Scribe_References.Look(ref Pawn, "pawn");
             Scribe_Values.Look(ref SharedId, "sharedId");
             Scribe_Values.Look(ref Trust, "trust", PromiseBalance.InitialTrust);
+            Scribe_Values.Look(ref MoodTrustProgressTicks, "moodTrustProgressTicks");
+            Scribe_Values.Look(ref MoodTrustDirection, "moodTrustDirection");
+            Scribe_Values.Look(ref LastMoodTrustTick, "lastMoodTrustTick", -1);
             Scribe_Values.Look(ref CooldownUntilTick, "cooldownUntilTick");
             Scribe_Values.Look(ref LastGenerationCheck, "lastGenerationCheck", -1);
             Scribe_Values.Look(ref NextUnpromisedRecoveryTick, "nextUnpromisedRecoveryTick");

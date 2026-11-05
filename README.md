@@ -6,7 +6,7 @@ Colonists ask for better housing, time for recreation, suitable equipment, or a 
 
 ## Requirements and installation
 
-- RimWorld **1.6**, or the experimental **1.7.4995 rev309** beta. Later beta builds may need another compatibility check.
+- RimWorld **1.6**, or the experimental **1.7.4998 rev1299** beta. Later beta builds may need another compatibility check.
 - **Harmony**, enabled and loaded before Colony Promises.
 - No DLC required. English and Ukrainian interfaces are included.
 
@@ -148,6 +148,8 @@ Fulfillment is checked before failure at the deadline. Each result applies once.
 ## Trust, recovery, and repeat limits
 
 Trust starts at **50** and stays between **0 and 100**. It represents confidence in leadership, with no permanent mood bonus or penalty. Below **40 trust**, new promises give a smoothly reduced positive mood reward: 25% of the normal reward at zero trust, rising to the full reward at 40. Trust gains are not reduced by low trust, and zero trust still allows requests and acceptance.
+
+Sustained mood also changes trust. Each continuous **2.5-day period** at **65% mood or higher** restores **1 trust**, up to **50**. Each continuous **2.5-day period** at **35% mood or lower** costs **1 trust**, down to **0**. Neutral mood, switching between good and poor mood, or a break in observation restarts the continuous count. Only eligible colonists present on a map are observed; caravan and suspended time earn no progress. Saving and loading preserves verified time. Good mood does not lower trust already above 50, and promise rewards can still raise it to 100. These gradual changes add no mood memories or request-result history entries. Hover over the trust label or open **More details** for the rules.
 
 Successful promises of the same type within the preceding **15 days** halve positive rewards for each recent success, down to 25%. Low-trust and repeat reductions combine. Success still grants at least one trust point before the upper bound; even at zero trust, the smallest repeated recreation reward remains positive. Failure and withdrawal penalties are never reduced.
 

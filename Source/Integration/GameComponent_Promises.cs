@@ -17,6 +17,7 @@ namespace ColonyPromises
         public List<ColonistPromises> OpenRequests(int now) => VisibleOpenRequests(now)
             .OrderBy(s => s.Request.OfferedTick).ThenBy(s => s.Pawn.thingIDNumber).ToList();
         private int nextCheck;
+        private int nextMoodTrustCheck;
         private int nextObservation;
         private int nextOffer;
         private int lastObservation = -1;
@@ -61,6 +62,8 @@ namespace ColonyPromises
             { state.Active = null; state.Request = null; state.Shared = null; }
             foreach (var state in colonists.Where(s => s?.Pawn != null))
             {
+                // Preserve verified progress, but never credit a loading interval.
+                state.LastMoodTrustTick = -1;
                 byPawn[state.Pawn] = state;
                 if (state.Active == null)
                 {
@@ -79,6 +82,7 @@ namespace ColonyPromises
                 Resolve(state, PromiseOutcome.Closed, Find.TickManager.TicksGame);
             RestoreSharedBedrooms();
             nextCheck = Find.TickManager.TicksGame;
+            nextMoodTrustCheck = nextCheck;
             if (nextOffer == 0) nextOffer = nextCheck + RequestRules.OfferSpacing;
         }
 
@@ -163,6 +167,13 @@ namespace ColonyPromises
             {
                 ObserveRequests(now);
                 nextObservation = now + RequestRules.ObservationInterval;
+            }
+            if (now >= nextMoodTrustCheck)
+            {
+                foreach (var state in colonists)
+                    if (state != null) MoodTrust.Observe(state, PromiseConditions.Observable(state.Pawn)
+                        ? (float?)state.Pawn.needs.mood.CurLevel : null, now);
+                nextMoodTrustCheck = now + TrustRules.MoodObservationInterval;
             }
             if (now < nextCheck) return;
             foreach (var state in active.Values.Where(s => s.Shared == null).ToList()) Check(state, now);

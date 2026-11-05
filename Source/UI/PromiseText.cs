@@ -11,6 +11,10 @@ namespace ColonyPromises
                 ? "uk-UA" : "en-US");
         public static string Number(float value) => value.ToString("0.##", Culture);
         public static string Signed(float value) => value.ToString("+0.##;-0.##;0", Culture).Replace('-', '\u2212');
+        public static string MoodTrustRules() => "CP_MoodTrustRules".Translate(
+            Number(TrustRules.GoodMoodThreshold * 100), Number(TrustRules.BadMoodThreshold * 100),
+            TrustRules.MoodTrustStep.ToString(), TrustRules.PassiveRecoveryTarget.ToString(),
+            Number(TrustRules.MoodTrustPeriodTicks / (float)PromiseBalance.TicksPerHour)).ToString();
         public static string Type(PromiseRecord record) => record.Kind == PromiseKind.Style
             ? (record.StyleBeard ? "CP_Type_BeardStyle" : "CP_Type_HairStyle").Translate().ToString() : record.RequiresBarracks
             ? (record.IsShared ? "CP_Type_SharedBarracks" : "CP_Type_Barracks").Translate().ToString()
