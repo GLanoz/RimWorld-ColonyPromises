@@ -61,7 +61,7 @@
   <CP_ReasonEquipmentQuality>Екіпірований предмет щонайменше {1} дні спостереження має якість нижче нормальної, а на карті є доступний придатний екземпляр того самого типу кращої якості.</CP_ReasonEquipmentQuality>
   <CP_Durability>Протягом утримання зберігайте щонайменше {0}% міцності.</CP_Durability>
   <CP_LegacyPromise>Для цієї давньої обіцянки збережено початкові правила винагороди.</CP_LegacyPromise>
-  <CP_Outcome_Declined>у проханні відмовлено без штрафу</CP_Outcome_Declined>
+  <CP_Outcome_Declined>у проханні відмовлено</CP_Outcome_Declined>
   <CP_Outcome_Expired>прохання без відповіді спливло без штрафу</CP_Outcome_Expired>
   <CP_Outcome_SatisfiedUnaccepted>прохання задоволено без обіцянки</CP_Outcome_SatisfiedUnaccepted>
   <CP_StatusPromise>активна обіцянка</CP_StatusPromise>

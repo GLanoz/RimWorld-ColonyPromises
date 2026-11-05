@@ -84,8 +84,16 @@ public static class HistoryChecks
                 {
                     var state = new ColonistPromises { Pawn = pawn };
                     var record = new PromiseRecord { Kind = PromiseKind.Bedroom, Outcome = outcome };
-                    record.RecordResolution(30000);
-                    PromiseConsequences.Apply(state, record, outcome, 30000);
+                    if (outcome == PromiseOutcome.Declined || outcome == PromiseOutcome.Expired)
+                    {
+                        state.Request = new ColonistRequest { Terms = record, OfferedTick = 0 };
+                        record = RequestLifecycle.Close(state, outcome, 30000);
+                    }
+                    else
+                    {
+                        record.RecordResolution(30000);
+                        PromiseConsequences.Apply(state, record, outcome, 30000);
+                    }
                     string row = PromiseHistory.Format(record, 60000);
                     Check(row.Contains(folder == "English" ? "0.5 days ago" : "0,5 дня тому"), folder + ": elapsed time for " + outcome + ": " + row);
                     Check(row.IndexOf(("CP_Outcome_" + outcome).Translate().ToString(), StringComparison.OrdinalIgnoreCase) >= 0, folder + ": result label for " + outcome);
@@ -96,6 +104,18 @@ public static class HistoryChecks
                         Check(row.Contains("\u22128") && row.Contains("\u221210"), folder + ": actual failure effects");
                     else if (outcome == PromiseOutcome.Withdrawn)
                         Check(row.Contains("\u22123") && row.Contains("\u22124"), folder + ": actual withdrawal effects");
+                    else if (outcome == PromiseOutcome.Declined)
+                    {
+                        Check(state.Trust == 49 && record.AppliedMood == -1 && record.AppliedTrust == -1
+                            && row.Contains("\u22121"), folder + ": actual decline penalty appears in history");
+                        Check("CP_Outcome_Declined".Translate().ToString() == (folder == "English"
+                            ? "request declined" : "\u0443 \u043f\u0440\u043e\u0445\u0430\u043d\u043d\u0456 \u0432\u0456\u0434\u043c\u043e\u0432\u043b\u0435\u043d\u043e"),
+                            folder + ": decline label makes no penalty-free claim for current or legacy results");
+                        Check(PromiseConsequences.DeclineText(new ColonistPromises()).Contains("\u22121"),
+                            folder + ": confirmation preview displays the decline penalty");
+                        Check(RequestLifecycle.Close(state, outcome, 30001) == null && state.Trust == 49,
+                            folder + ": repeated closure cannot apply the penalty twice");
+                    }
                     else
                         Check(row.Contains("CP_HistoryNoEffects".Translate().ToString()), folder + ": clear penalty-free result");
                     if (outcome == PromiseOutcome.Withdrawn) Console.WriteLine(folder + " sample: " + row);

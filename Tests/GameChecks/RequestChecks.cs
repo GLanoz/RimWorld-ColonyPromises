@@ -106,6 +106,39 @@ public static class RequestChecks
 
         // Apply actual compiled consequences without a mood tracker, not a simulated formula.
         var pawn = (Pawn)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
+        foreach (PromiseKind kind in Enum.GetValues(typeof(PromiseKind)))
+        {
+            foreach (int initialTrust in new[] { 0, 50, 99 })
+            {
+                var recovering = new ColonistPromises { Pawn = pawn, Trust = initialTrust };
+                for (int i = 0; i < 3; i++)
+                {
+                    recovering.Request = Request(kind, 0);
+                    RequestLifecycle.Close(recovering, PromiseOutcome.Declined, 100 + i);
+                }
+                int before = recovering.Trust;
+                // Even heavily repeated promises must retain a positive trust reward.
+                for (int i = 0; i < 5; i++)
+                    recovering.RecentSuccesses.Add(new SuccessStamp { Kind = kind, Tick = 100 });
+                recovering.Request = Request(kind, 0);
+                RequestLifecycle.Accept(recovering, recovering.Request, 1000);
+                var accepted = recovering.Active;
+                int promisedTrust = accepted.SuccessTrust;
+                Check(promisedTrust > 0, "Acceptance preserves trust recovery after declines: " + kind);
+                try {
+                    Scribe.saver.InitSaving(temporaryFile, "save");
+                    accepted.ExposeData();
+                    Scribe.saver.FinalizeSaving();
+                    accepted = new PromiseRecord();
+                    Scribe.loader.InitLoading(temporaryFile);
+                    Scribe.loader.curParent = accepted;
+                    accepted.ExposeData();
+                } finally { Scribe.saver.ForceStop(); Scribe.loader.ForceStop(); }
+                PromiseConsequences.Apply(recovering, accepted, PromiseOutcome.Fulfilled, 5000);
+                Check(recovering.Trust == before + promisedTrust && accepted.AppliedTrust == promisedTrust,
+                    "Saved fulfilled promise restores actual trust after declines and repeats: " + kind);
+            }
+        }
         var fresh = new ColonistPromises { Pawn = pawn };
         PromiseConsequences.Apply(fresh, new PromiseRecord(), PromiseOutcome.Declined, 5000);
         PromiseConsequences.Apply(fresh, new PromiseRecord(), PromiseOutcome.Expired, 5000);

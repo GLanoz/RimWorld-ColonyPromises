@@ -192,7 +192,13 @@ public static class SharedBedroomChecks
                     "Both personal effect sets format in " + language);
                 Check(SharedPromiseText.WithdrawConfirmation(sb, record).Contains(a.LabelShort), "Withdrawal names both partners in " + language);
             }
+            int beforeTrustA = sa.Trust, beforeTrustB = sb.Trust;
             Check((bool)Call(component, "CompleteShared", shared, PromiseOutcome.Fulfilled, 1500, false), "One common result is committed");
+            Check(sa.Trust == beforeTrustA + shared.FirstEffects.SuccessTrust
+                && sb.Trust == beforeTrustB + shared.SecondEffects.SuccessTrust
+                && sa.History[0].AppliedTrust == shared.FirstEffects.SuccessTrust
+                && sb.History[0].AppliedTrust == shared.SecondEffects.SuccessTrust,
+                "Shared fulfillment restores each participant's frozen personal trust reward");
             int trustA = sa.Trust, trustB = sb.Trust;
             Check(!(bool)Call(component, "CompleteShared", shared, PromiseOutcome.Fulfilled, 1500, false), "Shared resolution cannot run twice");
             Check(sa.Trust == trustA && sb.Trust == trustB && sa.History.Count == 1 && sb.History.Count == 1,

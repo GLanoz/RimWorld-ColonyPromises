@@ -61,7 +61,7 @@ Fulfill within {2} days after accepting.
   <CP_ReasonEquipmentQuality>An equipped item has remained below normal quality for at least {1} observed days, with a usable higher-quality copy of the same type available on this map.</CP_ReasonEquipmentQuality>
   <CP_Durability>Maintain at least {0}% durability throughout the hold.</CP_Durability>
   <CP_LegacyPromise>This older promise keeps its original reward rules.</CP_LegacyPromise>
-  <CP_Outcome_Declined>request declined without penalty</CP_Outcome_Declined>
+  <CP_Outcome_Declined>request declined</CP_Outcome_Declined>
   <CP_Outcome_Expired>unanswered request expired without penalty</CP_Outcome_Expired>
   <CP_Outcome_SatisfiedUnaccepted>request satisfied without a promise</CP_Outcome_SatisfiedUnaccepted>
   <CP_StatusPromise>active promise</CP_StatusPromise>
